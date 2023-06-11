@@ -1,0 +1,7 @@
+/node_modules
+/static/js/*
+!/static/js/index.js
+
+yarn.lock
+package-lock.json
+
