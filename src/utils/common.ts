@@ -1,4 +1,4 @@
-import { APP_NAME } from "@/configs/constants";
+import { APP_NAME } from "@/configs/consts";
 
 export const getAppName = () => APP_NAME;
 

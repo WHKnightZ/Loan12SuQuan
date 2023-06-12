@@ -56,7 +56,41 @@ const generateMap = () => Array.from({ length: MAP_WIDTH }).map(() => Array.from
 
 const map = generateMap();
 
-const find = () => {};
+const check = (x: number, y: number, posValue: number, compatible: number[]) => {
+  const value = map[y][x];
+  return value === posValue || compatible.includes(value);
+};
+
+const findFromPos = (x: number, y: number) => {
+  let h = 0;
+  let v = 0;
+  let newX: number, newY: number;
+  const posValue = map[y][x];
+  const compatible = tiles[posValue].compatible;
+
+  newX = x - 1;
+  while (newX >= 0) {
+    if (!check(newX, y, posValue, compatible)) break;
+    h += 1;
+  }
+  newX = x + 1;
+  while (newX < MAP_WIDTH) {
+    if (!check(newX, y, posValue, compatible)) break;
+    h += 1;
+  }
+  newY = y - 1;
+  while (newY >= 0) {
+    if (!check(x, newY, posValue, compatible)) break;
+    v += 1;
+  }
+  newY = y + 1;
+  while (newY < MAP_WIDTH) {
+    if (!check(x, newY, posValue, compatible)) break;
+    v += 1;
+  }
+
+  if (h < 2) h = 0;
+};
 
 const init = async () => {
   context.imageSmoothingEnabled = false;
