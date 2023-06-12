@@ -1,0 +1,23 @@
+html {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: linear-gradient(to bottom, transparent, #d6dbdc) #ffffff;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  border: 6px solid #3e3226;
+  image-rendering: pixelated;
+  width: 480px;
+  height: 480px;
+  background-color: #e5e6e7;
+}
