@@ -52,7 +52,56 @@ export const randomTile = () => {
   return -1;
 };
 
-const generateMap = () => Array.from({ length: MAP_WIDTH }).map(() => Array.from({ length: MAP_WIDTH }).map(randomTile));
+const generateMap = () => {
+  const genBase = () => Array.from({ length: MAP_WIDTH }).map(() => Array.from({ length: MAP_WIDTH }).map(randomTile));
+
+  const mapBase = genBase();
+
+  const check = (x: number, y: number, posValue: number, compatible: number[]) => {
+    const value = mapBase[y][x];
+    return value === posValue || compatible.includes(value);
+  };
+
+  const checkMatched = (x: number, y: number) => {
+    let h = 0;
+    let v = 0;
+    const posValue = mapBase[y][x];
+    const compatible = tiles[posValue].compatible;
+
+    let newX = x + 1;
+    while (newX < MAP_WIDTH) {
+      if (!check(newX, y, posValue, compatible)) break;
+      h += 1;
+      newX += 1;
+    }
+    if (h >= 2) return true;
+    let newY = y + 1;
+    while (newY < MAP_WIDTH) {
+      if (!check(x, newY, posValue, compatible)) break;
+      v += 1;
+      newY += 1;
+    }
+    if (v >= 2) return true;
+
+    return false;
+  };
+
+  let matched = true;
+  while (matched) {
+    matched = false;
+
+    for (let i = 0; i < MAP_WIDTH; i += 1) {
+      for (let j = 0; j < MAP_WIDTH; j += 1) {
+        if (!checkMatched(j, i)) continue;
+
+        matched = true;
+        mapBase[i][j] = randomTile();
+      }
+    }
+  }
+
+  return mapBase;
+};
 
 const map = generateMap();
 
@@ -62,8 +111,8 @@ const check = (x: number, y: number, posValue: number, compatible: number[]) => 
 };
 
 const findFromPos = (x: number, y: number) => {
-  let h = 0;
-  let v = 0;
+  let h: { x: number; y: number }[] = [];
+  let v: { x: number; y: number }[] = [];
   let newX: number, newY: number;
   const posValue = map[y][x];
   const compatible = tiles[posValue].compatible;
@@ -71,25 +120,59 @@ const findFromPos = (x: number, y: number) => {
   newX = x - 1;
   while (newX >= 0) {
     if (!check(newX, y, posValue, compatible)) break;
-    h += 1;
+    h.push({ x: newX, y });
+    newX -= 1;
   }
   newX = x + 1;
   while (newX < MAP_WIDTH) {
     if (!check(newX, y, posValue, compatible)) break;
-    h += 1;
+    h.push({ x: newX, y });
+    newX += 1;
   }
   newY = y - 1;
   while (newY >= 0) {
     if (!check(x, newY, posValue, compatible)) break;
-    v += 1;
+    v.push({ x, y: newY });
+    newY -= 1;
   }
   newY = y + 1;
   while (newY < MAP_WIDTH) {
     if (!check(x, newY, posValue, compatible)) break;
-    v += 1;
+    v.push({ x, y: newY });
+    newY += 1;
   }
 
-  if (h < 2) h = 0;
+  let hasH = true;
+  let hasV = true;
+
+  if (h.length < 2) {
+    h = [];
+    hasH = false;
+  }
+  if (v.length < 2) {
+    v = [];
+    hasV = false;
+  }
+
+  return hasH || hasV ? [...h, ...v] : [];
+};
+
+const findAll = () => {
+  const arr = [];
+  const has = {};
+
+  for (let i = 0; i < MAP_WIDTH; i += 1) {
+    for (let j = 0; j < MAP_WIDTH; j += 1) {
+      const out = findFromPos(j, i);
+      if (!out.length) continue;
+      const address = i * MAP_WIDTH + j;
+      if (has[address]) return;
+      has[address] = true;
+      arr.push(...out);
+    }
+  }
+
+  return arr;
 };
 
 const init = async () => {
@@ -115,6 +198,10 @@ const render = () => {
       context.drawImage(tiles[map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET, TILE_SIZE, TILE_SIZE);
     }
   }
+
+  // findAll().forEach(({ x, y }) => {
+  //   context.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  // });
 };
 
 const main = async () => {
