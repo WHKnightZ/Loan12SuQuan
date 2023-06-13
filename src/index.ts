@@ -5,6 +5,8 @@ const CELL_SIZE = 60;
 const SCREEN_SIZE = MAP_WIDTH * CELL_SIZE;
 const TILE_SIZE = 54;
 const TILE_OFFSET = Math.floor((CELL_SIZE - TILE_SIZE) / 2);
+const GAIN_TURN = 3;
+const MATCH_4_POINT = 50;
 
 type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
@@ -17,27 +19,28 @@ const context = canvas.getContext("2d")!;
 
 canvas.width = canvas.height = SCREEN_SIZE;
 
-const tiles: {
+const mapTileInfo: {
   [key: number]: {
     texture: HTMLImageElement;
     compatible: number[];
     probability: number;
+    point: number;
   };
 } = {
-  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 100, texture: null as any },
-  [TILES.HEART]: { compatible: [], probability: 100, texture: null as any },
-  [TILES.GOLD]: { compatible: [], probability: 100, texture: null as any },
-  [TILES.ENERGY]: { compatible: [], probability: 100, texture: null as any },
-  [TILES.MANA]: { compatible: [], probability: 100, texture: null as any },
-  [TILES.EXP]: { compatible: [], probability: 100, texture: null as any },
-  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, texture: null as any },
+  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 100, point: 10, texture: null as any },
+  [TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null as any },
+  [TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null as any },
+  [TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null as any },
+  [TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null as any },
+  [TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null as any },
+  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, point: 30, texture: null as any },
 };
 
 export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max
 
 let sumProbability = 0;
 const tileProbabilities = Array.from({ length: COUNT_TILES }).map((_, index) => {
-  const probability = tiles[index].probability;
+  const probability = mapTileInfo[index].probability;
   sumProbability += probability;
   return sumProbability;
 });
@@ -66,7 +69,7 @@ const generateMap = () => {
     let h = 0;
     let v = 0;
     const posValue = mapBase[y][x];
-    const compatible = tiles[posValue].compatible;
+    const compatible = mapTileInfo[posValue].compatible;
 
     let newX = x + 1;
     while (newX < MAP_WIDTH) {
@@ -89,7 +92,6 @@ const generateMap = () => {
   let matched = true;
   while (matched) {
     matched = false;
-
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
         if (!checkMatched(j, i)) continue;
@@ -105,40 +107,42 @@ const generateMap = () => {
 
 const map = generateMap();
 
-const check = (x: number, y: number, posValue: number, compatible: number[]) => {
-  const value = map[y][x];
-  return value === posValue || compatible.includes(value);
-};
+const check = (value: number, posValue: number, compatible: number[]) => value === posValue || compatible.includes(value);
 
-const findFromPos = (x: number, y: number) => {
-  let h: { x: number; y: number }[] = [];
-  let v: { x: number; y: number }[] = [];
+const matchPosition = (x: number, y: number) => {
+  type TileInfo = { x: number; y: number; point: number };
+  let h: TileInfo[] = [];
+  let v: TileInfo[] = [];
   let newX: number, newY: number;
   const posValue = map[y][x];
-  const compatible = tiles[posValue].compatible;
+  const compatible = mapTileInfo[posValue].compatible;
 
   newX = x - 1;
   while (newX >= 0) {
-    if (!check(newX, y, posValue, compatible)) break;
-    h.push({ x: newX, y });
+    const value = map[y][newX];
+    if (!check(value, posValue, compatible)) break;
+    h.push({ x: newX, y, point: mapTileInfo[value].point });
     newX -= 1;
   }
   newX = x + 1;
   while (newX < MAP_WIDTH) {
-    if (!check(newX, y, posValue, compatible)) break;
-    h.push({ x: newX, y });
+    const value = map[y][newX];
+    if (!check(value, posValue, compatible)) break;
+    h.push({ x: newX, y, point: mapTileInfo[value].point });
     newX += 1;
   }
   newY = y - 1;
   while (newY >= 0) {
-    if (!check(x, newY, posValue, compatible)) break;
-    v.push({ x, y: newY });
+    const value = map[newY][x];
+    if (!check(value, posValue, compatible)) break;
+    v.push({ x, y: newY, point: mapTileInfo[value].point });
     newY -= 1;
   }
   newY = y + 1;
   while (newY < MAP_WIDTH) {
-    if (!check(x, newY, posValue, compatible)) break;
-    v.push({ x, y: newY });
+    const value = map[newY][x];
+    if (!check(value, posValue, compatible)) break;
+    v.push({ x, y: newY, point: mapTileInfo[value].point });
     newY += 1;
   }
 
@@ -154,38 +158,60 @@ const findFromPos = (x: number, y: number) => {
     hasV = false;
   }
 
-  return hasH || hasV ? [...h, ...v] : [];
+  const matched = hasH || hasV;
+  const tiles = matched ? [...h, ...v, { x, y, point: mapTileInfo[map[y][x]].point }] : [];
+
+  return {
+    matched,
+    tiles,
+    point: tiles.reduce((a, b) => a + b.point, 0) + (h.length >= GAIN_TURN ? MATCH_4_POINT : 0) + (v.length >= GAIN_TURN ? MATCH_4_POINT : 0),
+    turn: Number(h.length >= GAIN_TURN) + Number(v.length >= GAIN_TURN),
+  };
 };
 
-const findAll = () => {
-  const arr = [];
-  const has = {};
+const swap = (x0: number, y0: number, x1: number, y1: number) => {
+  const tmp = map[y0][x0];
+  map[y0][x0] = map[y1][x1];
+  map[y1][x1] = tmp;
+};
 
-  for (let i = 0; i < MAP_WIDTH; i += 1) {
-    for (let j = 0; j < MAP_WIDTH; j += 1) {
-      const out = findFromPos(j, i);
-      if (!out.length) continue;
-      const address = i * MAP_WIDTH + j;
-      if (has[address]) return;
-      has[address] = true;
-      arr.push(...out);
+const findAllMatchedPositions = () => {
+  const allMatchedPositions: { x0: number; y0: number; x1: number; y1: number; point: number }[] = [];
+  for (let i = 0; i < MAP_WIDTH - 1; i += 1) {
+    for (let j = 0; j < MAP_WIDTH - 1; j += 1) {
+      swap(j, i, j + 1, i);
+      const { matched: m0, point: p0 } = matchPosition(j, i);
+      const { matched: m1, point: p1 } = matchPosition(j + 1, i);
+      if (m0 || m1) allMatchedPositions.push({ x0: j, y0: i, x1: j + 1, y1: i, point: p0 + p1 });
+      swap(j, i, j + 1, i);
+
+      swap(j, i, j, i + 1);
+      const { matched: m2, point: p2 } = matchPosition(j, i);
+      const { matched: m3, point: p3 } = matchPosition(j, i + 1);
+      if (m2 || m3) allMatchedPositions.push({ x0: j, y0: i, x1: j, y1: i + 1, point: p2 + p3 });
+      swap(j, i, j, i + 1);
     }
   }
-
-  return arr;
+  allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
+  console.log(allMatchedPositions);
+  return allMatchedPositions;
 };
+
+let best = { x0: -1, y0: -1, x1: -1, y1: -1, point: 0 };
 
 const init = async () => {
   context.imageSmoothingEnabled = false;
 
   const loadImage = (key: number, src: string) => {
     const image = new Image();
-    tiles[key].texture = image;
+    mapTileInfo[key].texture = image;
     image.src = getImageSrc(`tiles/${src}`);
     return new Promise((res) => (image.onload = () => res(image)));
   };
 
   await Promise.all(getKeys(TILES).map((tile, index) => loadImage(index, tile.toLowerCase())));
+
+  best = findAllMatchedPositions()[0];
 };
 
 const render = () => {
@@ -195,9 +221,15 @@ const render = () => {
       const x = j * CELL_SIZE;
       const y = i * CELL_SIZE;
       context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-      context.drawImage(tiles[map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET, TILE_SIZE, TILE_SIZE);
+      context.drawImage(mapTileInfo[map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET, TILE_SIZE, TILE_SIZE);
     }
   }
+
+  context.lineWidth = 5;
+  context.strokeStyle = "cyan";
+
+  context.strokeRect(best.x0 * CELL_SIZE, best.y0 * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  context.strokeRect(best.x1 * CELL_SIZE, best.y1 * CELL_SIZE, CELL_SIZE, CELL_SIZE);
 
   // findAll().forEach(({ x, y }) => {
   //   context.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
