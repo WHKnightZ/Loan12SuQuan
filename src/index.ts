@@ -1,12 +1,15 @@
 import { getImageSrc, getKeys } from "./utils/common";
 
 const MAP_WIDTH = 8;
+const MAP_WIDTH_1 = MAP_WIDTH - 1;
 const CELL_SIZE = 60;
 const SCREEN_SIZE = MAP_WIDTH * CELL_SIZE;
 const TILE_SIZE = 54;
 const TILE_OFFSET = Math.floor((CELL_SIZE - TILE_SIZE) / 2);
-const GAIN_TURN = 3;
+const GAIN_TURN = 3; // 4
 const MATCH_4_POINT = 50;
+const SWAP_DURATION = 10;
+const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 
 type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
@@ -175,25 +178,28 @@ const swap = (x0: number, y0: number, x1: number, y1: number) => {
   map[y1][x1] = tmp;
 };
 
-const findAllMatchedPositions = () => {
-  const allMatchedPositions: { x0: number; y0: number; x1: number; y1: number; point: number }[] = [];
-  for (let i = 0; i < MAP_WIDTH - 1; i += 1) {
-    for (let j = 0; j < MAP_WIDTH - 1; j += 1) {
-      swap(j, i, j + 1, i);
-      const { matched: m0, point: p0 } = matchPosition(j, i);
-      const { matched: m1, point: p1 } = matchPosition(j + 1, i);
-      if (m0 || m1) allMatchedPositions.push({ x0: j, y0: i, x1: j + 1, y1: i, point: p0 + p1 });
-      swap(j, i, j + 1, i);
+type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: number; point: number }[];
 
-      swap(j, i, j, i + 1);
-      const { matched: m2, point: p2 } = matchPosition(j, i);
-      const { matched: m3, point: p3 } = matchPosition(j, i + 1);
-      if (m2 || m3) allMatchedPositions.push({ x0: j, y0: i, x1: j, y1: i + 1, point: p2 + p3 });
-      swap(j, i, j, i + 1);
+const addMatchedPosition = (allMatchedPositions: AllMatchedPositions, x0: number, y0: number, x1: number, y1: number) => {
+  swap(x0, y0, x1, y1);
+  const { matched: m0, point: p0 } = matchPosition(x0, y0);
+  const { matched: m1, point: p1 } = matchPosition(x1, y1);
+  if (m0 || m1) allMatchedPositions.push({ x0, y0, x1, y1, point: p0 + p1 });
+  swap(x0, y0, x1, y1);
+};
+
+const findAllMatchedPositions = () => {
+  const allMatchedPositions: AllMatchedPositions = [];
+  for (let i = 0; i < MAP_WIDTH_1; i += 1) {
+    for (let j = 0; j < MAP_WIDTH_1; j += 1) {
+      addMatchedPosition(allMatchedPositions, j, i, j + 1, i);
+      addMatchedPosition(allMatchedPositions, j, i, j, i + 1);
     }
   }
+  for (let i = 0; i < MAP_WIDTH_1; i += 1) addMatchedPosition(allMatchedPositions, MAP_WIDTH_1, i, MAP_WIDTH_1, i + 1);
+  for (let j = 0; j < MAP_WIDTH_1; j += 1) addMatchedPosition(allMatchedPositions, j, MAP_WIDTH_1, j + 1, MAP_WIDTH_1);
+
   allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
-  console.log(allMatchedPositions);
   return allMatchedPositions;
 };
 
@@ -211,8 +217,26 @@ const init = async () => {
 
   await Promise.all(getKeys(TILES).map((tile, index) => loadImage(index, tile.toLowerCase())));
 
-  best = findAllMatchedPositions()[0];
+  // best = findAllMatchedPositions()[0];
 };
+
+class Game {
+  state: "IDLE" | "SELECT" | "FALL";
+
+  constructor() {}
+}
+
+let selected: { x: number; y: number } | null = null;
+let swapped: { x: number; y: number } | null = null;
+let tSwap = 0;
+let reswap = false;
+
+let fall: {
+  [key: number]: {
+    list: { x: number; y: number; offset: number; v: number; value: number }[];
+    below: number;
+  };
+} = {};
 
 const render = () => {
   for (let i = 0; i < MAP_WIDTH; i += 1) {
@@ -221,25 +245,126 @@ const render = () => {
       const x = j * CELL_SIZE;
       const y = i * CELL_SIZE;
       context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+      if (map[i][j] === -1 || (swapped && ((swapped.x === j && swapped.y === i) || (selected.x === j && selected.y === i)))) continue;
+
       context.drawImage(mapTileInfo[map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET, TILE_SIZE, TILE_SIZE);
     }
   }
 
-  context.lineWidth = 5;
-  context.strokeStyle = "cyan";
+  // context.lineWidth = 4;
+  // context.strokeStyle = "cyan";
 
-  context.strokeRect(best.x0 * CELL_SIZE, best.y0 * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-  context.strokeRect(best.x1 * CELL_SIZE, best.y1 * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+  // context.strokeRect(best.x0 * CELL_SIZE + 2, best.y0 * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+  // context.strokeRect(best.x1 * CELL_SIZE + 2, best.y1 * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
 
-  // findAll().forEach(({ x, y }) => {
-  //   context.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-  // });
+  if (selected) {
+    if (!swapped) {
+      context.lineWidth = 4;
+      context.strokeStyle = "cyan";
+      context.strokeRect(selected.x * CELL_SIZE + 2, selected.y * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+    } else {
+      let done = false;
+      tSwap += 1;
+      if (tSwap > SWAP_DURATION) {
+        tSwap = SWAP_DURATION;
+        done = true;
+      }
+
+      const offset = tSwap * SWAP_OFFSET;
+
+      const { x: x0, y: y0 } = selected;
+      const { x: x1, y: y1 } = swapped;
+
+      context.drawImage(
+        mapTileInfo[map[y1][x1]].texture,
+        x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
+        y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset,
+        TILE_SIZE,
+        TILE_SIZE
+      );
+      context.drawImage(
+        mapTileInfo[map[y0][x0]].texture,
+        x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
+        y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset,
+        TILE_SIZE,
+        TILE_SIZE
+      );
+
+      if (done) {
+        swap(x0, y0, x1, y1);
+
+        if (reswap) {
+          reswap = false;
+          selected = swapped = null;
+        } else {
+          const { matched: m0, tiles: t0 } = matchPosition(x0, y0);
+          const { matched: m1, tiles: t1 } = matchPosition(x1, y1);
+          if (m0 || m1) {
+            selected = swapped = null;
+            const t = [...t0, ...t1];
+            fall = {};
+            t.forEach(({ x, y }) => {
+              map[y][x] = -1;
+              if (fall[x]) {
+                !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) && fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+              } else fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+            });
+            const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+            getKeys(fall).forEach((key) => {
+              fall[key].below = findBelow(fall[key].list);
+              const needAdd = fall[key].list.length;
+              fall[key].list = [];
+              key = Number(key);
+              for (let i = fall[key].below; i >= 0; i -= 1) {
+                if (map[i][key] !== -1) {
+                  fall[key].list.push({ x: key, y: i, v: 0, offset: 0, value: map[i][key] });
+                  map[i][key] = -1;
+                }
+              }
+              for (let i = 0; i < needAdd; i += 1) {
+                fall[key].list.push({ x: key, y: -1 - i, v: 0, offset: 0, value: randomTile() });
+              }
+            });
+            console.log(fall);
+          } else {
+            reswap = true;
+            tSwap = 0;
+          }
+        }
+      }
+    }
+  }
+};
+
+const update = () => {
+  render();
+  requestAnimationFrame(update);
 };
 
 const main = async () => {
   await init();
 
-  render();
+  document.addEventListener("click", (e) => {
+    const x = Math.floor(e.offsetX / CELL_SIZE);
+    const y = Math.floor(e.offsetY / CELL_SIZE);
+    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
+
+    if (!selected) {
+      selected = { x, y };
+      return;
+    }
+
+    if (Math.abs(x - selected.x) + Math.abs(y - selected.y) !== 1) {
+      selected = null;
+      return;
+    }
+
+    swapped = { x, y };
+
+    tSwap = 0;
+  });
+
+  update();
 };
 
 main();
