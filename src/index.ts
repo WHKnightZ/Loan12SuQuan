@@ -10,6 +10,8 @@ const GAIN_TURN = 3; // 4
 const MATCH_4_POINT = 50;
 const SWAP_DURATION = 10;
 const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
+const VELOCITY_BASE = 2;
+const GRAVITY = 0.8;
 
 type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
@@ -230,6 +232,7 @@ let selected: { x: number; y: number } | null = null;
 let swapped: { x: number; y: number } | null = null;
 let tSwap = 0;
 let reswap = false;
+let falling = false;
 
 let fall: {
   [key: number]: {
@@ -317,15 +320,16 @@ const render = () => {
               key = Number(key);
               for (let i = fall[key].below; i >= 0; i -= 1) {
                 if (map[i][key] !== -1) {
-                  fall[key].list.push({ x: key, y: i, v: 0, offset: 0, value: map[i][key] });
+                  fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: map[i][key] });
                   map[i][key] = -1;
                 }
               }
               for (let i = 0; i < needAdd; i += 1) {
-                fall[key].list.push({ x: key, y: -1 - i, v: 0, offset: 0, value: randomTile() });
+                fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
               }
             });
             console.log(fall);
+            falling = true;
           } else {
             reswap = true;
             tSwap = 0;
@@ -334,11 +338,62 @@ const render = () => {
       }
     }
   }
+
+  if (falling) {
+    let newFalling = false;
+    getKeys(fall).forEach((col) => {
+      const colData = fall[col];
+      col = Number(col);
+
+      let shift = false;
+
+      colData.list.forEach((i, index) => {
+        i.v += GRAVITY;
+        i.offset += i.v;
+        const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
+
+        if (index === 0) {
+          if (newY >= colData.below) {
+            shift = true;
+            map[colData.below][col] = i.value;
+            colData.below -= 1;
+          }
+        } else {
+          // const prevY = colData.list[index - 1].y + Math.floor(colData.list[index - 1].offset / CELL_SIZE);
+          // if (newY === prevY - 1) {
+          if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
+            i.v = VELOCITY_BASE;
+            i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
+          }
+        }
+      });
+
+      colData.list.forEach(({ x, y, value, offset }) => {
+        context.drawImage(mapTileInfo[value].texture, x * CELL_SIZE + TILE_OFFSET, y * CELL_SIZE + TILE_OFFSET + offset, TILE_SIZE, TILE_SIZE);
+      });
+
+      if (shift) colData.list.shift();
+      if (colData.list.length) newFalling = true;
+    });
+
+    falling = newFalling;
+  }
 };
 
-const update = () => {
-  render();
+// Timer
+let then = 0;
+
+const update = (now = 0) => {
   requestAnimationFrame(update);
+
+  const elapsed = (now - then) / 1000;
+
+  if (elapsed > 0.3) {
+    then = now;
+    render();
+  } else {
+    return;
+  }
 };
 
 const main = async () => {
