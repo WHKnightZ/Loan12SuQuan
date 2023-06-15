@@ -11,7 +11,7 @@ const MATCH_4_POINT = 50;
 const SWAP_DURATION = 10;
 const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 const VELOCITY_BASE = 2;
-const GRAVITY = 0.8;
+const GRAVITY = 0.4;
 
 type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
@@ -254,12 +254,6 @@ const render = () => {
     }
   }
 
-  // context.lineWidth = 4;
-  // context.strokeStyle = "cyan";
-
-  // context.strokeRect(best.x0 * CELL_SIZE + 2, best.y0 * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-  // context.strokeRect(best.x1 * CELL_SIZE + 2, best.y1 * CELL_SIZE + 2, CELL_SIZE - 4, CELL_SIZE - 4);
-
   if (selected) {
     if (!swapped) {
       context.lineWidth = 4;
@@ -340,43 +334,13 @@ const render = () => {
   }
 
   if (falling) {
-    let newFalling = false;
     getKeys(fall).forEach((col) => {
       const colData = fall[col];
-      col = Number(col);
-
-      let shift = false;
-
-      colData.list.forEach((i, index) => {
-        i.v += GRAVITY;
-        i.offset += i.v;
-        const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
-
-        if (index === 0) {
-          if (newY >= colData.below) {
-            shift = true;
-            map[colData.below][col] = i.value;
-            colData.below -= 1;
-          }
-        } else {
-          // const prevY = colData.list[index - 1].y + Math.floor(colData.list[index - 1].offset / CELL_SIZE);
-          // if (newY === prevY - 1) {
-          if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-            i.v = VELOCITY_BASE;
-            i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
-          }
-        }
-      });
 
       colData.list.forEach(({ x, y, value, offset }) => {
         context.drawImage(mapTileInfo[value].texture, x * CELL_SIZE + TILE_OFFSET, y * CELL_SIZE + TILE_OFFSET + offset, TILE_SIZE, TILE_SIZE);
       });
-
-      if (shift) colData.list.shift();
-      if (colData.list.length) newFalling = true;
     });
-
-    falling = newFalling;
   }
 };
 
@@ -388,8 +352,83 @@ const update = (now = 0) => {
 
   const elapsed = (now - then) / 1000;
 
-  if (elapsed > 0.3) {
+  if (elapsed > 0) {
     then = now;
+
+    if (falling) {
+      let newFalling = false;
+      getKeys(fall).forEach((col) => {
+        const colData = fall[col];
+        col = Number(col);
+
+        let shift = false;
+
+        colData.list.forEach((i, index) => {
+          i.v += GRAVITY;
+          i.offset += i.v;
+          const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
+
+          if (index === 0) {
+            if (newY >= colData.below) {
+              shift = true;
+              map[colData.below][col] = i.value;
+              colData.below -= 1;
+            }
+          } else {
+            // const prevY = colData.list[index - 1].y + Math.floor(colData.list[index - 1].offset / CELL_SIZE);
+            // if (newY === prevY - 1) {
+            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
+              i.v = VELOCITY_BASE;
+              i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
+            }
+          }
+        });
+
+        if (shift) colData.list.shift();
+        if (colData.list.length) newFalling = true;
+      });
+
+      falling = newFalling;
+
+      if (!falling) {
+        const t: any[] = [];
+        for (let i = 0; i < MAP_WIDTH; i += 1) {
+          for (let j = 0; j < MAP_WIDTH; j += 1) {
+            const { matched: m0, tiles: t0 } = matchPosition(j, i);
+            if (m0) t.push(...t0);
+          }
+        }
+
+        if (t.length) {
+          fall = {};
+          t.forEach(({ x, y }) => {
+            map[y][x] = -1;
+            if (fall[x]) {
+              !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) && fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+            } else fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+          });
+          const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+          getKeys(fall).forEach((key) => {
+            fall[key].below = findBelow(fall[key].list);
+            const needAdd = fall[key].list.length;
+            fall[key].list = [];
+            key = Number(key);
+            for (let i = fall[key].below; i >= 0; i -= 1) {
+              if (map[i][key] !== -1) {
+                fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: map[i][key] });
+                map[i][key] = -1;
+              }
+            }
+            for (let i = 0; i < needAdd; i += 1) {
+              fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+            }
+          });
+          console.log(fall);
+          falling = true;
+        }
+      }
+    }
+
     render();
   } else {
     return;
