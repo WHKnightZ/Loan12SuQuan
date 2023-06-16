@@ -12,6 +12,7 @@ const SWAP_DURATION = 10;
 const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 const VELOCITY_BASE = 2;
 const GRAVITY = 0.4;
+const SCALE_RATIO = TILE_SIZE / 22;
 
 type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
@@ -30,15 +31,16 @@ const mapTileInfo: {
     compatible: number[];
     probability: number;
     point: number;
+    explosions: HTMLImageElement[];
   };
 } = {
-  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 100, point: 10, texture: null as any },
-  [TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null as any },
-  [TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null as any },
-  [TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null as any },
-  [TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null as any },
-  [TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null as any },
-  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, point: 30, texture: null as any },
+  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 100, point: 10, texture: null as any, explosions: [] },
+  [TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null as any, explosions: [] },
+  [TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null as any, explosions: [] },
+  [TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null as any, explosions: [] },
+  [TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null as any, explosions: [] },
+  [TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null as any, explosions: [] },
+  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, point: 30, texture: null as any, explosions: [] },
 };
 
 export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max
@@ -217,7 +219,39 @@ const init = async () => {
     return new Promise((res) => (image.onload = () => res(image)));
   };
 
-  await Promise.all(getKeys(TILES).map((tile, index) => loadImage(index, tile.toLowerCase())));
+  await Promise.all(getKeys(TILES).map((tile) => loadImage(TILES[tile], tile.toLowerCase())));
+
+  const explosionKeys: TileType[] = ["SWORD", "HEART", "GOLD", "ENERGY", "MANA", "EXP"];
+
+  const loadExplosion = (key: number, src: string) => {
+    const image = new Image();
+    image.src = getImageSrc(`explosions/${src}`);
+    return new Promise(
+      (res) =>
+        (image.onload = () => {
+          mapTileInfo[key].explosions = [];
+          for (let i = 0; i < 4; i += 1) {
+            const width = Math.floor((image.width / 4) * SCALE_RATIO);
+            const height = Math.floor(image.height * SCALE_RATIO);
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+            context.drawImage(image, 0, 0, width, height);
+
+            const image2 = new Image();
+            image2.src = canvas.toDataURL("image/png");
+            image2.onload = () => {
+              mapTileInfo[key].explosions[i] = image2;
+              res(null);
+            };
+          }
+        })
+    );
+  };
+
+  await Promise.all(explosionKeys.map((tile) => loadExplosion(TILES[tile], tile.toLowerCase())));
 
   // best = findAllMatchedPositions()[0];
 };
@@ -233,6 +267,7 @@ let swapped: { x: number; y: number } | null = null;
 let tSwap = 0;
 let reswap = false;
 let falling = false;
+let exploding = false;
 
 let fall: {
   [key: number]: {
@@ -240,6 +275,8 @@ let fall: {
     below: number;
   };
 } = {};
+
+let tExploding = 0;
 
 const render = () => {
   for (let i = 0; i < MAP_WIDTH; i += 1) {
@@ -323,7 +360,7 @@ const render = () => {
               }
             });
             console.log(fall);
-            falling = true;
+            exploding = true;
           } else {
             reswap = true;
             tSwap = 0;
@@ -333,7 +370,8 @@ const render = () => {
     }
   }
 
-  if (falling) {
+  if (exploding) {
+  } else if (falling) {
     getKeys(fall).forEach((col) => {
       const colData = fall[col];
 
@@ -355,7 +393,14 @@ const update = (now = 0) => {
   if (elapsed > 0) {
     then = now;
 
-    if (falling) {
+    if (exploding) {
+      tExploding += 1;
+      if (tExploding === 4) {
+        tExploding = 0;
+        falling = true;
+        exploding = false;
+      }
+    } else if (falling) {
       let newFalling = false;
       getKeys(fall).forEach((col) => {
         const colData = fall[col];
