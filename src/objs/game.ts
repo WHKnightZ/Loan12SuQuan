@@ -10,11 +10,10 @@ import {
   SWAP_DURATION,
   SWAP_OFFSET,
   TILE_OFFSET,
-  TILE_SIZE,
   VELOCITY_BASE,
 } from "@/configs/consts";
 import { AllMatchedPositions, Point, TileInfo } from "@/types";
-import { check, combine, findBelow, generateMap, getKey, getKeys, randomTile } from "@/utils/common";
+import { check, combine, findBelow, generateMap, getKeys, randomTile } from "@/utils/common";
 
 export class Game {
   state: "IDLE" | "SELECT" | "EXPLODE" | "FALL";
@@ -147,6 +146,8 @@ export class Game {
   }
 
   onClick(e: MouseEvent) {
+    if (this.state !== "IDLE" && this.state !== "SELECT") return;
+
     const x = Math.floor(e.offsetX / CELL_SIZE);
     const y = Math.floor(e.offsetY / CELL_SIZE);
     if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
@@ -154,19 +155,19 @@ export class Game {
     if (!this.selected) {
       this.selected = { x, y, value: base.map[y][x] };
       base.map[y][x] = -1;
+      this.state = "SELECT";
       return;
     }
 
     if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
       this.selected = null;
+      this.state = "IDLE";
       return;
     }
 
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
     this.tSwap = 0;
-
-    this.state = "SELECT";
   }
 
   render() {
@@ -178,219 +179,212 @@ export class Game {
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         if (base.map[i][j] === -1) continue;
 
-        base.context.drawImage(
-          mapTileInfo[base.map[i][j]].texture,
-          x + TILE_OFFSET,
-          y + TILE_OFFSET,
-          TILE_SIZE,
-          TILE_SIZE
-        );
+        base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }
     }
 
-    if (this.state === "SELECT") {
-      if (!this.swapped) {
-        base.context.lineWidth = 4;
-        base.context.strokeStyle = "cyan";
-        base.context.strokeRect(
-          this.selected.x * CELL_SIZE + 2,
-          this.selected.y * CELL_SIZE + 2,
-          CELL_SIZE - 4,
-          CELL_SIZE - 4
-        );
-      } else {
-        let done = false;
-        this.tSwap += 1;
-        if (this.tSwap > SWAP_DURATION) {
-          this.tSwap = SWAP_DURATION;
-          done = true;
-        }
-
-        console.log(this.tSwap);
-
+    switch (this.state) {
+      case "SELECT":
         const offset = this.tSwap * SWAP_OFFSET;
 
         const { x: x0, y: y0, value: v0 } = this.selected;
-        const { x: x1, y: y1, value: v1 } = this.swapped;
+        const { x: x1, y: y1, value: v1 } = this.swapped || this.selected;
 
-        console.log(v0, v1);
-
-        base.context.drawImage(
-          mapTileInfo[v1].texture,
-          x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
-          y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset,
-          TILE_SIZE,
-          TILE_SIZE
-        );
         base.context.drawImage(
           mapTileInfo[v0].texture,
           x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
-          y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset,
-          TILE_SIZE,
-          TILE_SIZE
+          y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
         );
 
-        if (done) {
-          base.map[y0][x0] = v0;
-          base.map[y1][x1] = v1;
-
-          this.swap(x0, y0, x1, y1);
-
-          if (this.reswap) {
-            this.reswap = false;
-            this.selected = this.swapped = null;
-          } else {
-            const { matched: m0, tiles: t0 } = this.matchPosition(x0, y0);
-            const { matched: m1, tiles: t1 } = this.matchPosition(x1, y1);
-            if (m0 || m1) {
-              this.selected = this.swapped = null;
-              this.explodedTiles = combine([t0, t1]);
-              this.explosions = [];
-              this.explodedTiles.forEach(({ x, y }) => {
-                this.explosions.push({ x, y, value: base.map[y][x] });
-                base.map[y][x] = -1;
-              });
-              this.state = "EXPLODE";
-            } else {
-              this.reswap = true;
-              this.tSwap = 0;
-            }
-          }
-        }
-      }
-    }
-
-    if (this.state === "EXPLODE") {
-      this.explosions.forEach(({ x, y, value }) => {
-        const texture = mapTileInfo[value].explosions[this.tExplode];
-        base.context.drawImage(
-          texture,
-          x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
-          y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
-        );
-      });
-    } else if (this.state === "FALL") {
-      getKeys(this.fall).forEach((col) => {
-        const colData = this.fall[col];
-
-        colData.list.forEach(({ x, y, value, offset }) => {
+        if (!this.swapped) {
+          base.context.lineWidth = 4;
+          base.context.strokeStyle = "cyan";
+          base.context.strokeRect(
+            this.selected.x * CELL_SIZE + 2,
+            this.selected.y * CELL_SIZE + 2,
+            CELL_SIZE - 4,
+            CELL_SIZE - 4
+          );
+        } else
           base.context.drawImage(
-            mapTileInfo[value].texture,
-            x * CELL_SIZE + TILE_OFFSET,
-            y * CELL_SIZE + TILE_OFFSET + offset,
-            TILE_SIZE,
-            TILE_SIZE
+            mapTileInfo[v1].texture,
+            x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
+            y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset
+          );
+        break;
+
+      case "EXPLODE":
+        this.explosions.forEach(({ x, y, value }) => {
+          const texture = mapTileInfo[value].explosions[this.tExplode];
+          base.context.drawImage(
+            texture,
+            x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
+            y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
           );
         });
-      });
+        break;
+
+      case "FALL":
+        getKeys(this.fall).forEach((col) => {
+          this.fall[col].list.forEach(({ x, y, value, offset }) => {
+            base.context.drawImage(
+              mapTileInfo[value].texture,
+              x * CELL_SIZE + TILE_OFFSET,
+              y * CELL_SIZE + TILE_OFFSET + offset
+            );
+          });
+        });
+        break;
     }
   }
 
   update() {
-    if (this.state === "EXPLODE") {
-      this.tExplode2 += 1;
-      if (this.tExplode2 % 2 === 0) {
-        this.tExplode += 1;
-        if (this.tExplode === 4) {
-          this.tExplode = 0;
-          this.state = "FALL";
+    switch (this.state) {
+      case "SELECT":
+        if (this.swapped) {
+          this.tSwap += 1;
+          if (this.tSwap > SWAP_DURATION) {
+            this.tSwap = SWAP_DURATION;
 
-          this.fall = {};
+            const { x: x0, y: y0, value: v0 } = this.selected;
+            const { x: x1, y: y1, value: v1 } = this.swapped;
 
-          this.explodedTiles.forEach(({ x, y }) => {
-            base.map[y][x] = -1;
-            if (this.fall[x]) {
-              !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-                this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-            } else this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
-          });
+            base.map[y0][x0] = v0;
+            base.map[y1][x1] = v1;
 
-          getKeys(this.fall).forEach((key) => {
-            this.fall[key].below = findBelow(this.fall[key].list);
-            const needAdd = this.fall[key].list.length;
-            this.fall[key].list = [];
-            key = Number(key);
-            for (let i = this.fall[key].below; i >= 0; i -= 1) {
-              if (base.map[i][key] !== -1) {
-                this.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-                base.map[i][key] = -1;
+            this.swap(x0, y0, x1, y1);
+
+            if (this.reswap) {
+              this.reswap = false;
+              this.selected = this.swapped = null;
+            } else {
+              const { matched: m0, tiles: t0 } = this.matchPosition(x0, y0);
+              const { matched: m1, tiles: t1 } = this.matchPosition(x1, y1);
+              if (m0 || m1) {
+                this.selected = this.swapped = null;
+                this.explodedTiles = combine([t0, t1]);
+                this.explosions = [];
+                this.explodedTiles.forEach(({ x, y }) => {
+                  this.explosions.push({ x, y, value: base.map[y][x] });
+                  base.map[y][x] = -1;
+                });
+                this.state = "EXPLODE";
+              } else {
+                this.reswap = true;
+                this.tSwap = 0;
               }
             }
-            for (let i = 0; i < needAdd; i += 1) {
-              this.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+          }
+        }
+        break;
+
+      case "EXPLODE":
+        this.tExplode2 += 1;
+        if (this.tExplode2 % 2 === 0) {
+          this.tExplode += 1;
+          if (this.tExplode === 4) {
+            this.tExplode = 0;
+            this.state = "FALL";
+
+            this.fall = {};
+
+            this.explodedTiles.forEach(({ x, y }) => {
+              base.map[y][x] = -1;
+              if (this.fall[x]) {
+                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                  this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+              } else this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+            });
+
+            getKeys(this.fall).forEach((key) => {
+              this.fall[key].below = findBelow(this.fall[key].list);
+              const needAdd = this.fall[key].list.length;
+              this.fall[key].list = [];
+              key = Number(key);
+              for (let i = this.fall[key].below; i >= 0; i -= 1) {
+                if (base.map[i][key] !== -1) {
+                  this.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+                  base.map[i][key] = -1;
+                }
+              }
+              for (let i = 0; i < needAdd; i += 1) {
+                this.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+              }
+            });
+          }
+        }
+        break;
+
+      case "FALL":
+        let newFalling = false;
+        getKeys(this.fall).forEach((col) => {
+          const colData = this.fall[col];
+          col = Number(col);
+
+          let shift = false;
+
+          colData.list.forEach((i, index) => {
+            i.v += GRAVITY;
+            i.offset += i.v;
+            const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
+
+            if (index === 0) {
+              if (newY >= colData.below) {
+                shift = true;
+                base.map[colData.below][col] = i.value;
+                colData.below -= 1;
+              }
+            } else {
+              if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
+                i.v = VELOCITY_BASE;
+                i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
+              }
             }
           });
-        }
-      }
-    } else if (this.state === "FALL") {
-      let newFalling = false;
-      getKeys(this.fall).forEach((col) => {
-        const colData = this.fall[col];
-        col = Number(col);
 
-        let shift = false;
-
-        colData.list.forEach((i, index) => {
-          i.v += GRAVITY;
-          i.offset += i.v;
-          const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
-
-          if (index === 0) {
-            if (newY >= colData.below) {
-              shift = true;
-              base.map[colData.below][col] = i.value;
-              colData.below -= 1;
-            }
-          } else {
-            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-              i.v = VELOCITY_BASE;
-              i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
-            }
-          }
+          if (shift) colData.list.shift();
+          if (colData.list.length) newFalling = true;
         });
 
-        if (shift) colData.list.shift();
-        if (colData.list.length) newFalling = true;
-      });
+        if (!newFalling) {
+          const t: any[] = [];
+          for (let i = 0; i < MAP_WIDTH; i += 1) {
+            for (let j = 0; j < MAP_WIDTH; j += 1) {
+              const { matched: m0, tiles: t0 } = this.matchPosition(j, i);
+              if (m0) t.push(...t0);
+            }
+          }
 
-      if (!newFalling) {
-        const t: any[] = [];
-        for (let i = 0; i < MAP_WIDTH; i += 1) {
-          for (let j = 0; j < MAP_WIDTH; j += 1) {
-            const { matched: m0, tiles: t0 } = this.matchPosition(j, i);
-            if (m0) t.push(...t0);
+          if (t.length) {
+            this.fall = {};
+            t.forEach(({ x, y }) => {
+              base.map[y][x] = -1;
+              if (this.fall[x]) {
+                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                  this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+              } else this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+            });
+            const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
+              list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+            getKeys(this.fall).forEach((key) => {
+              this.fall[key].below = findBelow(this.fall[key].list);
+              const needAdd = this.fall[key].list.length;
+              this.fall[key].list = [];
+              key = Number(key);
+              for (let i = this.fall[key].below; i >= 0; i -= 1) {
+                if (base.map[i][key] !== -1) {
+                  this.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+                  base.map[i][key] = -1;
+                }
+              }
+              for (let i = 0; i < needAdd; i += 1) {
+                this.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+              }
+            });
+            // falling = true;
           }
         }
-
-        if (t.length) {
-          this.fall = {};
-          t.forEach(({ x, y }) => {
-            base.map[y][x] = -1;
-            if (this.fall[x]) {
-              !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-                this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-            } else this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
-          });
-          const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
-            list.reduce((a, b) => (a < b.y ? b.y : a), -1);
-          getKeys(this.fall).forEach((key) => {
-            this.fall[key].below = findBelow(this.fall[key].list);
-            const needAdd = this.fall[key].list.length;
-            this.fall[key].list = [];
-            key = Number(key);
-            for (let i = this.fall[key].below; i >= 0; i -= 1) {
-              if (base.map[i][key] !== -1) {
-                this.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-                base.map[i][key] = -1;
-              }
-            }
-            for (let i = 0; i < needAdd; i += 1) {
-              this.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
-            }
-          });
-          // falling = true;
-        }
-      }
+        break;
     }
   }
 }

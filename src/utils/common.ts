@@ -7,6 +7,7 @@ import {
   MAP_WIDTH,
   SCALE_RATIO,
   TILES,
+  TILE_SIZE,
 } from "@/configs/consts";
 import { TileInfo } from "@/types";
 
@@ -93,9 +94,26 @@ export const initImages = async () => {
 
   const loadTile = (key: number, src: string) => {
     const image = new Image();
-    mapTileInfo[key].texture = image;
     image.src = getImageSrc(`tiles/${src}`);
-    return new Promise((res) => (image.onload = () => res(image)));
+    return new Promise(
+      (res) =>
+        (image.onload = () => {
+          const canvas = document.createElement("canvas");
+          canvas.width = TILE_SIZE;
+          canvas.height = TILE_SIZE;
+          const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+          context.imageSmoothingEnabled = false;
+
+          context.drawImage(image, 0, 0, TILE_SIZE, TILE_SIZE);
+
+          const image2 = new Image();
+          image2.src = canvas.toDataURL("image/png");
+          image2.onload = () => {
+            mapTileInfo[key].texture = image2;
+            res(null);
+          };
+        })
+    );
   };
 
   await Promise.all(getKeys(TILES).map((tile) => loadTile(TILES[tile], tile.toLowerCase())));
