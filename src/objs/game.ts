@@ -165,6 +165,8 @@ export class Game {
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
     this.tSwap = 0;
+
+    this.state = "SELECT";
   }
 
   render() {
@@ -176,7 +178,13 @@ export class Game {
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
         if (base.map[i][j] === -1) continue;
 
-        base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET, TILE_SIZE, TILE_SIZE);
+        base.context.drawImage(
+          mapTileInfo[base.map[i][j]].texture,
+          x + TILE_OFFSET,
+          y + TILE_OFFSET,
+          TILE_SIZE,
+          TILE_SIZE
+        );
       }
     }
 
@@ -198,20 +206,24 @@ export class Game {
           done = true;
         }
 
+        console.log(this.tSwap);
+
         const offset = this.tSwap * SWAP_OFFSET;
 
         const { x: x0, y: y0, value: v0 } = this.selected;
         const { x: x1, y: y1, value: v1 } = this.swapped;
 
+        console.log(v0, v1);
+
         base.context.drawImage(
-          mapTileInfo[base.map[y1][x1]].texture,
+          mapTileInfo[v1].texture,
           x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
           y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset,
           TILE_SIZE,
           TILE_SIZE
         );
         base.context.drawImage(
-          mapTileInfo[base.map[y0][x0]].texture,
+          mapTileInfo[v0].texture,
           x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
           y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset,
           TILE_SIZE,
@@ -356,7 +368,7 @@ export class Game {
             base.map[y][x] = -1;
             if (this.fall[x]) {
               !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-              this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+                this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
             } else this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
           });
           const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
