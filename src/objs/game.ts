@@ -152,6 +152,8 @@ export class Game {
     const y = Math.floor(e.offsetY / CELL_SIZE);
     if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
 
+    this.tSwap = 0;
+
     if (!this.selected) {
       this.selected = { x, y, value: base.map[y][x] };
       base.map[y][x] = -1;
@@ -160,6 +162,8 @@ export class Game {
     }
 
     if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
+      const { x, y, value } = this.selected;
+      base.map[y][x] = value;
       this.selected = null;
       this.state = "IDLE";
       return;
@@ -167,7 +171,6 @@ export class Game {
 
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
-    this.tSwap = 0;
   }
 
   render() {
@@ -257,6 +260,7 @@ export class Game {
             if (this.reswap) {
               this.reswap = false;
               this.selected = this.swapped = null;
+              this.state = "IDLE";
             } else {
               const { matched: m0, tiles: t0 } = this.matchPosition(x0, y0);
               const { matched: m1, tiles: t1 } = this.matchPosition(x1, y1);
@@ -347,7 +351,7 @@ export class Game {
         });
 
         if (!newFalling) {
-          const t: any[] = [];
+          const t: TileInfo[] = [];
           for (let i = 0; i < MAP_WIDTH; i += 1) {
             for (let j = 0; j < MAP_WIDTH; j += 1) {
               const { matched: m0, tiles: t0 } = this.matchPosition(j, i);
@@ -381,9 +385,10 @@ export class Game {
                 this.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
               }
             });
-            // falling = true;
+            newFalling = true;
           }
         }
+        if (!newFalling) this.state = "IDLE";
         break;
     }
   }

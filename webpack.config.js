@@ -1,5 +1,7 @@
 const path = require("path");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 module.exports = {
   entry: ["./src/index.ts"],
   module: {
@@ -33,4 +35,5 @@ module.exports = {
       },
     },
   },
+  devtool: isProduction ? undefined : "source-map",
 };

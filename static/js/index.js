@@ -1,11 +1,3 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -16,7 +8,183 @@
 /***/ ((module) => {
 
 "use strict";
-eval("\n\nmodule.exports = ansiHTML\n\n// Reference to https://github.com/sindresorhus/ansi-regex\nvar _regANSI = /(?:(?:\\u001b\\[)|\\u009b)(?:(?:[0-9]{1,3})?(?:(?:;[0-9]{0,3})*)?[A-M|f-m])|\\u001b[A-M]/\n\nvar _defColors = {\n  reset: ['fff', '000'], // [FOREGROUD_COLOR, BACKGROUND_COLOR]\n  black: '000',\n  red: 'ff0000',\n  green: '209805',\n  yellow: 'e8bf03',\n  blue: '0000ff',\n  magenta: 'ff00ff',\n  cyan: '00ffee',\n  lightgrey: 'f0f0f0',\n  darkgrey: '888'\n}\nvar _styles = {\n  30: 'black',\n  31: 'red',\n  32: 'green',\n  33: 'yellow',\n  34: 'blue',\n  35: 'magenta',\n  36: 'cyan',\n  37: 'lightgrey'\n}\nvar _openTags = {\n  '1': 'font-weight:bold', // bold\n  '2': 'opacity:0.5', // dim\n  '3': '<i>', // italic\n  '4': '<u>', // underscore\n  '8': 'display:none', // hidden\n  '9': '<del>' // delete\n}\nvar _closeTags = {\n  '23': '</i>', // reset italic\n  '24': '</u>', // reset underscore\n  '29': '</del>' // reset delete\n}\n\n;[0, 21, 22, 27, 28, 39, 49].forEach(function (n) {\n  _closeTags[n] = '</span>'\n})\n\n/**\n * Converts text with ANSI color codes to HTML markup.\n * @param {String} text\n * @returns {*}\n */\nfunction ansiHTML (text) {\n  // Returns the text if the string has no ANSI escape code.\n  if (!_regANSI.test(text)) {\n    return text\n  }\n\n  // Cache opened sequence.\n  var ansiCodes = []\n  // Replace with markup.\n  var ret = text.replace(/\\033\\[(\\d+)m/g, function (match, seq) {\n    var ot = _openTags[seq]\n    if (ot) {\n      // If current sequence has been opened, close it.\n      if (!!~ansiCodes.indexOf(seq)) { // eslint-disable-line no-extra-boolean-cast\n        ansiCodes.pop()\n        return '</span>'\n      }\n      // Open tag.\n      ansiCodes.push(seq)\n      return ot[0] === '<' ? ot : '<span style=\"' + ot + ';\">'\n    }\n\n    var ct = _closeTags[seq]\n    if (ct) {\n      // Pop sequence\n      ansiCodes.pop()\n      return ct\n    }\n    return ''\n  })\n\n  // Make sure tags are closed.\n  var l = ansiCodes.length\n  ;(l > 0) && (ret += Array(l + 1).join('</span>'))\n\n  return ret\n}\n\n/**\n * Customize colors.\n * @param {Object} colors reference to _defColors\n */\nansiHTML.setColors = function (colors) {\n  if (typeof colors !== 'object') {\n    throw new Error('`colors` parameter must be an Object.')\n  }\n\n  var _finalColors = {}\n  for (var key in _defColors) {\n    var hex = colors.hasOwnProperty(key) ? colors[key] : null\n    if (!hex) {\n      _finalColors[key] = _defColors[key]\n      continue\n    }\n    if ('reset' === key) {\n      if (typeof hex === 'string') {\n        hex = [hex]\n      }\n      if (!Array.isArray(hex) || hex.length === 0 || hex.some(function (h) {\n        return typeof h !== 'string'\n      })) {\n        throw new Error('The value of `' + key + '` property must be an Array and each item could only be a hex string, e.g.: FF0000')\n      }\n      var defHexColor = _defColors[key]\n      if (!hex[0]) {\n        hex[0] = defHexColor[0]\n      }\n      if (hex.length === 1 || !hex[1]) {\n        hex = [hex[0]]\n        hex.push(defHexColor[1])\n      }\n\n      hex = hex.slice(0, 2)\n    } else if (typeof hex !== 'string') {\n      throw new Error('The value of `' + key + '` property must be a hex string, e.g.: FF0000')\n    }\n    _finalColors[key] = hex\n  }\n  _setTags(_finalColors)\n}\n\n/**\n * Reset colors.\n */\nansiHTML.reset = function () {\n  _setTags(_defColors)\n}\n\n/**\n * Expose tags, including open and close.\n * @type {Object}\n */\nansiHTML.tags = {}\n\nif (Object.defineProperty) {\n  Object.defineProperty(ansiHTML.tags, 'open', {\n    get: function () { return _openTags }\n  })\n  Object.defineProperty(ansiHTML.tags, 'close', {\n    get: function () { return _closeTags }\n  })\n} else {\n  ansiHTML.tags.open = _openTags\n  ansiHTML.tags.close = _closeTags\n}\n\nfunction _setTags (colors) {\n  // reset all\n  _openTags['0'] = 'font-weight:normal;opacity:1;color:#' + colors.reset[0] + ';background:#' + colors.reset[1]\n  // inverse\n  _openTags['7'] = 'color:#' + colors.reset[1] + ';background:#' + colors.reset[0]\n  // dark grey\n  _openTags['90'] = 'color:#' + colors.darkgrey\n\n  for (var code in _styles) {\n    var color = _styles[code]\n    var oriColor = colors[color] || '000'\n    _openTags[code] = 'color:#' + oriColor\n    code = parseInt(code)\n    _openTags[(code + 10).toString()] = 'background:#' + oriColor\n  }\n}\n\nansiHTML.reset()\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/ansi-html-community/index.js?");
+
+
+module.exports = ansiHTML
+
+// Reference to https://github.com/sindresorhus/ansi-regex
+var _regANSI = /(?:(?:\u001b\[)|\u009b)(?:(?:[0-9]{1,3})?(?:(?:;[0-9]{0,3})*)?[A-M|f-m])|\u001b[A-M]/
+
+var _defColors = {
+  reset: ['fff', '000'], // [FOREGROUD_COLOR, BACKGROUND_COLOR]
+  black: '000',
+  red: 'ff0000',
+  green: '209805',
+  yellow: 'e8bf03',
+  blue: '0000ff',
+  magenta: 'ff00ff',
+  cyan: '00ffee',
+  lightgrey: 'f0f0f0',
+  darkgrey: '888'
+}
+var _styles = {
+  30: 'black',
+  31: 'red',
+  32: 'green',
+  33: 'yellow',
+  34: 'blue',
+  35: 'magenta',
+  36: 'cyan',
+  37: 'lightgrey'
+}
+var _openTags = {
+  '1': 'font-weight:bold', // bold
+  '2': 'opacity:0.5', // dim
+  '3': '<i>', // italic
+  '4': '<u>', // underscore
+  '8': 'display:none', // hidden
+  '9': '<del>' // delete
+}
+var _closeTags = {
+  '23': '</i>', // reset italic
+  '24': '</u>', // reset underscore
+  '29': '</del>' // reset delete
+}
+
+;[0, 21, 22, 27, 28, 39, 49].forEach(function (n) {
+  _closeTags[n] = '</span>'
+})
+
+/**
+ * Converts text with ANSI color codes to HTML markup.
+ * @param {String} text
+ * @returns {*}
+ */
+function ansiHTML (text) {
+  // Returns the text if the string has no ANSI escape code.
+  if (!_regANSI.test(text)) {
+    return text
+  }
+
+  // Cache opened sequence.
+  var ansiCodes = []
+  // Replace with markup.
+  var ret = text.replace(/\033\[(\d+)m/g, function (match, seq) {
+    var ot = _openTags[seq]
+    if (ot) {
+      // If current sequence has been opened, close it.
+      if (!!~ansiCodes.indexOf(seq)) { // eslint-disable-line no-extra-boolean-cast
+        ansiCodes.pop()
+        return '</span>'
+      }
+      // Open tag.
+      ansiCodes.push(seq)
+      return ot[0] === '<' ? ot : '<span style="' + ot + ';">'
+    }
+
+    var ct = _closeTags[seq]
+    if (ct) {
+      // Pop sequence
+      ansiCodes.pop()
+      return ct
+    }
+    return ''
+  })
+
+  // Make sure tags are closed.
+  var l = ansiCodes.length
+  ;(l > 0) && (ret += Array(l + 1).join('</span>'))
+
+  return ret
+}
+
+/**
+ * Customize colors.
+ * @param {Object} colors reference to _defColors
+ */
+ansiHTML.setColors = function (colors) {
+  if (typeof colors !== 'object') {
+    throw new Error('`colors` parameter must be an Object.')
+  }
+
+  var _finalColors = {}
+  for (var key in _defColors) {
+    var hex = colors.hasOwnProperty(key) ? colors[key] : null
+    if (!hex) {
+      _finalColors[key] = _defColors[key]
+      continue
+    }
+    if ('reset' === key) {
+      if (typeof hex === 'string') {
+        hex = [hex]
+      }
+      if (!Array.isArray(hex) || hex.length === 0 || hex.some(function (h) {
+        return typeof h !== 'string'
+      })) {
+        throw new Error('The value of `' + key + '` property must be an Array and each item could only be a hex string, e.g.: FF0000')
+      }
+      var defHexColor = _defColors[key]
+      if (!hex[0]) {
+        hex[0] = defHexColor[0]
+      }
+      if (hex.length === 1 || !hex[1]) {
+        hex = [hex[0]]
+        hex.push(defHexColor[1])
+      }
+
+      hex = hex.slice(0, 2)
+    } else if (typeof hex !== 'string') {
+      throw new Error('The value of `' + key + '` property must be a hex string, e.g.: FF0000')
+    }
+    _finalColors[key] = hex
+  }
+  _setTags(_finalColors)
+}
+
+/**
+ * Reset colors.
+ */
+ansiHTML.reset = function () {
+  _setTags(_defColors)
+}
+
+/**
+ * Expose tags, including open and close.
+ * @type {Object}
+ */
+ansiHTML.tags = {}
+
+if (Object.defineProperty) {
+  Object.defineProperty(ansiHTML.tags, 'open', {
+    get: function () { return _openTags }
+  })
+  Object.defineProperty(ansiHTML.tags, 'close', {
+    get: function () { return _closeTags }
+  })
+} else {
+  ansiHTML.tags.open = _openTags
+  ansiHTML.tags.close = _closeTags
+}
+
+function _setTags (colors) {
+  // reset all
+  _openTags['0'] = 'font-weight:normal;opacity:1;color:#' + colors.reset[0] + ';background:#' + colors.reset[1]
+  // inverse
+  _openTags['7'] = 'color:#' + colors.reset[1] + ';background:#' + colors.reset[0]
+  // dark grey
+  _openTags['90'] = 'color:#' + colors.darkgrey
+
+  for (var code in _styles) {
+    var color = _styles[code]
+    var oriColor = colors[color] || '000'
+    _openTags[code] = 'color:#' + oriColor
+    code = parseInt(code)
+    _openTags[(code + 10).toString()] = 'background:#' + oriColor
+  }
+}
+
+ansiHTML.reset()
+
 
 /***/ }),
 
@@ -27,7 +195,504 @@ eval("\n\nmodule.exports = ansiHTML\n\n// Reference to https://github.com/sindre
 /***/ ((module) => {
 
 "use strict";
-eval("// Copyright Joyent, Inc. and other Node contributors.\n//\n// Permission is hereby granted, free of charge, to any person obtaining a\n// copy of this software and associated documentation files (the\n// \"Software\"), to deal in the Software without restriction, including\n// without limitation the rights to use, copy, modify, merge, publish,\n// distribute, sublicense, and/or sell copies of the Software, and to permit\n// persons to whom the Software is furnished to do so, subject to the\n// following conditions:\n//\n// The above copyright notice and this permission notice shall be included\n// in all copies or substantial portions of the Software.\n//\n// THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS\n// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF\n// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN\n// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,\n// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR\n// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE\n// USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\nvar R = typeof Reflect === 'object' ? Reflect : null\nvar ReflectApply = R && typeof R.apply === 'function'\n  ? R.apply\n  : function ReflectApply(target, receiver, args) {\n    return Function.prototype.apply.call(target, receiver, args);\n  }\n\nvar ReflectOwnKeys\nif (R && typeof R.ownKeys === 'function') {\n  ReflectOwnKeys = R.ownKeys\n} else if (Object.getOwnPropertySymbols) {\n  ReflectOwnKeys = function ReflectOwnKeys(target) {\n    return Object.getOwnPropertyNames(target)\n      .concat(Object.getOwnPropertySymbols(target));\n  };\n} else {\n  ReflectOwnKeys = function ReflectOwnKeys(target) {\n    return Object.getOwnPropertyNames(target);\n  };\n}\n\nfunction ProcessEmitWarning(warning) {\n  if (console && console.warn) console.warn(warning);\n}\n\nvar NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {\n  return value !== value;\n}\n\nfunction EventEmitter() {\n  EventEmitter.init.call(this);\n}\nmodule.exports = EventEmitter;\nmodule.exports.once = once;\n\n// Backwards-compat with node 0.10.x\nEventEmitter.EventEmitter = EventEmitter;\n\nEventEmitter.prototype._events = undefined;\nEventEmitter.prototype._eventsCount = 0;\nEventEmitter.prototype._maxListeners = undefined;\n\n// By default EventEmitters will print a warning if more than 10 listeners are\n// added to it. This is a useful default which helps finding memory leaks.\nvar defaultMaxListeners = 10;\n\nfunction checkListener(listener) {\n  if (typeof listener !== 'function') {\n    throw new TypeError('The \"listener\" argument must be of type Function. Received type ' + typeof listener);\n  }\n}\n\nObject.defineProperty(EventEmitter, 'defaultMaxListeners', {\n  enumerable: true,\n  get: function() {\n    return defaultMaxListeners;\n  },\n  set: function(arg) {\n    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {\n      throw new RangeError('The value of \"defaultMaxListeners\" is out of range. It must be a non-negative number. Received ' + arg + '.');\n    }\n    defaultMaxListeners = arg;\n  }\n});\n\nEventEmitter.init = function() {\n\n  if (this._events === undefined ||\n      this._events === Object.getPrototypeOf(this)._events) {\n    this._events = Object.create(null);\n    this._eventsCount = 0;\n  }\n\n  this._maxListeners = this._maxListeners || undefined;\n};\n\n// Obviously not all Emitters should be limited to 10. This function allows\n// that to be increased. Set to zero for unlimited.\nEventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {\n  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {\n    throw new RangeError('The value of \"n\" is out of range. It must be a non-negative number. Received ' + n + '.');\n  }\n  this._maxListeners = n;\n  return this;\n};\n\nfunction _getMaxListeners(that) {\n  if (that._maxListeners === undefined)\n    return EventEmitter.defaultMaxListeners;\n  return that._maxListeners;\n}\n\nEventEmitter.prototype.getMaxListeners = function getMaxListeners() {\n  return _getMaxListeners(this);\n};\n\nEventEmitter.prototype.emit = function emit(type) {\n  var args = [];\n  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);\n  var doError = (type === 'error');\n\n  var events = this._events;\n  if (events !== undefined)\n    doError = (doError && events.error === undefined);\n  else if (!doError)\n    return false;\n\n  // If there is no 'error' event listener then throw.\n  if (doError) {\n    var er;\n    if (args.length > 0)\n      er = args[0];\n    if (er instanceof Error) {\n      // Note: The comments on the `throw` lines are intentional, they show\n      // up in Node's output if this results in an unhandled exception.\n      throw er; // Unhandled 'error' event\n    }\n    // At least give some kind of context to the user\n    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));\n    err.context = er;\n    throw err; // Unhandled 'error' event\n  }\n\n  var handler = events[type];\n\n  if (handler === undefined)\n    return false;\n\n  if (typeof handler === 'function') {\n    ReflectApply(handler, this, args);\n  } else {\n    var len = handler.length;\n    var listeners = arrayClone(handler, len);\n    for (var i = 0; i < len; ++i)\n      ReflectApply(listeners[i], this, args);\n  }\n\n  return true;\n};\n\nfunction _addListener(target, type, listener, prepend) {\n  var m;\n  var events;\n  var existing;\n\n  checkListener(listener);\n\n  events = target._events;\n  if (events === undefined) {\n    events = target._events = Object.create(null);\n    target._eventsCount = 0;\n  } else {\n    // To avoid recursion in the case that type === \"newListener\"! Before\n    // adding it to the listeners, first emit \"newListener\".\n    if (events.newListener !== undefined) {\n      target.emit('newListener', type,\n                  listener.listener ? listener.listener : listener);\n\n      // Re-assign `events` because a newListener handler could have caused the\n      // this._events to be assigned to a new object\n      events = target._events;\n    }\n    existing = events[type];\n  }\n\n  if (existing === undefined) {\n    // Optimize the case of one listener. Don't need the extra array object.\n    existing = events[type] = listener;\n    ++target._eventsCount;\n  } else {\n    if (typeof existing === 'function') {\n      // Adding the second element, need to change to array.\n      existing = events[type] =\n        prepend ? [listener, existing] : [existing, listener];\n      // If we've already got an array, just append.\n    } else if (prepend) {\n      existing.unshift(listener);\n    } else {\n      existing.push(listener);\n    }\n\n    // Check for listener leak\n    m = _getMaxListeners(target);\n    if (m > 0 && existing.length > m && !existing.warned) {\n      existing.warned = true;\n      // No error code for this since it is a Warning\n      // eslint-disable-next-line no-restricted-syntax\n      var w = new Error('Possible EventEmitter memory leak detected. ' +\n                          existing.length + ' ' + String(type) + ' listeners ' +\n                          'added. Use emitter.setMaxListeners() to ' +\n                          'increase limit');\n      w.name = 'MaxListenersExceededWarning';\n      w.emitter = target;\n      w.type = type;\n      w.count = existing.length;\n      ProcessEmitWarning(w);\n    }\n  }\n\n  return target;\n}\n\nEventEmitter.prototype.addListener = function addListener(type, listener) {\n  return _addListener(this, type, listener, false);\n};\n\nEventEmitter.prototype.on = EventEmitter.prototype.addListener;\n\nEventEmitter.prototype.prependListener =\n    function prependListener(type, listener) {\n      return _addListener(this, type, listener, true);\n    };\n\nfunction onceWrapper() {\n  if (!this.fired) {\n    this.target.removeListener(this.type, this.wrapFn);\n    this.fired = true;\n    if (arguments.length === 0)\n      return this.listener.call(this.target);\n    return this.listener.apply(this.target, arguments);\n  }\n}\n\nfunction _onceWrap(target, type, listener) {\n  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };\n  var wrapped = onceWrapper.bind(state);\n  wrapped.listener = listener;\n  state.wrapFn = wrapped;\n  return wrapped;\n}\n\nEventEmitter.prototype.once = function once(type, listener) {\n  checkListener(listener);\n  this.on(type, _onceWrap(this, type, listener));\n  return this;\n};\n\nEventEmitter.prototype.prependOnceListener =\n    function prependOnceListener(type, listener) {\n      checkListener(listener);\n      this.prependListener(type, _onceWrap(this, type, listener));\n      return this;\n    };\n\n// Emits a 'removeListener' event if and only if the listener was removed.\nEventEmitter.prototype.removeListener =\n    function removeListener(type, listener) {\n      var list, events, position, i, originalListener;\n\n      checkListener(listener);\n\n      events = this._events;\n      if (events === undefined)\n        return this;\n\n      list = events[type];\n      if (list === undefined)\n        return this;\n\n      if (list === listener || list.listener === listener) {\n        if (--this._eventsCount === 0)\n          this._events = Object.create(null);\n        else {\n          delete events[type];\n          if (events.removeListener)\n            this.emit('removeListener', type, list.listener || listener);\n        }\n      } else if (typeof list !== 'function') {\n        position = -1;\n\n        for (i = list.length - 1; i >= 0; i--) {\n          if (list[i] === listener || list[i].listener === listener) {\n            originalListener = list[i].listener;\n            position = i;\n            break;\n          }\n        }\n\n        if (position < 0)\n          return this;\n\n        if (position === 0)\n          list.shift();\n        else {\n          spliceOne(list, position);\n        }\n\n        if (list.length === 1)\n          events[type] = list[0];\n\n        if (events.removeListener !== undefined)\n          this.emit('removeListener', type, originalListener || listener);\n      }\n\n      return this;\n    };\n\nEventEmitter.prototype.off = EventEmitter.prototype.removeListener;\n\nEventEmitter.prototype.removeAllListeners =\n    function removeAllListeners(type) {\n      var listeners, events, i;\n\n      events = this._events;\n      if (events === undefined)\n        return this;\n\n      // not listening for removeListener, no need to emit\n      if (events.removeListener === undefined) {\n        if (arguments.length === 0) {\n          this._events = Object.create(null);\n          this._eventsCount = 0;\n        } else if (events[type] !== undefined) {\n          if (--this._eventsCount === 0)\n            this._events = Object.create(null);\n          else\n            delete events[type];\n        }\n        return this;\n      }\n\n      // emit removeListener for all listeners on all events\n      if (arguments.length === 0) {\n        var keys = Object.keys(events);\n        var key;\n        for (i = 0; i < keys.length; ++i) {\n          key = keys[i];\n          if (key === 'removeListener') continue;\n          this.removeAllListeners(key);\n        }\n        this.removeAllListeners('removeListener');\n        this._events = Object.create(null);\n        this._eventsCount = 0;\n        return this;\n      }\n\n      listeners = events[type];\n\n      if (typeof listeners === 'function') {\n        this.removeListener(type, listeners);\n      } else if (listeners !== undefined) {\n        // LIFO order\n        for (i = listeners.length - 1; i >= 0; i--) {\n          this.removeListener(type, listeners[i]);\n        }\n      }\n\n      return this;\n    };\n\nfunction _listeners(target, type, unwrap) {\n  var events = target._events;\n\n  if (events === undefined)\n    return [];\n\n  var evlistener = events[type];\n  if (evlistener === undefined)\n    return [];\n\n  if (typeof evlistener === 'function')\n    return unwrap ? [evlistener.listener || evlistener] : [evlistener];\n\n  return unwrap ?\n    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);\n}\n\nEventEmitter.prototype.listeners = function listeners(type) {\n  return _listeners(this, type, true);\n};\n\nEventEmitter.prototype.rawListeners = function rawListeners(type) {\n  return _listeners(this, type, false);\n};\n\nEventEmitter.listenerCount = function(emitter, type) {\n  if (typeof emitter.listenerCount === 'function') {\n    return emitter.listenerCount(type);\n  } else {\n    return listenerCount.call(emitter, type);\n  }\n};\n\nEventEmitter.prototype.listenerCount = listenerCount;\nfunction listenerCount(type) {\n  var events = this._events;\n\n  if (events !== undefined) {\n    var evlistener = events[type];\n\n    if (typeof evlistener === 'function') {\n      return 1;\n    } else if (evlistener !== undefined) {\n      return evlistener.length;\n    }\n  }\n\n  return 0;\n}\n\nEventEmitter.prototype.eventNames = function eventNames() {\n  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];\n};\n\nfunction arrayClone(arr, n) {\n  var copy = new Array(n);\n  for (var i = 0; i < n; ++i)\n    copy[i] = arr[i];\n  return copy;\n}\n\nfunction spliceOne(list, index) {\n  for (; index + 1 < list.length; index++)\n    list[index] = list[index + 1];\n  list.pop();\n}\n\nfunction unwrapListeners(arr) {\n  var ret = new Array(arr.length);\n  for (var i = 0; i < ret.length; ++i) {\n    ret[i] = arr[i].listener || arr[i];\n  }\n  return ret;\n}\n\nfunction once(emitter, name) {\n  return new Promise(function (resolve, reject) {\n    function errorListener(err) {\n      emitter.removeListener(name, resolver);\n      reject(err);\n    }\n\n    function resolver() {\n      if (typeof emitter.removeListener === 'function') {\n        emitter.removeListener('error', errorListener);\n      }\n      resolve([].slice.call(arguments));\n    };\n\n    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });\n    if (name !== 'error') {\n      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });\n    }\n  });\n}\n\nfunction addErrorHandlerIfEventEmitter(emitter, handler, flags) {\n  if (typeof emitter.on === 'function') {\n    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);\n  }\n}\n\nfunction eventTargetAgnosticAddListener(emitter, name, listener, flags) {\n  if (typeof emitter.on === 'function') {\n    if (flags.once) {\n      emitter.once(name, listener);\n    } else {\n      emitter.on(name, listener);\n    }\n  } else if (typeof emitter.addEventListener === 'function') {\n    // EventTarget does not have `error` event semantics like Node\n    // EventEmitters, we do not listen for `error` events here.\n    emitter.addEventListener(name, function wrapListener(arg) {\n      // IE does not have builtin `{ once: true }` support so we\n      // have to do it manually.\n      if (flags.once) {\n        emitter.removeEventListener(name, wrapListener);\n      }\n      listener(arg);\n    });\n  } else {\n    throw new TypeError('The \"emitter\" argument must be of type EventEmitter. Received type ' + typeof emitter);\n  }\n}\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/events/events.js?");
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+
+var R = typeof Reflect === 'object' ? Reflect : null
+var ReflectApply = R && typeof R.apply === 'function'
+  ? R.apply
+  : function ReflectApply(target, receiver, args) {
+    return Function.prototype.apply.call(target, receiver, args);
+  }
+
+var ReflectOwnKeys
+if (R && typeof R.ownKeys === 'function') {
+  ReflectOwnKeys = R.ownKeys
+} else if (Object.getOwnPropertySymbols) {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target)
+      .concat(Object.getOwnPropertySymbols(target));
+  };
+} else {
+  ReflectOwnKeys = function ReflectOwnKeys(target) {
+    return Object.getOwnPropertyNames(target);
+  };
+}
+
+function ProcessEmitWarning(warning) {
+  if (console && console.warn) console.warn(warning);
+}
+
+var NumberIsNaN = Number.isNaN || function NumberIsNaN(value) {
+  return value !== value;
+}
+
+function EventEmitter() {
+  EventEmitter.init.call(this);
+}
+module.exports = EventEmitter;
+module.exports.once = once;
+
+// Backwards-compat with node 0.10.x
+EventEmitter.EventEmitter = EventEmitter;
+
+EventEmitter.prototype._events = undefined;
+EventEmitter.prototype._eventsCount = 0;
+EventEmitter.prototype._maxListeners = undefined;
+
+// By default EventEmitters will print a warning if more than 10 listeners are
+// added to it. This is a useful default which helps finding memory leaks.
+var defaultMaxListeners = 10;
+
+function checkListener(listener) {
+  if (typeof listener !== 'function') {
+    throw new TypeError('The "listener" argument must be of type Function. Received type ' + typeof listener);
+  }
+}
+
+Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+  enumerable: true,
+  get: function() {
+    return defaultMaxListeners;
+  },
+  set: function(arg) {
+    if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+      throw new RangeError('The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' + arg + '.');
+    }
+    defaultMaxListeners = arg;
+  }
+});
+
+EventEmitter.init = function() {
+
+  if (this._events === undefined ||
+      this._events === Object.getPrototypeOf(this)._events) {
+    this._events = Object.create(null);
+    this._eventsCount = 0;
+  }
+
+  this._maxListeners = this._maxListeners || undefined;
+};
+
+// Obviously not all Emitters should be limited to 10. This function allows
+// that to be increased. Set to zero for unlimited.
+EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
+  if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+    throw new RangeError('The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.');
+  }
+  this._maxListeners = n;
+  return this;
+};
+
+function _getMaxListeners(that) {
+  if (that._maxListeners === undefined)
+    return EventEmitter.defaultMaxListeners;
+  return that._maxListeners;
+}
+
+EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
+  return _getMaxListeners(this);
+};
+
+EventEmitter.prototype.emit = function emit(type) {
+  var args = [];
+  for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
+  var doError = (type === 'error');
+
+  var events = this._events;
+  if (events !== undefined)
+    doError = (doError && events.error === undefined);
+  else if (!doError)
+    return false;
+
+  // If there is no 'error' event listener then throw.
+  if (doError) {
+    var er;
+    if (args.length > 0)
+      er = args[0];
+    if (er instanceof Error) {
+      // Note: The comments on the `throw` lines are intentional, they show
+      // up in Node's output if this results in an unhandled exception.
+      throw er; // Unhandled 'error' event
+    }
+    // At least give some kind of context to the user
+    var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+    err.context = er;
+    throw err; // Unhandled 'error' event
+  }
+
+  var handler = events[type];
+
+  if (handler === undefined)
+    return false;
+
+  if (typeof handler === 'function') {
+    ReflectApply(handler, this, args);
+  } else {
+    var len = handler.length;
+    var listeners = arrayClone(handler, len);
+    for (var i = 0; i < len; ++i)
+      ReflectApply(listeners[i], this, args);
+  }
+
+  return true;
+};
+
+function _addListener(target, type, listener, prepend) {
+  var m;
+  var events;
+  var existing;
+
+  checkListener(listener);
+
+  events = target._events;
+  if (events === undefined) {
+    events = target._events = Object.create(null);
+    target._eventsCount = 0;
+  } else {
+    // To avoid recursion in the case that type === "newListener"! Before
+    // adding it to the listeners, first emit "newListener".
+    if (events.newListener !== undefined) {
+      target.emit('newListener', type,
+                  listener.listener ? listener.listener : listener);
+
+      // Re-assign `events` because a newListener handler could have caused the
+      // this._events to be assigned to a new object
+      events = target._events;
+    }
+    existing = events[type];
+  }
+
+  if (existing === undefined) {
+    // Optimize the case of one listener. Don't need the extra array object.
+    existing = events[type] = listener;
+    ++target._eventsCount;
+  } else {
+    if (typeof existing === 'function') {
+      // Adding the second element, need to change to array.
+      existing = events[type] =
+        prepend ? [listener, existing] : [existing, listener];
+      // If we've already got an array, just append.
+    } else if (prepend) {
+      existing.unshift(listener);
+    } else {
+      existing.push(listener);
+    }
+
+    // Check for listener leak
+    m = _getMaxListeners(target);
+    if (m > 0 && existing.length > m && !existing.warned) {
+      existing.warned = true;
+      // No error code for this since it is a Warning
+      // eslint-disable-next-line no-restricted-syntax
+      var w = new Error('Possible EventEmitter memory leak detected. ' +
+                          existing.length + ' ' + String(type) + ' listeners ' +
+                          'added. Use emitter.setMaxListeners() to ' +
+                          'increase limit');
+      w.name = 'MaxListenersExceededWarning';
+      w.emitter = target;
+      w.type = type;
+      w.count = existing.length;
+      ProcessEmitWarning(w);
+    }
+  }
+
+  return target;
+}
+
+EventEmitter.prototype.addListener = function addListener(type, listener) {
+  return _addListener(this, type, listener, false);
+};
+
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
+
+EventEmitter.prototype.prependListener =
+    function prependListener(type, listener) {
+      return _addListener(this, type, listener, true);
+    };
+
+function onceWrapper() {
+  if (!this.fired) {
+    this.target.removeListener(this.type, this.wrapFn);
+    this.fired = true;
+    if (arguments.length === 0)
+      return this.listener.call(this.target);
+    return this.listener.apply(this.target, arguments);
+  }
+}
+
+function _onceWrap(target, type, listener) {
+  var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
+  var wrapped = onceWrapper.bind(state);
+  wrapped.listener = listener;
+  state.wrapFn = wrapped;
+  return wrapped;
+}
+
+EventEmitter.prototype.once = function once(type, listener) {
+  checkListener(listener);
+  this.on(type, _onceWrap(this, type, listener));
+  return this;
+};
+
+EventEmitter.prototype.prependOnceListener =
+    function prependOnceListener(type, listener) {
+      checkListener(listener);
+      this.prependListener(type, _onceWrap(this, type, listener));
+      return this;
+    };
+
+// Emits a 'removeListener' event if and only if the listener was removed.
+EventEmitter.prototype.removeListener =
+    function removeListener(type, listener) {
+      var list, events, position, i, originalListener;
+
+      checkListener(listener);
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      list = events[type];
+      if (list === undefined)
+        return this;
+
+      if (list === listener || list.listener === listener) {
+        if (--this._eventsCount === 0)
+          this._events = Object.create(null);
+        else {
+          delete events[type];
+          if (events.removeListener)
+            this.emit('removeListener', type, list.listener || listener);
+        }
+      } else if (typeof list !== 'function') {
+        position = -1;
+
+        for (i = list.length - 1; i >= 0; i--) {
+          if (list[i] === listener || list[i].listener === listener) {
+            originalListener = list[i].listener;
+            position = i;
+            break;
+          }
+        }
+
+        if (position < 0)
+          return this;
+
+        if (position === 0)
+          list.shift();
+        else {
+          spliceOne(list, position);
+        }
+
+        if (list.length === 1)
+          events[type] = list[0];
+
+        if (events.removeListener !== undefined)
+          this.emit('removeListener', type, originalListener || listener);
+      }
+
+      return this;
+    };
+
+EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
+EventEmitter.prototype.removeAllListeners =
+    function removeAllListeners(type) {
+      var listeners, events, i;
+
+      events = this._events;
+      if (events === undefined)
+        return this;
+
+      // not listening for removeListener, no need to emit
+      if (events.removeListener === undefined) {
+        if (arguments.length === 0) {
+          this._events = Object.create(null);
+          this._eventsCount = 0;
+        } else if (events[type] !== undefined) {
+          if (--this._eventsCount === 0)
+            this._events = Object.create(null);
+          else
+            delete events[type];
+        }
+        return this;
+      }
+
+      // emit removeListener for all listeners on all events
+      if (arguments.length === 0) {
+        var keys = Object.keys(events);
+        var key;
+        for (i = 0; i < keys.length; ++i) {
+          key = keys[i];
+          if (key === 'removeListener') continue;
+          this.removeAllListeners(key);
+        }
+        this.removeAllListeners('removeListener');
+        this._events = Object.create(null);
+        this._eventsCount = 0;
+        return this;
+      }
+
+      listeners = events[type];
+
+      if (typeof listeners === 'function') {
+        this.removeListener(type, listeners);
+      } else if (listeners !== undefined) {
+        // LIFO order
+        for (i = listeners.length - 1; i >= 0; i--) {
+          this.removeListener(type, listeners[i]);
+        }
+      }
+
+      return this;
+    };
+
+function _listeners(target, type, unwrap) {
+  var events = target._events;
+
+  if (events === undefined)
+    return [];
+
+  var evlistener = events[type];
+  if (evlistener === undefined)
+    return [];
+
+  if (typeof evlistener === 'function')
+    return unwrap ? [evlistener.listener || evlistener] : [evlistener];
+
+  return unwrap ?
+    unwrapListeners(evlistener) : arrayClone(evlistener, evlistener.length);
+}
+
+EventEmitter.prototype.listeners = function listeners(type) {
+  return _listeners(this, type, true);
+};
+
+EventEmitter.prototype.rawListeners = function rawListeners(type) {
+  return _listeners(this, type, false);
+};
+
+EventEmitter.listenerCount = function(emitter, type) {
+  if (typeof emitter.listenerCount === 'function') {
+    return emitter.listenerCount(type);
+  } else {
+    return listenerCount.call(emitter, type);
+  }
+};
+
+EventEmitter.prototype.listenerCount = listenerCount;
+function listenerCount(type) {
+  var events = this._events;
+
+  if (events !== undefined) {
+    var evlistener = events[type];
+
+    if (typeof evlistener === 'function') {
+      return 1;
+    } else if (evlistener !== undefined) {
+      return evlistener.length;
+    }
+  }
+
+  return 0;
+}
+
+EventEmitter.prototype.eventNames = function eventNames() {
+  return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
+};
+
+function arrayClone(arr, n) {
+  var copy = new Array(n);
+  for (var i = 0; i < n; ++i)
+    copy[i] = arr[i];
+  return copy;
+}
+
+function spliceOne(list, index) {
+  for (; index + 1 < list.length; index++)
+    list[index] = list[index + 1];
+  list.pop();
+}
+
+function unwrapListeners(arr) {
+  var ret = new Array(arr.length);
+  for (var i = 0; i < ret.length; ++i) {
+    ret[i] = arr[i].listener || arr[i];
+  }
+  return ret;
+}
+
+function once(emitter, name) {
+  return new Promise(function (resolve, reject) {
+    function errorListener(err) {
+      emitter.removeListener(name, resolver);
+      reject(err);
+    }
+
+    function resolver() {
+      if (typeof emitter.removeListener === 'function') {
+        emitter.removeListener('error', errorListener);
+      }
+      resolve([].slice.call(arguments));
+    };
+
+    eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
+    if (name !== 'error') {
+      addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
+    }
+  });
+}
+
+function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
+  if (typeof emitter.on === 'function') {
+    eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
+  }
+}
+
+function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
+  if (typeof emitter.on === 'function') {
+    if (flags.once) {
+      emitter.once(name, listener);
+    } else {
+      emitter.on(name, listener);
+    }
+  } else if (typeof emitter.addEventListener === 'function') {
+    // EventTarget does not have `error` event semantics like Node
+    // EventEmitters, we do not listen for `error` events here.
+    emitter.addEventListener(name, function wrapListener(arg) {
+      // IE does not have builtin `{ once: true }` support so we
+      // have to do it manually.
+      if (flags.once) {
+        emitter.removeEventListener(name, wrapListener);
+      }
+      listener(arg);
+    });
+  } else {
+    throw new TypeError('The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter);
+  }
+}
+
 
 /***/ }),
 
@@ -38,7 +703,197 @@ eval("// Copyright Joyent, Inc. and other Node contributors.\n//\n// Permission 
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-eval("\nvar __assign = (this && this.__assign) || function () {\n    __assign = Object.assign || function(t) {\n        for (var s, i = 1, n = arguments.length; i < n; i++) {\n            s = arguments[i];\n            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))\n                t[p] = s[p];\n        }\n        return t;\n    };\n    return __assign.apply(this, arguments);\n};\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\nvar named_references_1 = __webpack_require__(/*! ./named-references */ \"./node_modules/html-entities/lib/named-references.js\");\nvar numeric_unicode_map_1 = __webpack_require__(/*! ./numeric-unicode-map */ \"./node_modules/html-entities/lib/numeric-unicode-map.js\");\nvar surrogate_pairs_1 = __webpack_require__(/*! ./surrogate-pairs */ \"./node_modules/html-entities/lib/surrogate-pairs.js\");\nvar allNamedReferences = __assign(__assign({}, named_references_1.namedReferences), { all: named_references_1.namedReferences.html5 });\nvar encodeRegExps = {\n    specialChars: /[<>'\"&]/g,\n    nonAscii: /(?:[<>'\"&\\u0080-\\uD7FF\\uE000-\\uFFFF]|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?:[^\\uD800-\\uDBFF]|^)[\\uDC00-\\uDFFF])/g,\n    nonAsciiPrintable: /(?:[<>'\"&\\x01-\\x08\\x11-\\x15\\x17-\\x1F\\x7f-\\uD7FF\\uE000-\\uFFFF]|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?:[^\\uD800-\\uDBFF]|^)[\\uDC00-\\uDFFF])/g,\n    extensive: /(?:[\\x01-\\x0c\\x0e-\\x1f\\x21-\\x2c\\x2e-\\x2f\\x3a-\\x40\\x5b-\\x60\\x7b-\\x7d\\x7f-\\uD7FF\\uE000-\\uFFFF]|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|(?:[^\\uD800-\\uDBFF]|^)[\\uDC00-\\uDFFF])/g\n};\nvar defaultEncodeOptions = {\n    mode: 'specialChars',\n    level: 'all',\n    numeric: 'decimal'\n};\n/** Encodes all the necessary (specified by `level`) characters in the text */\nfunction encode(text, _a) {\n    var _b = _a === void 0 ? defaultEncodeOptions : _a, _c = _b.mode, mode = _c === void 0 ? 'specialChars' : _c, _d = _b.numeric, numeric = _d === void 0 ? 'decimal' : _d, _e = _b.level, level = _e === void 0 ? 'all' : _e;\n    if (!text) {\n        return '';\n    }\n    var encodeRegExp = encodeRegExps[mode];\n    var references = allNamedReferences[level].characters;\n    var isHex = numeric === 'hexadecimal';\n    encodeRegExp.lastIndex = 0;\n    var _b = encodeRegExp.exec(text);\n    var _c;\n    if (_b) {\n        _c = '';\n        var _d = 0;\n        do {\n            if (_d !== _b.index) {\n                _c += text.substring(_d, _b.index);\n            }\n            var _e = _b[0];\n            var result_1 = references[_e];\n            if (!result_1) {\n                var code_1 = _e.length > 1 ? surrogate_pairs_1.getCodePoint(_e, 0) : _e.charCodeAt(0);\n                result_1 = (isHex ? '&#x' + code_1.toString(16) : '&#' + code_1) + ';';\n            }\n            _c += result_1;\n            _d = _b.index + _e.length;\n        } while ((_b = encodeRegExp.exec(text)));\n        if (_d !== text.length) {\n            _c += text.substring(_d);\n        }\n    }\n    else {\n        _c =\n            text;\n    }\n    return _c;\n}\nexports.encode = encode;\nvar defaultDecodeOptions = {\n    scope: 'body',\n    level: 'all'\n};\nvar strict = /&(?:#\\d+|#[xX][\\da-fA-F]+|[0-9a-zA-Z]+);/g;\nvar attribute = /&(?:#\\d+|#[xX][\\da-fA-F]+|[0-9a-zA-Z]+)[;=]?/g;\nvar baseDecodeRegExps = {\n    xml: {\n        strict: strict,\n        attribute: attribute,\n        body: named_references_1.bodyRegExps.xml\n    },\n    html4: {\n        strict: strict,\n        attribute: attribute,\n        body: named_references_1.bodyRegExps.html4\n    },\n    html5: {\n        strict: strict,\n        attribute: attribute,\n        body: named_references_1.bodyRegExps.html5\n    }\n};\nvar decodeRegExps = __assign(__assign({}, baseDecodeRegExps), { all: baseDecodeRegExps.html5 });\nvar fromCharCode = String.fromCharCode;\nvar outOfBoundsChar = fromCharCode(65533);\nvar defaultDecodeEntityOptions = {\n    level: 'all'\n};\n/** Decodes a single entity */\nfunction decodeEntity(entity, _a) {\n    var _b = (_a === void 0 ? defaultDecodeEntityOptions : _a).level, level = _b === void 0 ? 'all' : _b;\n    if (!entity) {\n        return '';\n    }\n    var _b = entity;\n    var decodeEntityLastChar_1 = entity[entity.length - 1];\n    if (false) {}\n    else if (false) {}\n    else {\n        var decodeResultByReference_1 = allNamedReferences[level].entities[entity];\n        if (decodeResultByReference_1) {\n            _b = decodeResultByReference_1;\n        }\n        else if (entity[0] === '&' && entity[1] === '#') {\n            var decodeSecondChar_1 = entity[2];\n            var decodeCode_1 = decodeSecondChar_1 == 'x' || decodeSecondChar_1 == 'X'\n                ? parseInt(entity.substr(3), 16)\n                : parseInt(entity.substr(2));\n            _b =\n                decodeCode_1 >= 0x10ffff\n                    ? outOfBoundsChar\n                    : decodeCode_1 > 65535\n                        ? surrogate_pairs_1.fromCodePoint(decodeCode_1)\n                        : fromCharCode(numeric_unicode_map_1.numericUnicodeMap[decodeCode_1] || decodeCode_1);\n        }\n    }\n    return _b;\n}\nexports.decodeEntity = decodeEntity;\n/** Decodes all entities in the text */\nfunction decode(text, _a) {\n    var decodeSecondChar_1 = _a === void 0 ? defaultDecodeOptions : _a, decodeCode_1 = decodeSecondChar_1.level, level = decodeCode_1 === void 0 ? 'all' : decodeCode_1, _b = decodeSecondChar_1.scope, scope = _b === void 0 ? level === 'xml' ? 'strict' : 'body' : _b;\n    if (!text) {\n        return '';\n    }\n    var decodeRegExp = decodeRegExps[level][scope];\n    var references = allNamedReferences[level].entities;\n    var isAttribute = scope === 'attribute';\n    var isStrict = scope === 'strict';\n    decodeRegExp.lastIndex = 0;\n    var replaceMatch_1 = decodeRegExp.exec(text);\n    var replaceResult_1;\n    if (replaceMatch_1) {\n        replaceResult_1 = '';\n        var replaceLastIndex_1 = 0;\n        do {\n            if (replaceLastIndex_1 !== replaceMatch_1.index) {\n                replaceResult_1 += text.substring(replaceLastIndex_1, replaceMatch_1.index);\n            }\n            var replaceInput_1 = replaceMatch_1[0];\n            var decodeResult_1 = replaceInput_1;\n            var decodeEntityLastChar_2 = replaceInput_1[replaceInput_1.length - 1];\n            if (isAttribute\n                && decodeEntityLastChar_2 === '=') {\n                decodeResult_1 = replaceInput_1;\n            }\n            else if (isStrict\n                && decodeEntityLastChar_2 !== ';') {\n                decodeResult_1 = replaceInput_1;\n            }\n            else {\n                var decodeResultByReference_2 = references[replaceInput_1];\n                if (decodeResultByReference_2) {\n                    decodeResult_1 = decodeResultByReference_2;\n                }\n                else if (replaceInput_1[0] === '&' && replaceInput_1[1] === '#') {\n                    var decodeSecondChar_2 = replaceInput_1[2];\n                    var decodeCode_2 = decodeSecondChar_2 == 'x' || decodeSecondChar_2 == 'X'\n                        ? parseInt(replaceInput_1.substr(3), 16)\n                        : parseInt(replaceInput_1.substr(2));\n                    decodeResult_1 =\n                        decodeCode_2 >= 0x10ffff\n                            ? outOfBoundsChar\n                            : decodeCode_2 > 65535\n                                ? surrogate_pairs_1.fromCodePoint(decodeCode_2)\n                                : fromCharCode(numeric_unicode_map_1.numericUnicodeMap[decodeCode_2] || decodeCode_2);\n                }\n            }\n            replaceResult_1 += decodeResult_1;\n            replaceLastIndex_1 = replaceMatch_1.index + replaceInput_1.length;\n        } while ((replaceMatch_1 = decodeRegExp.exec(text)));\n        if (replaceLastIndex_1 !== text.length) {\n            replaceResult_1 += text.substring(replaceLastIndex_1);\n        }\n    }\n    else {\n        replaceResult_1 =\n            text;\n    }\n    return replaceResult_1;\n}\nexports.decode = decode;\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/html-entities/lib/index.js?");
+
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var named_references_1 = __webpack_require__(/*! ./named-references */ "./node_modules/html-entities/lib/named-references.js");
+var numeric_unicode_map_1 = __webpack_require__(/*! ./numeric-unicode-map */ "./node_modules/html-entities/lib/numeric-unicode-map.js");
+var surrogate_pairs_1 = __webpack_require__(/*! ./surrogate-pairs */ "./node_modules/html-entities/lib/surrogate-pairs.js");
+var allNamedReferences = __assign(__assign({}, named_references_1.namedReferences), { all: named_references_1.namedReferences.html5 });
+var encodeRegExps = {
+    specialChars: /[<>'"&]/g,
+    nonAscii: /(?:[<>'"&\u0080-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/g,
+    nonAsciiPrintable: /(?:[<>'"&\x01-\x08\x11-\x15\x17-\x1F\x7f-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/g,
+    extensive: /(?:[\x01-\x0c\x0e-\x1f\x21-\x2c\x2e-\x2f\x3a-\x40\x5b-\x60\x7b-\x7d\x7f-\uD7FF\uE000-\uFFFF]|[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF])/g
+};
+var defaultEncodeOptions = {
+    mode: 'specialChars',
+    level: 'all',
+    numeric: 'decimal'
+};
+/** Encodes all the necessary (specified by `level`) characters in the text */
+function encode(text, _a) {
+    var _b = _a === void 0 ? defaultEncodeOptions : _a, _c = _b.mode, mode = _c === void 0 ? 'specialChars' : _c, _d = _b.numeric, numeric = _d === void 0 ? 'decimal' : _d, _e = _b.level, level = _e === void 0 ? 'all' : _e;
+    if (!text) {
+        return '';
+    }
+    var encodeRegExp = encodeRegExps[mode];
+    var references = allNamedReferences[level].characters;
+    var isHex = numeric === 'hexadecimal';
+    encodeRegExp.lastIndex = 0;
+    var _b = encodeRegExp.exec(text);
+    var _c;
+    if (_b) {
+        _c = '';
+        var _d = 0;
+        do {
+            if (_d !== _b.index) {
+                _c += text.substring(_d, _b.index);
+            }
+            var _e = _b[0];
+            var result_1 = references[_e];
+            if (!result_1) {
+                var code_1 = _e.length > 1 ? surrogate_pairs_1.getCodePoint(_e, 0) : _e.charCodeAt(0);
+                result_1 = (isHex ? '&#x' + code_1.toString(16) : '&#' + code_1) + ';';
+            }
+            _c += result_1;
+            _d = _b.index + _e.length;
+        } while ((_b = encodeRegExp.exec(text)));
+        if (_d !== text.length) {
+            _c += text.substring(_d);
+        }
+    }
+    else {
+        _c =
+            text;
+    }
+    return _c;
+}
+exports.encode = encode;
+var defaultDecodeOptions = {
+    scope: 'body',
+    level: 'all'
+};
+var strict = /&(?:#\d+|#[xX][\da-fA-F]+|[0-9a-zA-Z]+);/g;
+var attribute = /&(?:#\d+|#[xX][\da-fA-F]+|[0-9a-zA-Z]+)[;=]?/g;
+var baseDecodeRegExps = {
+    xml: {
+        strict: strict,
+        attribute: attribute,
+        body: named_references_1.bodyRegExps.xml
+    },
+    html4: {
+        strict: strict,
+        attribute: attribute,
+        body: named_references_1.bodyRegExps.html4
+    },
+    html5: {
+        strict: strict,
+        attribute: attribute,
+        body: named_references_1.bodyRegExps.html5
+    }
+};
+var decodeRegExps = __assign(__assign({}, baseDecodeRegExps), { all: baseDecodeRegExps.html5 });
+var fromCharCode = String.fromCharCode;
+var outOfBoundsChar = fromCharCode(65533);
+var defaultDecodeEntityOptions = {
+    level: 'all'
+};
+/** Decodes a single entity */
+function decodeEntity(entity, _a) {
+    var _b = (_a === void 0 ? defaultDecodeEntityOptions : _a).level, level = _b === void 0 ? 'all' : _b;
+    if (!entity) {
+        return '';
+    }
+    var _b = entity;
+    var decodeEntityLastChar_1 = entity[entity.length - 1];
+    if (false) {}
+    else if (false) {}
+    else {
+        var decodeResultByReference_1 = allNamedReferences[level].entities[entity];
+        if (decodeResultByReference_1) {
+            _b = decodeResultByReference_1;
+        }
+        else if (entity[0] === '&' && entity[1] === '#') {
+            var decodeSecondChar_1 = entity[2];
+            var decodeCode_1 = decodeSecondChar_1 == 'x' || decodeSecondChar_1 == 'X'
+                ? parseInt(entity.substr(3), 16)
+                : parseInt(entity.substr(2));
+            _b =
+                decodeCode_1 >= 0x10ffff
+                    ? outOfBoundsChar
+                    : decodeCode_1 > 65535
+                        ? surrogate_pairs_1.fromCodePoint(decodeCode_1)
+                        : fromCharCode(numeric_unicode_map_1.numericUnicodeMap[decodeCode_1] || decodeCode_1);
+        }
+    }
+    return _b;
+}
+exports.decodeEntity = decodeEntity;
+/** Decodes all entities in the text */
+function decode(text, _a) {
+    var decodeSecondChar_1 = _a === void 0 ? defaultDecodeOptions : _a, decodeCode_1 = decodeSecondChar_1.level, level = decodeCode_1 === void 0 ? 'all' : decodeCode_1, _b = decodeSecondChar_1.scope, scope = _b === void 0 ? level === 'xml' ? 'strict' : 'body' : _b;
+    if (!text) {
+        return '';
+    }
+    var decodeRegExp = decodeRegExps[level][scope];
+    var references = allNamedReferences[level].entities;
+    var isAttribute = scope === 'attribute';
+    var isStrict = scope === 'strict';
+    decodeRegExp.lastIndex = 0;
+    var replaceMatch_1 = decodeRegExp.exec(text);
+    var replaceResult_1;
+    if (replaceMatch_1) {
+        replaceResult_1 = '';
+        var replaceLastIndex_1 = 0;
+        do {
+            if (replaceLastIndex_1 !== replaceMatch_1.index) {
+                replaceResult_1 += text.substring(replaceLastIndex_1, replaceMatch_1.index);
+            }
+            var replaceInput_1 = replaceMatch_1[0];
+            var decodeResult_1 = replaceInput_1;
+            var decodeEntityLastChar_2 = replaceInput_1[replaceInput_1.length - 1];
+            if (isAttribute
+                && decodeEntityLastChar_2 === '=') {
+                decodeResult_1 = replaceInput_1;
+            }
+            else if (isStrict
+                && decodeEntityLastChar_2 !== ';') {
+                decodeResult_1 = replaceInput_1;
+            }
+            else {
+                var decodeResultByReference_2 = references[replaceInput_1];
+                if (decodeResultByReference_2) {
+                    decodeResult_1 = decodeResultByReference_2;
+                }
+                else if (replaceInput_1[0] === '&' && replaceInput_1[1] === '#') {
+                    var decodeSecondChar_2 = replaceInput_1[2];
+                    var decodeCode_2 = decodeSecondChar_2 == 'x' || decodeSecondChar_2 == 'X'
+                        ? parseInt(replaceInput_1.substr(3), 16)
+                        : parseInt(replaceInput_1.substr(2));
+                    decodeResult_1 =
+                        decodeCode_2 >= 0x10ffff
+                            ? outOfBoundsChar
+                            : decodeCode_2 > 65535
+                                ? surrogate_pairs_1.fromCodePoint(decodeCode_2)
+                                : fromCharCode(numeric_unicode_map_1.numericUnicodeMap[decodeCode_2] || decodeCode_2);
+                }
+            }
+            replaceResult_1 += decodeResult_1;
+            replaceLastIndex_1 = replaceMatch_1.index + replaceInput_1.length;
+        } while ((replaceMatch_1 = decodeRegExp.exec(text)));
+        if (replaceLastIndex_1 !== text.length) {
+            replaceResult_1 += text.substring(replaceLastIndex_1);
+        }
+    }
+    else {
+        replaceResult_1 =
+            text;
+    }
+    return replaceResult_1;
+}
+exports.decode = decode;
+
 
 /***/ }),
 
@@ -49,7 +904,7 @@ eval("\nvar __assign = (this && this.__assign) || function () {\n    __assign = 
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
-eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.bodyRegExps={xml:/&(?:#\\d+|#[xX][\\da-fA-F]+|[0-9a-zA-Z]+);?/g,html4:/&notin;|&(?:nbsp|iexcl|cent|pound|curren|yen|brvbar|sect|uml|copy|ordf|laquo|not|shy|reg|macr|deg|plusmn|sup2|sup3|acute|micro|para|middot|cedil|sup1|ordm|raquo|frac14|frac12|frac34|iquest|Agrave|Aacute|Acirc|Atilde|Auml|Aring|AElig|Ccedil|Egrave|Eacute|Ecirc|Euml|Igrave|Iacute|Icirc|Iuml|ETH|Ntilde|Ograve|Oacute|Ocirc|Otilde|Ouml|times|Oslash|Ugrave|Uacute|Ucirc|Uuml|Yacute|THORN|szlig|agrave|aacute|acirc|atilde|auml|aring|aelig|ccedil|egrave|eacute|ecirc|euml|igrave|iacute|icirc|iuml|eth|ntilde|ograve|oacute|ocirc|otilde|ouml|divide|oslash|ugrave|uacute|ucirc|uuml|yacute|thorn|yuml|quot|amp|lt|gt|#\\d+|#[xX][\\da-fA-F]+|[0-9a-zA-Z]+);?/g,html5:/&centerdot;|&copysr;|&divideontimes;|&gtcc;|&gtcir;|&gtdot;|&gtlPar;|&gtquest;|&gtrapprox;|&gtrarr;|&gtrdot;|&gtreqless;|&gtreqqless;|&gtrless;|&gtrsim;|&ltcc;|&ltcir;|&ltdot;|&lthree;|&ltimes;|&ltlarr;|&ltquest;|&ltrPar;|&ltri;|&ltrie;|&ltrif;|&notin;|&notinE;|&notindot;|&notinva;|&notinvb;|&notinvc;|&notni;|&notniva;|&notnivb;|&notnivc;|&parallel;|&timesb;|&timesbar;|&timesd;|&(?:AElig|AMP|Aacute|Acirc|Agrave|Aring|Atilde|Auml|COPY|Ccedil|ETH|Eacute|Ecirc|Egrave|Euml|GT|Iacute|Icirc|Igrave|Iuml|LT|Ntilde|Oacute|Ocirc|Ograve|Oslash|Otilde|Ouml|QUOT|REG|THORN|Uacute|Ucirc|Ugrave|Uuml|Yacute|aacute|acirc|acute|aelig|agrave|amp|aring|atilde|auml|brvbar|ccedil|cedil|cent|copy|curren|deg|divide|eacute|ecirc|egrave|eth|euml|frac12|frac14|frac34|gt|iacute|icirc|iexcl|igrave|iquest|iuml|laquo|lt|macr|micro|middot|nbsp|not|ntilde|oacute|ocirc|ograve|ordf|ordm|oslash|otilde|ouml|para|plusmn|pound|quot|raquo|reg|sect|shy|sup1|sup2|sup3|szlig|thorn|times|uacute|ucirc|ugrave|uml|uuml|yacute|yen|yuml|#\\d+|#[xX][\\da-fA-F]+|[0-9a-zA-Z]+);?/g};exports.namedReferences={xml:{entities:{\"&lt;\":\"<\",\"&gt;\":\">\",\"&quot;\":'\"',\"&apos;\":\"'\",\"&amp;\":\"&\"},characters:{\"<\":\"&lt;\",\">\":\"&gt;\",'\"':\"&quot;\",\"'\":\"&apos;\",\"&\":\"&amp;\"}},html4:{entities:{\"&apos;\":\"'\",\"&nbsp\":\" \",\"&nbsp;\":\" \",\"&iexcl\":\"¡\",\"&iexcl;\":\"¡\",\"&cent\":\"¢\",\"&cent;\":\"¢\",\"&pound\":\"£\",\"&pound;\":\"£\",\"&curren\":\"¤\",\"&curren;\":\"¤\",\"&yen\":\"¥\",\"&yen;\":\"¥\",\"&brvbar\":\"¦\",\"&brvbar;\":\"¦\",\"&sect\":\"§\",\"&sect;\":\"§\",\"&uml\":\"¨\",\"&uml;\":\"¨\",\"&copy\":\"©\",\"&copy;\":\"©\",\"&ordf\":\"ª\",\"&ordf;\":\"ª\",\"&laquo\":\"«\",\"&laquo;\":\"«\",\"&not\":\"¬\",\"&not;\":\"¬\",\"&shy\":\"­\",\"&shy;\":\"­\",\"&reg\":\"®\",\"&reg;\":\"®\",\"&macr\":\"¯\",\"&macr;\":\"¯\",\"&deg\":\"°\",\"&deg;\":\"°\",\"&plusmn\":\"±\",\"&plusmn;\":\"±\",\"&sup2\":\"²\",\"&sup2;\":\"²\",\"&sup3\":\"³\",\"&sup3;\":\"³\",\"&acute\":\"´\",\"&acute;\":\"´\",\"&micro\":\"µ\",\"&micro;\":\"µ\",\"&para\":\"¶\",\"&para;\":\"¶\",\"&middot\":\"·\",\"&middot;\":\"·\",\"&cedil\":\"¸\",\"&cedil;\":\"¸\",\"&sup1\":\"¹\",\"&sup1;\":\"¹\",\"&ordm\":\"º\",\"&ordm;\":\"º\",\"&raquo\":\"»\",\"&raquo;\":\"»\",\"&frac14\":\"¼\",\"&frac14;\":\"¼\",\"&frac12\":\"½\",\"&frac12;\":\"½\",\"&frac34\":\"¾\",\"&frac34;\":\"¾\",\"&iquest\":\"¿\",\"&iquest;\":\"¿\",\"&Agrave\":\"À\",\"&Agrave;\":\"À\",\"&Aacute\":\"Á\",\"&Aacute;\":\"Á\",\"&Acirc\":\"Â\",\"&Acirc;\":\"Â\",\"&Atilde\":\"Ã\",\"&Atilde;\":\"Ã\",\"&Auml\":\"Ä\",\"&Auml;\":\"Ä\",\"&Aring\":\"Å\",\"&Aring;\":\"Å\",\"&AElig\":\"Æ\",\"&AElig;\":\"Æ\",\"&Ccedil\":\"Ç\",\"&Ccedil;\":\"Ç\",\"&Egrave\":\"È\",\"&Egrave;\":\"È\",\"&Eacute\":\"É\",\"&Eacute;\":\"É\",\"&Ecirc\":\"Ê\",\"&Ecirc;\":\"Ê\",\"&Euml\":\"Ë\",\"&Euml;\":\"Ë\",\"&Igrave\":\"Ì\",\"&Igrave;\":\"Ì\",\"&Iacute\":\"Í\",\"&Iacute;\":\"Í\",\"&Icirc\":\"Î\",\"&Icirc;\":\"Î\",\"&Iuml\":\"Ï\",\"&Iuml;\":\"Ï\",\"&ETH\":\"Ð\",\"&ETH;\":\"Ð\",\"&Ntilde\":\"Ñ\",\"&Ntilde;\":\"Ñ\",\"&Ograve\":\"Ò\",\"&Ograve;\":\"Ò\",\"&Oacute\":\"Ó\",\"&Oacute;\":\"Ó\",\"&Ocirc\":\"Ô\",\"&Ocirc;\":\"Ô\",\"&Otilde\":\"Õ\",\"&Otilde;\":\"Õ\",\"&Ouml\":\"Ö\",\"&Ouml;\":\"Ö\",\"&times\":\"×\",\"&times;\":\"×\",\"&Oslash\":\"Ø\",\"&Oslash;\":\"Ø\",\"&Ugrave\":\"Ù\",\"&Ugrave;\":\"Ù\",\"&Uacute\":\"Ú\",\"&Uacute;\":\"Ú\",\"&Ucirc\":\"Û\",\"&Ucirc;\":\"Û\",\"&Uuml\":\"Ü\",\"&Uuml;\":\"Ü\",\"&Yacute\":\"Ý\",\"&Yacute;\":\"Ý\",\"&THORN\":\"Þ\",\"&THORN;\":\"Þ\",\"&szlig\":\"ß\",\"&szlig;\":\"ß\",\"&agrave\":\"à\",\"&agrave;\":\"à\",\"&aacute\":\"á\",\"&aacute;\":\"á\",\"&acirc\":\"â\",\"&acirc;\":\"â\",\"&atilde\":\"ã\",\"&atilde;\":\"ã\",\"&auml\":\"ä\",\"&auml;\":\"ä\",\"&aring\":\"å\",\"&aring;\":\"å\",\"&aelig\":\"æ\",\"&aelig;\":\"æ\",\"&ccedil\":\"ç\",\"&ccedil;\":\"ç\",\"&egrave\":\"è\",\"&egrave;\":\"è\",\"&eacute\":\"é\",\"&eacute;\":\"é\",\"&ecirc\":\"ê\",\"&ecirc;\":\"ê\",\"&euml\":\"ë\",\"&euml;\":\"ë\",\"&igrave\":\"ì\",\"&igrave;\":\"ì\",\"&iacute\":\"í\",\"&iacute;\":\"í\",\"&icirc\":\"î\",\"&icirc;\":\"î\",\"&iuml\":\"ï\",\"&iuml;\":\"ï\",\"&eth\":\"ð\",\"&eth;\":\"ð\",\"&ntilde\":\"ñ\",\"&ntilde;\":\"ñ\",\"&ograve\":\"ò\",\"&ograve;\":\"ò\",\"&oacute\":\"ó\",\"&oacute;\":\"ó\",\"&ocirc\":\"ô\",\"&ocirc;\":\"ô\",\"&otilde\":\"õ\",\"&otilde;\":\"õ\",\"&ouml\":\"ö\",\"&ouml;\":\"ö\",\"&divide\":\"÷\",\"&divide;\":\"÷\",\"&oslash\":\"ø\",\"&oslash;\":\"ø\",\"&ugrave\":\"ù\",\"&ugrave;\":\"ù\",\"&uacute\":\"ú\",\"&uacute;\":\"ú\",\"&ucirc\":\"û\",\"&ucirc;\":\"û\",\"&uuml\":\"ü\",\"&uuml;\":\"ü\",\"&yacute\":\"ý\",\"&yacute;\":\"ý\",\"&thorn\":\"þ\",\"&thorn;\":\"þ\",\"&yuml\":\"ÿ\",\"&yuml;\":\"ÿ\",\"&quot\":'\"',\"&quot;\":'\"',\"&amp\":\"&\",\"&amp;\":\"&\",\"&lt\":\"<\",\"&lt;\":\"<\",\"&gt\":\">\",\"&gt;\":\">\",\"&OElig;\":\"Œ\",\"&oelig;\":\"œ\",\"&Scaron;\":\"Š\",\"&scaron;\":\"š\",\"&Yuml;\":\"Ÿ\",\"&circ;\":\"ˆ\",\"&tilde;\":\"˜\",\"&ensp;\":\" \",\"&emsp;\":\" \",\"&thinsp;\":\" \",\"&zwnj;\":\"‌\",\"&zwj;\":\"‍\",\"&lrm;\":\"‎\",\"&rlm;\":\"‏\",\"&ndash;\":\"–\",\"&mdash;\":\"—\",\"&lsquo;\":\"‘\",\"&rsquo;\":\"’\",\"&sbquo;\":\"‚\",\"&ldquo;\":\"“\",\"&rdquo;\":\"”\",\"&bdquo;\":\"„\",\"&dagger;\":\"†\",\"&Dagger;\":\"‡\",\"&permil;\":\"‰\",\"&lsaquo;\":\"‹\",\"&rsaquo;\":\"›\",\"&euro;\":\"€\",\"&fnof;\":\"ƒ\",\"&Alpha;\":\"Α\",\"&Beta;\":\"Β\",\"&Gamma;\":\"Γ\",\"&Delta;\":\"Δ\",\"&Epsilon;\":\"Ε\",\"&Zeta;\":\"Ζ\",\"&Eta;\":\"Η\",\"&Theta;\":\"Θ\",\"&Iota;\":\"Ι\",\"&Kappa;\":\"Κ\",\"&Lambda;\":\"Λ\",\"&Mu;\":\"Μ\",\"&Nu;\":\"Ν\",\"&Xi;\":\"Ξ\",\"&Omicron;\":\"Ο\",\"&Pi;\":\"Π\",\"&Rho;\":\"Ρ\",\"&Sigma;\":\"Σ\",\"&Tau;\":\"Τ\",\"&Upsilon;\":\"Υ\",\"&Phi;\":\"Φ\",\"&Chi;\":\"Χ\",\"&Psi;\":\"Ψ\",\"&Omega;\":\"Ω\",\"&alpha;\":\"α\",\"&beta;\":\"β\",\"&gamma;\":\"γ\",\"&delta;\":\"δ\",\"&epsilon;\":\"ε\",\"&zeta;\":\"ζ\",\"&eta;\":\"η\",\"&theta;\":\"θ\",\"&iota;\":\"ι\",\"&kappa;\":\"κ\",\"&lambda;\":\"λ\",\"&mu;\":\"μ\",\"&nu;\":\"ν\",\"&xi;\":\"ξ\",\"&omicron;\":\"ο\",\"&pi;\":\"π\",\"&rho;\":\"ρ\",\"&sigmaf;\":\"ς\",\"&sigma;\":\"σ\",\"&tau;\":\"τ\",\"&upsilon;\":\"υ\",\"&phi;\":\"φ\",\"&chi;\":\"χ\",\"&psi;\":\"ψ\",\"&omega;\":\"ω\",\"&thetasym;\":\"ϑ\",\"&upsih;\":\"ϒ\",\"&piv;\":\"ϖ\",\"&bull;\":\"•\",\"&hellip;\":\"…\",\"&prime;\":\"′\",\"&Prime;\":\"″\",\"&oline;\":\"‾\",\"&frasl;\":\"⁄\",\"&weierp;\":\"℘\",\"&image;\":\"ℑ\",\"&real;\":\"ℜ\",\"&trade;\":\"™\",\"&alefsym;\":\"ℵ\",\"&larr;\":\"←\",\"&uarr;\":\"↑\",\"&rarr;\":\"→\",\"&darr;\":\"↓\",\"&harr;\":\"↔\",\"&crarr;\":\"↵\",\"&lArr;\":\"⇐\",\"&uArr;\":\"⇑\",\"&rArr;\":\"⇒\",\"&dArr;\":\"⇓\",\"&hArr;\":\"⇔\",\"&forall;\":\"∀\",\"&part;\":\"∂\",\"&exist;\":\"∃\",\"&empty;\":\"∅\",\"&nabla;\":\"∇\",\"&isin;\":\"∈\",\"&notin;\":\"∉\",\"&ni;\":\"∋\",\"&prod;\":\"∏\",\"&sum;\":\"∑\",\"&minus;\":\"−\",\"&lowast;\":\"∗\",\"&radic;\":\"√\",\"&prop;\":\"∝\",\"&infin;\":\"∞\",\"&ang;\":\"∠\",\"&and;\":\"∧\",\"&or;\":\"∨\",\"&cap;\":\"∩\",\"&cup;\":\"∪\",\"&int;\":\"∫\",\"&there4;\":\"∴\",\"&sim;\":\"∼\",\"&cong;\":\"≅\",\"&asymp;\":\"≈\",\"&ne;\":\"≠\",\"&equiv;\":\"≡\",\"&le;\":\"≤\",\"&ge;\":\"≥\",\"&sub;\":\"⊂\",\"&sup;\":\"⊃\",\"&nsub;\":\"⊄\",\"&sube;\":\"⊆\",\"&supe;\":\"⊇\",\"&oplus;\":\"⊕\",\"&otimes;\":\"⊗\",\"&perp;\":\"⊥\",\"&sdot;\":\"⋅\",\"&lceil;\":\"⌈\",\"&rceil;\":\"⌉\",\"&lfloor;\":\"⌊\",\"&rfloor;\":\"⌋\",\"&lang;\":\"〈\",\"&rang;\":\"〉\",\"&loz;\":\"◊\",\"&spades;\":\"♠\",\"&clubs;\":\"♣\",\"&hearts;\":\"♥\",\"&diams;\":\"♦\"},characters:{\"'\":\"&apos;\",\" \":\"&nbsp;\",\"¡\":\"&iexcl;\",\"¢\":\"&cent;\",\"£\":\"&pound;\",\"¤\":\"&curren;\",\"¥\":\"&yen;\",\"¦\":\"&brvbar;\",\"§\":\"&sect;\",\"¨\":\"&uml;\",\"©\":\"&copy;\",\"ª\":\"&ordf;\",\"«\":\"&laquo;\",\"¬\":\"&not;\",\"­\":\"&shy;\",\"®\":\"&reg;\",\"¯\":\"&macr;\",\"°\":\"&deg;\",\"±\":\"&plusmn;\",\"²\":\"&sup2;\",\"³\":\"&sup3;\",\"´\":\"&acute;\",\"µ\":\"&micro;\",\"¶\":\"&para;\",\"·\":\"&middot;\",\"¸\":\"&cedil;\",\"¹\":\"&sup1;\",\"º\":\"&ordm;\",\"»\":\"&raquo;\",\"¼\":\"&frac14;\",\"½\":\"&frac12;\",\"¾\":\"&frac34;\",\"¿\":\"&iquest;\",\"À\":\"&Agrave;\",\"Á\":\"&Aacute;\",\"Â\":\"&Acirc;\",\"Ã\":\"&Atilde;\",\"Ä\":\"&Auml;\",\"Å\":\"&Aring;\",\"Æ\":\"&AElig;\",\"Ç\":\"&Ccedil;\",\"È\":\"&Egrave;\",\"É\":\"&Eacute;\",\"Ê\":\"&Ecirc;\",\"Ë\":\"&Euml;\",\"Ì\":\"&Igrave;\",\"Í\":\"&Iacute;\",\"Î\":\"&Icirc;\",\"Ï\":\"&Iuml;\",\"Ð\":\"&ETH;\",\"Ñ\":\"&Ntilde;\",\"Ò\":\"&Ograve;\",\"Ó\":\"&Oacute;\",\"Ô\":\"&Ocirc;\",\"Õ\":\"&Otilde;\",\"Ö\":\"&Ouml;\",\"×\":\"&times;\",\"Ø\":\"&Oslash;\",\"Ù\":\"&Ugrave;\",\"Ú\":\"&Uacute;\",\"Û\":\"&Ucirc;\",\"Ü\":\"&Uuml;\",\"Ý\":\"&Yacute;\",\"Þ\":\"&THORN;\",\"ß\":\"&szlig;\",\"à\":\"&agrave;\",\"á\":\"&aacute;\",\"â\":\"&acirc;\",\"ã\":\"&atilde;\",\"ä\":\"&auml;\",\"å\":\"&aring;\",\"æ\":\"&aelig;\",\"ç\":\"&ccedil;\",\"è\":\"&egrave;\",\"é\":\"&eacute;\",\"ê\":\"&ecirc;\",\"ë\":\"&euml;\",\"ì\":\"&igrave;\",\"í\":\"&iacute;\",\"î\":\"&icirc;\",\"ï\":\"&iuml;\",\"ð\":\"&eth;\",\"ñ\":\"&ntilde;\",\"ò\":\"&ograve;\",\"ó\":\"&oacute;\",\"ô\":\"&ocirc;\",\"õ\":\"&otilde;\",\"ö\":\"&ouml;\",\"÷\":\"&divide;\",\"ø\":\"&oslash;\",\"ù\":\"&ugrave;\",\"ú\":\"&uacute;\",\"û\":\"&ucirc;\",\"ü\":\"&uuml;\",\"ý\":\"&yacute;\",\"þ\":\"&thorn;\",\"ÿ\":\"&yuml;\",'\"':\"&quot;\",\"&\":\"&amp;\",\"<\":\"&lt;\",\">\":\"&gt;\",\"Œ\":\"&OElig;\",\"œ\":\"&oelig;\",\"Š\":\"&Scaron;\",\"š\":\"&scaron;\",\"Ÿ\":\"&Yuml;\",\"ˆ\":\"&circ;\",\"˜\":\"&tilde;\",\" \":\"&ensp;\",\" \":\"&emsp;\",\" \":\"&thinsp;\",\"‌\":\"&zwnj;\",\"‍\":\"&zwj;\",\"‎\":\"&lrm;\",\"‏\":\"&rlm;\",\"–\":\"&ndash;\",\"—\":\"&mdash;\",\"‘\":\"&lsquo;\",\"’\":\"&rsquo;\",\"‚\":\"&sbquo;\",\"“\":\"&ldquo;\",\"”\":\"&rdquo;\",\"„\":\"&bdquo;\",\"†\":\"&dagger;\",\"‡\":\"&Dagger;\",\"‰\":\"&permil;\",\"‹\":\"&lsaquo;\",\"›\":\"&rsaquo;\",\"€\":\"&euro;\",\"ƒ\":\"&fnof;\",\"Α\":\"&Alpha;\",\"Β\":\"&Beta;\",\"Γ\":\"&Gamma;\",\"Δ\":\"&Delta;\",\"Ε\":\"&Epsilon;\",\"Ζ\":\"&Zeta;\",\"Η\":\"&Eta;\",\"Θ\":\"&Theta;\",\"Ι\":\"&Iota;\",\"Κ\":\"&Kappa;\",\"Λ\":\"&Lambda;\",\"Μ\":\"&Mu;\",\"Ν\":\"&Nu;\",\"Ξ\":\"&Xi;\",\"Ο\":\"&Omicron;\",\"Π\":\"&Pi;\",\"Ρ\":\"&Rho;\",\"Σ\":\"&Sigma;\",\"Τ\":\"&Tau;\",\"Υ\":\"&Upsilon;\",\"Φ\":\"&Phi;\",\"Χ\":\"&Chi;\",\"Ψ\":\"&Psi;\",\"Ω\":\"&Omega;\",\"α\":\"&alpha;\",\"β\":\"&beta;\",\"γ\":\"&gamma;\",\"δ\":\"&delta;\",\"ε\":\"&epsilon;\",\"ζ\":\"&zeta;\",\"η\":\"&eta;\",\"θ\":\"&theta;\",\"ι\":\"&iota;\",\"κ\":\"&kappa;\",\"λ\":\"&lambda;\",\"μ\":\"&mu;\",\"ν\":\"&nu;\",\"ξ\":\"&xi;\",\"ο\":\"&omicron;\",\"π\":\"&pi;\",\"ρ\":\"&rho;\",\"ς\":\"&sigmaf;\",\"σ\":\"&sigma;\",\"τ\":\"&tau;\",\"υ\":\"&upsilon;\",\"φ\":\"&phi;\",\"χ\":\"&chi;\",\"ψ\":\"&psi;\",\"ω\":\"&omega;\",\"ϑ\":\"&thetasym;\",\"ϒ\":\"&upsih;\",\"ϖ\":\"&piv;\",\"•\":\"&bull;\",\"…\":\"&hellip;\",\"′\":\"&prime;\",\"″\":\"&Prime;\",\"‾\":\"&oline;\",\"⁄\":\"&frasl;\",\"℘\":\"&weierp;\",\"ℑ\":\"&image;\",\"ℜ\":\"&real;\",\"™\":\"&trade;\",\"ℵ\":\"&alefsym;\",\"←\":\"&larr;\",\"↑\":\"&uarr;\",\"→\":\"&rarr;\",\"↓\":\"&darr;\",\"↔\":\"&harr;\",\"↵\":\"&crarr;\",\"⇐\":\"&lArr;\",\"⇑\":\"&uArr;\",\"⇒\":\"&rArr;\",\"⇓\":\"&dArr;\",\"⇔\":\"&hArr;\",\"∀\":\"&forall;\",\"∂\":\"&part;\",\"∃\":\"&exist;\",\"∅\":\"&empty;\",\"∇\":\"&nabla;\",\"∈\":\"&isin;\",\"∉\":\"&notin;\",\"∋\":\"&ni;\",\"∏\":\"&prod;\",\"∑\":\"&sum;\",\"−\":\"&minus;\",\"∗\":\"&lowast;\",\"√\":\"&radic;\",\"∝\":\"&prop;\",\"∞\":\"&infin;\",\"∠\":\"&ang;\",\"∧\":\"&and;\",\"∨\":\"&or;\",\"∩\":\"&cap;\",\"∪\":\"&cup;\",\"∫\":\"&int;\",\"∴\":\"&there4;\",\"∼\":\"&sim;\",\"≅\":\"&cong;\",\"≈\":\"&asymp;\",\"≠\":\"&ne;\",\"≡\":\"&equiv;\",\"≤\":\"&le;\",\"≥\":\"&ge;\",\"⊂\":\"&sub;\",\"⊃\":\"&sup;\",\"⊄\":\"&nsub;\",\"⊆\":\"&sube;\",\"⊇\":\"&supe;\",\"⊕\":\"&oplus;\",\"⊗\":\"&otimes;\",\"⊥\":\"&perp;\",\"⋅\":\"&sdot;\",\"⌈\":\"&lceil;\",\"⌉\":\"&rceil;\",\"⌊\":\"&lfloor;\",\"⌋\":\"&rfloor;\",\"〈\":\"&lang;\",\"〉\":\"&rang;\",\"◊\":\"&loz;\",\"♠\":\"&spades;\",\"♣\":\"&clubs;\",\"♥\":\"&hearts;\",\"♦\":\"&diams;\"}},html5:{entities:{\"&AElig\":\"Æ\",\"&AElig;\":\"Æ\",\"&AMP\":\"&\",\"&AMP;\":\"&\",\"&Aacute\":\"Á\",\"&Aacute;\":\"Á\",\"&Abreve;\":\"Ă\",\"&Acirc\":\"Â\",\"&Acirc;\":\"Â\",\"&Acy;\":\"А\",\"&Afr;\":\"𝔄\",\"&Agrave\":\"À\",\"&Agrave;\":\"À\",\"&Alpha;\":\"Α\",\"&Amacr;\":\"Ā\",\"&And;\":\"⩓\",\"&Aogon;\":\"Ą\",\"&Aopf;\":\"𝔸\",\"&ApplyFunction;\":\"⁡\",\"&Aring\":\"Å\",\"&Aring;\":\"Å\",\"&Ascr;\":\"𝒜\",\"&Assign;\":\"≔\",\"&Atilde\":\"Ã\",\"&Atilde;\":\"Ã\",\"&Auml\":\"Ä\",\"&Auml;\":\"Ä\",\"&Backslash;\":\"∖\",\"&Barv;\":\"⫧\",\"&Barwed;\":\"⌆\",\"&Bcy;\":\"Б\",\"&Because;\":\"∵\",\"&Bernoullis;\":\"ℬ\",\"&Beta;\":\"Β\",\"&Bfr;\":\"𝔅\",\"&Bopf;\":\"𝔹\",\"&Breve;\":\"˘\",\"&Bscr;\":\"ℬ\",\"&Bumpeq;\":\"≎\",\"&CHcy;\":\"Ч\",\"&COPY\":\"©\",\"&COPY;\":\"©\",\"&Cacute;\":\"Ć\",\"&Cap;\":\"⋒\",\"&CapitalDifferentialD;\":\"ⅅ\",\"&Cayleys;\":\"ℭ\",\"&Ccaron;\":\"Č\",\"&Ccedil\":\"Ç\",\"&Ccedil;\":\"Ç\",\"&Ccirc;\":\"Ĉ\",\"&Cconint;\":\"∰\",\"&Cdot;\":\"Ċ\",\"&Cedilla;\":\"¸\",\"&CenterDot;\":\"·\",\"&Cfr;\":\"ℭ\",\"&Chi;\":\"Χ\",\"&CircleDot;\":\"⊙\",\"&CircleMinus;\":\"⊖\",\"&CirclePlus;\":\"⊕\",\"&CircleTimes;\":\"⊗\",\"&ClockwiseContourIntegral;\":\"∲\",\"&CloseCurlyDoubleQuote;\":\"”\",\"&CloseCurlyQuote;\":\"’\",\"&Colon;\":\"∷\",\"&Colone;\":\"⩴\",\"&Congruent;\":\"≡\",\"&Conint;\":\"∯\",\"&ContourIntegral;\":\"∮\",\"&Copf;\":\"ℂ\",\"&Coproduct;\":\"∐\",\"&CounterClockwiseContourIntegral;\":\"∳\",\"&Cross;\":\"⨯\",\"&Cscr;\":\"𝒞\",\"&Cup;\":\"⋓\",\"&CupCap;\":\"≍\",\"&DD;\":\"ⅅ\",\"&DDotrahd;\":\"⤑\",\"&DJcy;\":\"Ђ\",\"&DScy;\":\"Ѕ\",\"&DZcy;\":\"Џ\",\"&Dagger;\":\"‡\",\"&Darr;\":\"↡\",\"&Dashv;\":\"⫤\",\"&Dcaron;\":\"Ď\",\"&Dcy;\":\"Д\",\"&Del;\":\"∇\",\"&Delta;\":\"Δ\",\"&Dfr;\":\"𝔇\",\"&DiacriticalAcute;\":\"´\",\"&DiacriticalDot;\":\"˙\",\"&DiacriticalDoubleAcute;\":\"˝\",\"&DiacriticalGrave;\":\"`\",\"&DiacriticalTilde;\":\"˜\",\"&Diamond;\":\"⋄\",\"&DifferentialD;\":\"ⅆ\",\"&Dopf;\":\"𝔻\",\"&Dot;\":\"¨\",\"&DotDot;\":\"⃜\",\"&DotEqual;\":\"≐\",\"&DoubleContourIntegral;\":\"∯\",\"&DoubleDot;\":\"¨\",\"&DoubleDownArrow;\":\"⇓\",\"&DoubleLeftArrow;\":\"⇐\",\"&DoubleLeftRightArrow;\":\"⇔\",\"&DoubleLeftTee;\":\"⫤\",\"&DoubleLongLeftArrow;\":\"⟸\",\"&DoubleLongLeftRightArrow;\":\"⟺\",\"&DoubleLongRightArrow;\":\"⟹\",\"&DoubleRightArrow;\":\"⇒\",\"&DoubleRightTee;\":\"⊨\",\"&DoubleUpArrow;\":\"⇑\",\"&DoubleUpDownArrow;\":\"⇕\",\"&DoubleVerticalBar;\":\"∥\",\"&DownArrow;\":\"↓\",\"&DownArrowBar;\":\"⤓\",\"&DownArrowUpArrow;\":\"⇵\",\"&DownBreve;\":\"̑\",\"&DownLeftRightVector;\":\"⥐\",\"&DownLeftTeeVector;\":\"⥞\",\"&DownLeftVector;\":\"↽\",\"&DownLeftVectorBar;\":\"⥖\",\"&DownRightTeeVector;\":\"⥟\",\"&DownRightVector;\":\"⇁\",\"&DownRightVectorBar;\":\"⥗\",\"&DownTee;\":\"⊤\",\"&DownTeeArrow;\":\"↧\",\"&Downarrow;\":\"⇓\",\"&Dscr;\":\"𝒟\",\"&Dstrok;\":\"Đ\",\"&ENG;\":\"Ŋ\",\"&ETH\":\"Ð\",\"&ETH;\":\"Ð\",\"&Eacute\":\"É\",\"&Eacute;\":\"É\",\"&Ecaron;\":\"Ě\",\"&Ecirc\":\"Ê\",\"&Ecirc;\":\"Ê\",\"&Ecy;\":\"Э\",\"&Edot;\":\"Ė\",\"&Efr;\":\"𝔈\",\"&Egrave\":\"È\",\"&Egrave;\":\"È\",\"&Element;\":\"∈\",\"&Emacr;\":\"Ē\",\"&EmptySmallSquare;\":\"◻\",\"&EmptyVerySmallSquare;\":\"▫\",\"&Eogon;\":\"Ę\",\"&Eopf;\":\"𝔼\",\"&Epsilon;\":\"Ε\",\"&Equal;\":\"⩵\",\"&EqualTilde;\":\"≂\",\"&Equilibrium;\":\"⇌\",\"&Escr;\":\"ℰ\",\"&Esim;\":\"⩳\",\"&Eta;\":\"Η\",\"&Euml\":\"Ë\",\"&Euml;\":\"Ë\",\"&Exists;\":\"∃\",\"&ExponentialE;\":\"ⅇ\",\"&Fcy;\":\"Ф\",\"&Ffr;\":\"𝔉\",\"&FilledSmallSquare;\":\"◼\",\"&FilledVerySmallSquare;\":\"▪\",\"&Fopf;\":\"𝔽\",\"&ForAll;\":\"∀\",\"&Fouriertrf;\":\"ℱ\",\"&Fscr;\":\"ℱ\",\"&GJcy;\":\"Ѓ\",\"&GT\":\">\",\"&GT;\":\">\",\"&Gamma;\":\"Γ\",\"&Gammad;\":\"Ϝ\",\"&Gbreve;\":\"Ğ\",\"&Gcedil;\":\"Ģ\",\"&Gcirc;\":\"Ĝ\",\"&Gcy;\":\"Г\",\"&Gdot;\":\"Ġ\",\"&Gfr;\":\"𝔊\",\"&Gg;\":\"⋙\",\"&Gopf;\":\"𝔾\",\"&GreaterEqual;\":\"≥\",\"&GreaterEqualLess;\":\"⋛\",\"&GreaterFullEqual;\":\"≧\",\"&GreaterGreater;\":\"⪢\",\"&GreaterLess;\":\"≷\",\"&GreaterSlantEqual;\":\"⩾\",\"&GreaterTilde;\":\"≳\",\"&Gscr;\":\"𝒢\",\"&Gt;\":\"≫\",\"&HARDcy;\":\"Ъ\",\"&Hacek;\":\"ˇ\",\"&Hat;\":\"^\",\"&Hcirc;\":\"Ĥ\",\"&Hfr;\":\"ℌ\",\"&HilbertSpace;\":\"ℋ\",\"&Hopf;\":\"ℍ\",\"&HorizontalLine;\":\"─\",\"&Hscr;\":\"ℋ\",\"&Hstrok;\":\"Ħ\",\"&HumpDownHump;\":\"≎\",\"&HumpEqual;\":\"≏\",\"&IEcy;\":\"Е\",\"&IJlig;\":\"Ĳ\",\"&IOcy;\":\"Ё\",\"&Iacute\":\"Í\",\"&Iacute;\":\"Í\",\"&Icirc\":\"Î\",\"&Icirc;\":\"Î\",\"&Icy;\":\"И\",\"&Idot;\":\"İ\",\"&Ifr;\":\"ℑ\",\"&Igrave\":\"Ì\",\"&Igrave;\":\"Ì\",\"&Im;\":\"ℑ\",\"&Imacr;\":\"Ī\",\"&ImaginaryI;\":\"ⅈ\",\"&Implies;\":\"⇒\",\"&Int;\":\"∬\",\"&Integral;\":\"∫\",\"&Intersection;\":\"⋂\",\"&InvisibleComma;\":\"⁣\",\"&InvisibleTimes;\":\"⁢\",\"&Iogon;\":\"Į\",\"&Iopf;\":\"𝕀\",\"&Iota;\":\"Ι\",\"&Iscr;\":\"ℐ\",\"&Itilde;\":\"Ĩ\",\"&Iukcy;\":\"І\",\"&Iuml\":\"Ï\",\"&Iuml;\":\"Ï\",\"&Jcirc;\":\"Ĵ\",\"&Jcy;\":\"Й\",\"&Jfr;\":\"𝔍\",\"&Jopf;\":\"𝕁\",\"&Jscr;\":\"𝒥\",\"&Jsercy;\":\"Ј\",\"&Jukcy;\":\"Є\",\"&KHcy;\":\"Х\",\"&KJcy;\":\"Ќ\",\"&Kappa;\":\"Κ\",\"&Kcedil;\":\"Ķ\",\"&Kcy;\":\"К\",\"&Kfr;\":\"𝔎\",\"&Kopf;\":\"𝕂\",\"&Kscr;\":\"𝒦\",\"&LJcy;\":\"Љ\",\"&LT\":\"<\",\"&LT;\":\"<\",\"&Lacute;\":\"Ĺ\",\"&Lambda;\":\"Λ\",\"&Lang;\":\"⟪\",\"&Laplacetrf;\":\"ℒ\",\"&Larr;\":\"↞\",\"&Lcaron;\":\"Ľ\",\"&Lcedil;\":\"Ļ\",\"&Lcy;\":\"Л\",\"&LeftAngleBracket;\":\"⟨\",\"&LeftArrow;\":\"←\",\"&LeftArrowBar;\":\"⇤\",\"&LeftArrowRightArrow;\":\"⇆\",\"&LeftCeiling;\":\"⌈\",\"&LeftDoubleBracket;\":\"⟦\",\"&LeftDownTeeVector;\":\"⥡\",\"&LeftDownVector;\":\"⇃\",\"&LeftDownVectorBar;\":\"⥙\",\"&LeftFloor;\":\"⌊\",\"&LeftRightArrow;\":\"↔\",\"&LeftRightVector;\":\"⥎\",\"&LeftTee;\":\"⊣\",\"&LeftTeeArrow;\":\"↤\",\"&LeftTeeVector;\":\"⥚\",\"&LeftTriangle;\":\"⊲\",\"&LeftTriangleBar;\":\"⧏\",\"&LeftTriangleEqual;\":\"⊴\",\"&LeftUpDownVector;\":\"⥑\",\"&LeftUpTeeVector;\":\"⥠\",\"&LeftUpVector;\":\"↿\",\"&LeftUpVectorBar;\":\"⥘\",\"&LeftVector;\":\"↼\",\"&LeftVectorBar;\":\"⥒\",\"&Leftarrow;\":\"⇐\",\"&Leftrightarrow;\":\"⇔\",\"&LessEqualGreater;\":\"⋚\",\"&LessFullEqual;\":\"≦\",\"&LessGreater;\":\"≶\",\"&LessLess;\":\"⪡\",\"&LessSlantEqual;\":\"⩽\",\"&LessTilde;\":\"≲\",\"&Lfr;\":\"𝔏\",\"&Ll;\":\"⋘\",\"&Lleftarrow;\":\"⇚\",\"&Lmidot;\":\"Ŀ\",\"&LongLeftArrow;\":\"⟵\",\"&LongLeftRightArrow;\":\"⟷\",\"&LongRightArrow;\":\"⟶\",\"&Longleftarrow;\":\"⟸\",\"&Longleftrightarrow;\":\"⟺\",\"&Longrightarrow;\":\"⟹\",\"&Lopf;\":\"𝕃\",\"&LowerLeftArrow;\":\"↙\",\"&LowerRightArrow;\":\"↘\",\"&Lscr;\":\"ℒ\",\"&Lsh;\":\"↰\",\"&Lstrok;\":\"Ł\",\"&Lt;\":\"≪\",\"&Map;\":\"⤅\",\"&Mcy;\":\"М\",\"&MediumSpace;\":\" \",\"&Mellintrf;\":\"ℳ\",\"&Mfr;\":\"𝔐\",\"&MinusPlus;\":\"∓\",\"&Mopf;\":\"𝕄\",\"&Mscr;\":\"ℳ\",\"&Mu;\":\"Μ\",\"&NJcy;\":\"Њ\",\"&Nacute;\":\"Ń\",\"&Ncaron;\":\"Ň\",\"&Ncedil;\":\"Ņ\",\"&Ncy;\":\"Н\",\"&NegativeMediumSpace;\":\"​\",\"&NegativeThickSpace;\":\"​\",\"&NegativeThinSpace;\":\"​\",\"&NegativeVeryThinSpace;\":\"​\",\"&NestedGreaterGreater;\":\"≫\",\"&NestedLessLess;\":\"≪\",\"&NewLine;\":\"\\n\",\"&Nfr;\":\"𝔑\",\"&NoBreak;\":\"⁠\",\"&NonBreakingSpace;\":\" \",\"&Nopf;\":\"ℕ\",\"&Not;\":\"⫬\",\"&NotCongruent;\":\"≢\",\"&NotCupCap;\":\"≭\",\"&NotDoubleVerticalBar;\":\"∦\",\"&NotElement;\":\"∉\",\"&NotEqual;\":\"≠\",\"&NotEqualTilde;\":\"≂̸\",\"&NotExists;\":\"∄\",\"&NotGreater;\":\"≯\",\"&NotGreaterEqual;\":\"≱\",\"&NotGreaterFullEqual;\":\"≧̸\",\"&NotGreaterGreater;\":\"≫̸\",\"&NotGreaterLess;\":\"≹\",\"&NotGreaterSlantEqual;\":\"⩾̸\",\"&NotGreaterTilde;\":\"≵\",\"&NotHumpDownHump;\":\"≎̸\",\"&NotHumpEqual;\":\"≏̸\",\"&NotLeftTriangle;\":\"⋪\",\"&NotLeftTriangleBar;\":\"⧏̸\",\"&NotLeftTriangleEqual;\":\"⋬\",\"&NotLess;\":\"≮\",\"&NotLessEqual;\":\"≰\",\"&NotLessGreater;\":\"≸\",\"&NotLessLess;\":\"≪̸\",\"&NotLessSlantEqual;\":\"⩽̸\",\"&NotLessTilde;\":\"≴\",\"&NotNestedGreaterGreater;\":\"⪢̸\",\"&NotNestedLessLess;\":\"⪡̸\",\"&NotPrecedes;\":\"⊀\",\"&NotPrecedesEqual;\":\"⪯̸\",\"&NotPrecedesSlantEqual;\":\"⋠\",\"&NotReverseElement;\":\"∌\",\"&NotRightTriangle;\":\"⋫\",\"&NotRightTriangleBar;\":\"⧐̸\",\"&NotRightTriangleEqual;\":\"⋭\",\"&NotSquareSubset;\":\"⊏̸\",\"&NotSquareSubsetEqual;\":\"⋢\",\"&NotSquareSuperset;\":\"⊐̸\",\"&NotSquareSupersetEqual;\":\"⋣\",\"&NotSubset;\":\"⊂⃒\",\"&NotSubsetEqual;\":\"⊈\",\"&NotSucceeds;\":\"⊁\",\"&NotSucceedsEqual;\":\"⪰̸\",\"&NotSucceedsSlantEqual;\":\"⋡\",\"&NotSucceedsTilde;\":\"≿̸\",\"&NotSuperset;\":\"⊃⃒\",\"&NotSupersetEqual;\":\"⊉\",\"&NotTilde;\":\"≁\",\"&NotTildeEqual;\":\"≄\",\"&NotTildeFullEqual;\":\"≇\",\"&NotTildeTilde;\":\"≉\",\"&NotVerticalBar;\":\"∤\",\"&Nscr;\":\"𝒩\",\"&Ntilde\":\"Ñ\",\"&Ntilde;\":\"Ñ\",\"&Nu;\":\"Ν\",\"&OElig;\":\"Œ\",\"&Oacute\":\"Ó\",\"&Oacute;\":\"Ó\",\"&Ocirc\":\"Ô\",\"&Ocirc;\":\"Ô\",\"&Ocy;\":\"О\",\"&Odblac;\":\"Ő\",\"&Ofr;\":\"𝔒\",\"&Ograve\":\"Ò\",\"&Ograve;\":\"Ò\",\"&Omacr;\":\"Ō\",\"&Omega;\":\"Ω\",\"&Omicron;\":\"Ο\",\"&Oopf;\":\"𝕆\",\"&OpenCurlyDoubleQuote;\":\"“\",\"&OpenCurlyQuote;\":\"‘\",\"&Or;\":\"⩔\",\"&Oscr;\":\"𝒪\",\"&Oslash\":\"Ø\",\"&Oslash;\":\"Ø\",\"&Otilde\":\"Õ\",\"&Otilde;\":\"Õ\",\"&Otimes;\":\"⨷\",\"&Ouml\":\"Ö\",\"&Ouml;\":\"Ö\",\"&OverBar;\":\"‾\",\"&OverBrace;\":\"⏞\",\"&OverBracket;\":\"⎴\",\"&OverParenthesis;\":\"⏜\",\"&PartialD;\":\"∂\",\"&Pcy;\":\"П\",\"&Pfr;\":\"𝔓\",\"&Phi;\":\"Φ\",\"&Pi;\":\"Π\",\"&PlusMinus;\":\"±\",\"&Poincareplane;\":\"ℌ\",\"&Popf;\":\"ℙ\",\"&Pr;\":\"⪻\",\"&Precedes;\":\"≺\",\"&PrecedesEqual;\":\"⪯\",\"&PrecedesSlantEqual;\":\"≼\",\"&PrecedesTilde;\":\"≾\",\"&Prime;\":\"″\",\"&Product;\":\"∏\",\"&Proportion;\":\"∷\",\"&Proportional;\":\"∝\",\"&Pscr;\":\"𝒫\",\"&Psi;\":\"Ψ\",\"&QUOT\":'\"',\"&QUOT;\":'\"',\"&Qfr;\":\"𝔔\",\"&Qopf;\":\"ℚ\",\"&Qscr;\":\"𝒬\",\"&RBarr;\":\"⤐\",\"&REG\":\"®\",\"&REG;\":\"®\",\"&Racute;\":\"Ŕ\",\"&Rang;\":\"⟫\",\"&Rarr;\":\"↠\",\"&Rarrtl;\":\"⤖\",\"&Rcaron;\":\"Ř\",\"&Rcedil;\":\"Ŗ\",\"&Rcy;\":\"Р\",\"&Re;\":\"ℜ\",\"&ReverseElement;\":\"∋\",\"&ReverseEquilibrium;\":\"⇋\",\"&ReverseUpEquilibrium;\":\"⥯\",\"&Rfr;\":\"ℜ\",\"&Rho;\":\"Ρ\",\"&RightAngleBracket;\":\"⟩\",\"&RightArrow;\":\"→\",\"&RightArrowBar;\":\"⇥\",\"&RightArrowLeftArrow;\":\"⇄\",\"&RightCeiling;\":\"⌉\",\"&RightDoubleBracket;\":\"⟧\",\"&RightDownTeeVector;\":\"⥝\",\"&RightDownVector;\":\"⇂\",\"&RightDownVectorBar;\":\"⥕\",\"&RightFloor;\":\"⌋\",\"&RightTee;\":\"⊢\",\"&RightTeeArrow;\":\"↦\",\"&RightTeeVector;\":\"⥛\",\"&RightTriangle;\":\"⊳\",\"&RightTriangleBar;\":\"⧐\",\"&RightTriangleEqual;\":\"⊵\",\"&RightUpDownVector;\":\"⥏\",\"&RightUpTeeVector;\":\"⥜\",\"&RightUpVector;\":\"↾\",\"&RightUpVectorBar;\":\"⥔\",\"&RightVector;\":\"⇀\",\"&RightVectorBar;\":\"⥓\",\"&Rightarrow;\":\"⇒\",\"&Ropf;\":\"ℝ\",\"&RoundImplies;\":\"⥰\",\"&Rrightarrow;\":\"⇛\",\"&Rscr;\":\"ℛ\",\"&Rsh;\":\"↱\",\"&RuleDelayed;\":\"⧴\",\"&SHCHcy;\":\"Щ\",\"&SHcy;\":\"Ш\",\"&SOFTcy;\":\"Ь\",\"&Sacute;\":\"Ś\",\"&Sc;\":\"⪼\",\"&Scaron;\":\"Š\",\"&Scedil;\":\"Ş\",\"&Scirc;\":\"Ŝ\",\"&Scy;\":\"С\",\"&Sfr;\":\"𝔖\",\"&ShortDownArrow;\":\"↓\",\"&ShortLeftArrow;\":\"←\",\"&ShortRightArrow;\":\"→\",\"&ShortUpArrow;\":\"↑\",\"&Sigma;\":\"Σ\",\"&SmallCircle;\":\"∘\",\"&Sopf;\":\"𝕊\",\"&Sqrt;\":\"√\",\"&Square;\":\"□\",\"&SquareIntersection;\":\"⊓\",\"&SquareSubset;\":\"⊏\",\"&SquareSubsetEqual;\":\"⊑\",\"&SquareSuperset;\":\"⊐\",\"&SquareSupersetEqual;\":\"⊒\",\"&SquareUnion;\":\"⊔\",\"&Sscr;\":\"𝒮\",\"&Star;\":\"⋆\",\"&Sub;\":\"⋐\",\"&Subset;\":\"⋐\",\"&SubsetEqual;\":\"⊆\",\"&Succeeds;\":\"≻\",\"&SucceedsEqual;\":\"⪰\",\"&SucceedsSlantEqual;\":\"≽\",\"&SucceedsTilde;\":\"≿\",\"&SuchThat;\":\"∋\",\"&Sum;\":\"∑\",\"&Sup;\":\"⋑\",\"&Superset;\":\"⊃\",\"&SupersetEqual;\":\"⊇\",\"&Supset;\":\"⋑\",\"&THORN\":\"Þ\",\"&THORN;\":\"Þ\",\"&TRADE;\":\"™\",\"&TSHcy;\":\"Ћ\",\"&TScy;\":\"Ц\",\"&Tab;\":\"\\t\",\"&Tau;\":\"Τ\",\"&Tcaron;\":\"Ť\",\"&Tcedil;\":\"Ţ\",\"&Tcy;\":\"Т\",\"&Tfr;\":\"𝔗\",\"&Therefore;\":\"∴\",\"&Theta;\":\"Θ\",\"&ThickSpace;\":\"  \",\"&ThinSpace;\":\" \",\"&Tilde;\":\"∼\",\"&TildeEqual;\":\"≃\",\"&TildeFullEqual;\":\"≅\",\"&TildeTilde;\":\"≈\",\"&Topf;\":\"𝕋\",\"&TripleDot;\":\"⃛\",\"&Tscr;\":\"𝒯\",\"&Tstrok;\":\"Ŧ\",\"&Uacute\":\"Ú\",\"&Uacute;\":\"Ú\",\"&Uarr;\":\"↟\",\"&Uarrocir;\":\"⥉\",\"&Ubrcy;\":\"Ў\",\"&Ubreve;\":\"Ŭ\",\"&Ucirc\":\"Û\",\"&Ucirc;\":\"Û\",\"&Ucy;\":\"У\",\"&Udblac;\":\"Ű\",\"&Ufr;\":\"𝔘\",\"&Ugrave\":\"Ù\",\"&Ugrave;\":\"Ù\",\"&Umacr;\":\"Ū\",\"&UnderBar;\":\"_\",\"&UnderBrace;\":\"⏟\",\"&UnderBracket;\":\"⎵\",\"&UnderParenthesis;\":\"⏝\",\"&Union;\":\"⋃\",\"&UnionPlus;\":\"⊎\",\"&Uogon;\":\"Ų\",\"&Uopf;\":\"𝕌\",\"&UpArrow;\":\"↑\",\"&UpArrowBar;\":\"⤒\",\"&UpArrowDownArrow;\":\"⇅\",\"&UpDownArrow;\":\"↕\",\"&UpEquilibrium;\":\"⥮\",\"&UpTee;\":\"⊥\",\"&UpTeeArrow;\":\"↥\",\"&Uparrow;\":\"⇑\",\"&Updownarrow;\":\"⇕\",\"&UpperLeftArrow;\":\"↖\",\"&UpperRightArrow;\":\"↗\",\"&Upsi;\":\"ϒ\",\"&Upsilon;\":\"Υ\",\"&Uring;\":\"Ů\",\"&Uscr;\":\"𝒰\",\"&Utilde;\":\"Ũ\",\"&Uuml\":\"Ü\",\"&Uuml;\":\"Ü\",\"&VDash;\":\"⊫\",\"&Vbar;\":\"⫫\",\"&Vcy;\":\"В\",\"&Vdash;\":\"⊩\",\"&Vdashl;\":\"⫦\",\"&Vee;\":\"⋁\",\"&Verbar;\":\"‖\",\"&Vert;\":\"‖\",\"&VerticalBar;\":\"∣\",\"&VerticalLine;\":\"|\",\"&VerticalSeparator;\":\"❘\",\"&VerticalTilde;\":\"≀\",\"&VeryThinSpace;\":\" \",\"&Vfr;\":\"𝔙\",\"&Vopf;\":\"𝕍\",\"&Vscr;\":\"𝒱\",\"&Vvdash;\":\"⊪\",\"&Wcirc;\":\"Ŵ\",\"&Wedge;\":\"⋀\",\"&Wfr;\":\"𝔚\",\"&Wopf;\":\"𝕎\",\"&Wscr;\":\"𝒲\",\"&Xfr;\":\"𝔛\",\"&Xi;\":\"Ξ\",\"&Xopf;\":\"𝕏\",\"&Xscr;\":\"𝒳\",\"&YAcy;\":\"Я\",\"&YIcy;\":\"Ї\",\"&YUcy;\":\"Ю\",\"&Yacute\":\"Ý\",\"&Yacute;\":\"Ý\",\"&Ycirc;\":\"Ŷ\",\"&Ycy;\":\"Ы\",\"&Yfr;\":\"𝔜\",\"&Yopf;\":\"𝕐\",\"&Yscr;\":\"𝒴\",\"&Yuml;\":\"Ÿ\",\"&ZHcy;\":\"Ж\",\"&Zacute;\":\"Ź\",\"&Zcaron;\":\"Ž\",\"&Zcy;\":\"З\",\"&Zdot;\":\"Ż\",\"&ZeroWidthSpace;\":\"​\",\"&Zeta;\":\"Ζ\",\"&Zfr;\":\"ℨ\",\"&Zopf;\":\"ℤ\",\"&Zscr;\":\"𝒵\",\"&aacute\":\"á\",\"&aacute;\":\"á\",\"&abreve;\":\"ă\",\"&ac;\":\"∾\",\"&acE;\":\"∾̳\",\"&acd;\":\"∿\",\"&acirc\":\"â\",\"&acirc;\":\"â\",\"&acute\":\"´\",\"&acute;\":\"´\",\"&acy;\":\"а\",\"&aelig\":\"æ\",\"&aelig;\":\"æ\",\"&af;\":\"⁡\",\"&afr;\":\"𝔞\",\"&agrave\":\"à\",\"&agrave;\":\"à\",\"&alefsym;\":\"ℵ\",\"&aleph;\":\"ℵ\",\"&alpha;\":\"α\",\"&amacr;\":\"ā\",\"&amalg;\":\"⨿\",\"&amp\":\"&\",\"&amp;\":\"&\",\"&and;\":\"∧\",\"&andand;\":\"⩕\",\"&andd;\":\"⩜\",\"&andslope;\":\"⩘\",\"&andv;\":\"⩚\",\"&ang;\":\"∠\",\"&ange;\":\"⦤\",\"&angle;\":\"∠\",\"&angmsd;\":\"∡\",\"&angmsdaa;\":\"⦨\",\"&angmsdab;\":\"⦩\",\"&angmsdac;\":\"⦪\",\"&angmsdad;\":\"⦫\",\"&angmsdae;\":\"⦬\",\"&angmsdaf;\":\"⦭\",\"&angmsdag;\":\"⦮\",\"&angmsdah;\":\"⦯\",\"&angrt;\":\"∟\",\"&angrtvb;\":\"⊾\",\"&angrtvbd;\":\"⦝\",\"&angsph;\":\"∢\",\"&angst;\":\"Å\",\"&angzarr;\":\"⍼\",\"&aogon;\":\"ą\",\"&aopf;\":\"𝕒\",\"&ap;\":\"≈\",\"&apE;\":\"⩰\",\"&apacir;\":\"⩯\",\"&ape;\":\"≊\",\"&apid;\":\"≋\",\"&apos;\":\"'\",\"&approx;\":\"≈\",\"&approxeq;\":\"≊\",\"&aring\":\"å\",\"&aring;\":\"å\",\"&ascr;\":\"𝒶\",\"&ast;\":\"*\",\"&asymp;\":\"≈\",\"&asympeq;\":\"≍\",\"&atilde\":\"ã\",\"&atilde;\":\"ã\",\"&auml\":\"ä\",\"&auml;\":\"ä\",\"&awconint;\":\"∳\",\"&awint;\":\"⨑\",\"&bNot;\":\"⫭\",\"&backcong;\":\"≌\",\"&backepsilon;\":\"϶\",\"&backprime;\":\"‵\",\"&backsim;\":\"∽\",\"&backsimeq;\":\"⋍\",\"&barvee;\":\"⊽\",\"&barwed;\":\"⌅\",\"&barwedge;\":\"⌅\",\"&bbrk;\":\"⎵\",\"&bbrktbrk;\":\"⎶\",\"&bcong;\":\"≌\",\"&bcy;\":\"б\",\"&bdquo;\":\"„\",\"&becaus;\":\"∵\",\"&because;\":\"∵\",\"&bemptyv;\":\"⦰\",\"&bepsi;\":\"϶\",\"&bernou;\":\"ℬ\",\"&beta;\":\"β\",\"&beth;\":\"ℶ\",\"&between;\":\"≬\",\"&bfr;\":\"𝔟\",\"&bigcap;\":\"⋂\",\"&bigcirc;\":\"◯\",\"&bigcup;\":\"⋃\",\"&bigodot;\":\"⨀\",\"&bigoplus;\":\"⨁\",\"&bigotimes;\":\"⨂\",\"&bigsqcup;\":\"⨆\",\"&bigstar;\":\"★\",\"&bigtriangledown;\":\"▽\",\"&bigtriangleup;\":\"△\",\"&biguplus;\":\"⨄\",\"&bigvee;\":\"⋁\",\"&bigwedge;\":\"⋀\",\"&bkarow;\":\"⤍\",\"&blacklozenge;\":\"⧫\",\"&blacksquare;\":\"▪\",\"&blacktriangle;\":\"▴\",\"&blacktriangledown;\":\"▾\",\"&blacktriangleleft;\":\"◂\",\"&blacktriangleright;\":\"▸\",\"&blank;\":\"␣\",\"&blk12;\":\"▒\",\"&blk14;\":\"░\",\"&blk34;\":\"▓\",\"&block;\":\"█\",\"&bne;\":\"=⃥\",\"&bnequiv;\":\"≡⃥\",\"&bnot;\":\"⌐\",\"&bopf;\":\"𝕓\",\"&bot;\":\"⊥\",\"&bottom;\":\"⊥\",\"&bowtie;\":\"⋈\",\"&boxDL;\":\"╗\",\"&boxDR;\":\"╔\",\"&boxDl;\":\"╖\",\"&boxDr;\":\"╓\",\"&boxH;\":\"═\",\"&boxHD;\":\"╦\",\"&boxHU;\":\"╩\",\"&boxHd;\":\"╤\",\"&boxHu;\":\"╧\",\"&boxUL;\":\"╝\",\"&boxUR;\":\"╚\",\"&boxUl;\":\"╜\",\"&boxUr;\":\"╙\",\"&boxV;\":\"║\",\"&boxVH;\":\"╬\",\"&boxVL;\":\"╣\",\"&boxVR;\":\"╠\",\"&boxVh;\":\"╫\",\"&boxVl;\":\"╢\",\"&boxVr;\":\"╟\",\"&boxbox;\":\"⧉\",\"&boxdL;\":\"╕\",\"&boxdR;\":\"╒\",\"&boxdl;\":\"┐\",\"&boxdr;\":\"┌\",\"&boxh;\":\"─\",\"&boxhD;\":\"╥\",\"&boxhU;\":\"╨\",\"&boxhd;\":\"┬\",\"&boxhu;\":\"┴\",\"&boxminus;\":\"⊟\",\"&boxplus;\":\"⊞\",\"&boxtimes;\":\"⊠\",\"&boxuL;\":\"╛\",\"&boxuR;\":\"╘\",\"&boxul;\":\"┘\",\"&boxur;\":\"└\",\"&boxv;\":\"│\",\"&boxvH;\":\"╪\",\"&boxvL;\":\"╡\",\"&boxvR;\":\"╞\",\"&boxvh;\":\"┼\",\"&boxvl;\":\"┤\",\"&boxvr;\":\"├\",\"&bprime;\":\"‵\",\"&breve;\":\"˘\",\"&brvbar\":\"¦\",\"&brvbar;\":\"¦\",\"&bscr;\":\"𝒷\",\"&bsemi;\":\"⁏\",\"&bsim;\":\"∽\",\"&bsime;\":\"⋍\",\"&bsol;\":\"\\\\\",\"&bsolb;\":\"⧅\",\"&bsolhsub;\":\"⟈\",\"&bull;\":\"•\",\"&bullet;\":\"•\",\"&bump;\":\"≎\",\"&bumpE;\":\"⪮\",\"&bumpe;\":\"≏\",\"&bumpeq;\":\"≏\",\"&cacute;\":\"ć\",\"&cap;\":\"∩\",\"&capand;\":\"⩄\",\"&capbrcup;\":\"⩉\",\"&capcap;\":\"⩋\",\"&capcup;\":\"⩇\",\"&capdot;\":\"⩀\",\"&caps;\":\"∩︀\",\"&caret;\":\"⁁\",\"&caron;\":\"ˇ\",\"&ccaps;\":\"⩍\",\"&ccaron;\":\"č\",\"&ccedil\":\"ç\",\"&ccedil;\":\"ç\",\"&ccirc;\":\"ĉ\",\"&ccups;\":\"⩌\",\"&ccupssm;\":\"⩐\",\"&cdot;\":\"ċ\",\"&cedil\":\"¸\",\"&cedil;\":\"¸\",\"&cemptyv;\":\"⦲\",\"&cent\":\"¢\",\"&cent;\":\"¢\",\"&centerdot;\":\"·\",\"&cfr;\":\"𝔠\",\"&chcy;\":\"ч\",\"&check;\":\"✓\",\"&checkmark;\":\"✓\",\"&chi;\":\"χ\",\"&cir;\":\"○\",\"&cirE;\":\"⧃\",\"&circ;\":\"ˆ\",\"&circeq;\":\"≗\",\"&circlearrowleft;\":\"↺\",\"&circlearrowright;\":\"↻\",\"&circledR;\":\"®\",\"&circledS;\":\"Ⓢ\",\"&circledast;\":\"⊛\",\"&circledcirc;\":\"⊚\",\"&circleddash;\":\"⊝\",\"&cire;\":\"≗\",\"&cirfnint;\":\"⨐\",\"&cirmid;\":\"⫯\",\"&cirscir;\":\"⧂\",\"&clubs;\":\"♣\",\"&clubsuit;\":\"♣\",\"&colon;\":\":\",\"&colone;\":\"≔\",\"&coloneq;\":\"≔\",\"&comma;\":\",\",\"&commat;\":\"@\",\"&comp;\":\"∁\",\"&compfn;\":\"∘\",\"&complement;\":\"∁\",\"&complexes;\":\"ℂ\",\"&cong;\":\"≅\",\"&congdot;\":\"⩭\",\"&conint;\":\"∮\",\"&copf;\":\"𝕔\",\"&coprod;\":\"∐\",\"&copy\":\"©\",\"&copy;\":\"©\",\"&copysr;\":\"℗\",\"&crarr;\":\"↵\",\"&cross;\":\"✗\",\"&cscr;\":\"𝒸\",\"&csub;\":\"⫏\",\"&csube;\":\"⫑\",\"&csup;\":\"⫐\",\"&csupe;\":\"⫒\",\"&ctdot;\":\"⋯\",\"&cudarrl;\":\"⤸\",\"&cudarrr;\":\"⤵\",\"&cuepr;\":\"⋞\",\"&cuesc;\":\"⋟\",\"&cularr;\":\"↶\",\"&cularrp;\":\"⤽\",\"&cup;\":\"∪\",\"&cupbrcap;\":\"⩈\",\"&cupcap;\":\"⩆\",\"&cupcup;\":\"⩊\",\"&cupdot;\":\"⊍\",\"&cupor;\":\"⩅\",\"&cups;\":\"∪︀\",\"&curarr;\":\"↷\",\"&curarrm;\":\"⤼\",\"&curlyeqprec;\":\"⋞\",\"&curlyeqsucc;\":\"⋟\",\"&curlyvee;\":\"⋎\",\"&curlywedge;\":\"⋏\",\"&curren\":\"¤\",\"&curren;\":\"¤\",\"&curvearrowleft;\":\"↶\",\"&curvearrowright;\":\"↷\",\"&cuvee;\":\"⋎\",\"&cuwed;\":\"⋏\",\"&cwconint;\":\"∲\",\"&cwint;\":\"∱\",\"&cylcty;\":\"⌭\",\"&dArr;\":\"⇓\",\"&dHar;\":\"⥥\",\"&dagger;\":\"†\",\"&daleth;\":\"ℸ\",\"&darr;\":\"↓\",\"&dash;\":\"‐\",\"&dashv;\":\"⊣\",\"&dbkarow;\":\"⤏\",\"&dblac;\":\"˝\",\"&dcaron;\":\"ď\",\"&dcy;\":\"д\",\"&dd;\":\"ⅆ\",\"&ddagger;\":\"‡\",\"&ddarr;\":\"⇊\",\"&ddotseq;\":\"⩷\",\"&deg\":\"°\",\"&deg;\":\"°\",\"&delta;\":\"δ\",\"&demptyv;\":\"⦱\",\"&dfisht;\":\"⥿\",\"&dfr;\":\"𝔡\",\"&dharl;\":\"⇃\",\"&dharr;\":\"⇂\",\"&diam;\":\"⋄\",\"&diamond;\":\"⋄\",\"&diamondsuit;\":\"♦\",\"&diams;\":\"♦\",\"&die;\":\"¨\",\"&digamma;\":\"ϝ\",\"&disin;\":\"⋲\",\"&div;\":\"÷\",\"&divide\":\"÷\",\"&divide;\":\"÷\",\"&divideontimes;\":\"⋇\",\"&divonx;\":\"⋇\",\"&djcy;\":\"ђ\",\"&dlcorn;\":\"⌞\",\"&dlcrop;\":\"⌍\",\"&dollar;\":\"$\",\"&dopf;\":\"𝕕\",\"&dot;\":\"˙\",\"&doteq;\":\"≐\",\"&doteqdot;\":\"≑\",\"&dotminus;\":\"∸\",\"&dotplus;\":\"∔\",\"&dotsquare;\":\"⊡\",\"&doublebarwedge;\":\"⌆\",\"&downarrow;\":\"↓\",\"&downdownarrows;\":\"⇊\",\"&downharpoonleft;\":\"⇃\",\"&downharpoonright;\":\"⇂\",\"&drbkarow;\":\"⤐\",\"&drcorn;\":\"⌟\",\"&drcrop;\":\"⌌\",\"&dscr;\":\"𝒹\",\"&dscy;\":\"ѕ\",\"&dsol;\":\"⧶\",\"&dstrok;\":\"đ\",\"&dtdot;\":\"⋱\",\"&dtri;\":\"▿\",\"&dtrif;\":\"▾\",\"&duarr;\":\"⇵\",\"&duhar;\":\"⥯\",\"&dwangle;\":\"⦦\",\"&dzcy;\":\"џ\",\"&dzigrarr;\":\"⟿\",\"&eDDot;\":\"⩷\",\"&eDot;\":\"≑\",\"&eacute\":\"é\",\"&eacute;\":\"é\",\"&easter;\":\"⩮\",\"&ecaron;\":\"ě\",\"&ecir;\":\"≖\",\"&ecirc\":\"ê\",\"&ecirc;\":\"ê\",\"&ecolon;\":\"≕\",\"&ecy;\":\"э\",\"&edot;\":\"ė\",\"&ee;\":\"ⅇ\",\"&efDot;\":\"≒\",\"&efr;\":\"𝔢\",\"&eg;\":\"⪚\",\"&egrave\":\"è\",\"&egrave;\":\"è\",\"&egs;\":\"⪖\",\"&egsdot;\":\"⪘\",\"&el;\":\"⪙\",\"&elinters;\":\"⏧\",\"&ell;\":\"ℓ\",\"&els;\":\"⪕\",\"&elsdot;\":\"⪗\",\"&emacr;\":\"ē\",\"&empty;\":\"∅\",\"&emptyset;\":\"∅\",\"&emptyv;\":\"∅\",\"&emsp13;\":\" \",\"&emsp14;\":\" \",\"&emsp;\":\" \",\"&eng;\":\"ŋ\",\"&ensp;\":\" \",\"&eogon;\":\"ę\",\"&eopf;\":\"𝕖\",\"&epar;\":\"⋕\",\"&eparsl;\":\"⧣\",\"&eplus;\":\"⩱\",\"&epsi;\":\"ε\",\"&epsilon;\":\"ε\",\"&epsiv;\":\"ϵ\",\"&eqcirc;\":\"≖\",\"&eqcolon;\":\"≕\",\"&eqsim;\":\"≂\",\"&eqslantgtr;\":\"⪖\",\"&eqslantless;\":\"⪕\",\"&equals;\":\"=\",\"&equest;\":\"≟\",\"&equiv;\":\"≡\",\"&equivDD;\":\"⩸\",\"&eqvparsl;\":\"⧥\",\"&erDot;\":\"≓\",\"&erarr;\":\"⥱\",\"&escr;\":\"ℯ\",\"&esdot;\":\"≐\",\"&esim;\":\"≂\",\"&eta;\":\"η\",\"&eth\":\"ð\",\"&eth;\":\"ð\",\"&euml\":\"ë\",\"&euml;\":\"ë\",\"&euro;\":\"€\",\"&excl;\":\"!\",\"&exist;\":\"∃\",\"&expectation;\":\"ℰ\",\"&exponentiale;\":\"ⅇ\",\"&fallingdotseq;\":\"≒\",\"&fcy;\":\"ф\",\"&female;\":\"♀\",\"&ffilig;\":\"ﬃ\",\"&fflig;\":\"ﬀ\",\"&ffllig;\":\"ﬄ\",\"&ffr;\":\"𝔣\",\"&filig;\":\"ﬁ\",\"&fjlig;\":\"fj\",\"&flat;\":\"♭\",\"&fllig;\":\"ﬂ\",\"&fltns;\":\"▱\",\"&fnof;\":\"ƒ\",\"&fopf;\":\"𝕗\",\"&forall;\":\"∀\",\"&fork;\":\"⋔\",\"&forkv;\":\"⫙\",\"&fpartint;\":\"⨍\",\"&frac12\":\"½\",\"&frac12;\":\"½\",\"&frac13;\":\"⅓\",\"&frac14\":\"¼\",\"&frac14;\":\"¼\",\"&frac15;\":\"⅕\",\"&frac16;\":\"⅙\",\"&frac18;\":\"⅛\",\"&frac23;\":\"⅔\",\"&frac25;\":\"⅖\",\"&frac34\":\"¾\",\"&frac34;\":\"¾\",\"&frac35;\":\"⅗\",\"&frac38;\":\"⅜\",\"&frac45;\":\"⅘\",\"&frac56;\":\"⅚\",\"&frac58;\":\"⅝\",\"&frac78;\":\"⅞\",\"&frasl;\":\"⁄\",\"&frown;\":\"⌢\",\"&fscr;\":\"𝒻\",\"&gE;\":\"≧\",\"&gEl;\":\"⪌\",\"&gacute;\":\"ǵ\",\"&gamma;\":\"γ\",\"&gammad;\":\"ϝ\",\"&gap;\":\"⪆\",\"&gbreve;\":\"ğ\",\"&gcirc;\":\"ĝ\",\"&gcy;\":\"г\",\"&gdot;\":\"ġ\",\"&ge;\":\"≥\",\"&gel;\":\"⋛\",\"&geq;\":\"≥\",\"&geqq;\":\"≧\",\"&geqslant;\":\"⩾\",\"&ges;\":\"⩾\",\"&gescc;\":\"⪩\",\"&gesdot;\":\"⪀\",\"&gesdoto;\":\"⪂\",\"&gesdotol;\":\"⪄\",\"&gesl;\":\"⋛︀\",\"&gesles;\":\"⪔\",\"&gfr;\":\"𝔤\",\"&gg;\":\"≫\",\"&ggg;\":\"⋙\",\"&gimel;\":\"ℷ\",\"&gjcy;\":\"ѓ\",\"&gl;\":\"≷\",\"&glE;\":\"⪒\",\"&gla;\":\"⪥\",\"&glj;\":\"⪤\",\"&gnE;\":\"≩\",\"&gnap;\":\"⪊\",\"&gnapprox;\":\"⪊\",\"&gne;\":\"⪈\",\"&gneq;\":\"⪈\",\"&gneqq;\":\"≩\",\"&gnsim;\":\"⋧\",\"&gopf;\":\"𝕘\",\"&grave;\":\"`\",\"&gscr;\":\"ℊ\",\"&gsim;\":\"≳\",\"&gsime;\":\"⪎\",\"&gsiml;\":\"⪐\",\"&gt\":\">\",\"&gt;\":\">\",\"&gtcc;\":\"⪧\",\"&gtcir;\":\"⩺\",\"&gtdot;\":\"⋗\",\"&gtlPar;\":\"⦕\",\"&gtquest;\":\"⩼\",\"&gtrapprox;\":\"⪆\",\"&gtrarr;\":\"⥸\",\"&gtrdot;\":\"⋗\",\"&gtreqless;\":\"⋛\",\"&gtreqqless;\":\"⪌\",\"&gtrless;\":\"≷\",\"&gtrsim;\":\"≳\",\"&gvertneqq;\":\"≩︀\",\"&gvnE;\":\"≩︀\",\"&hArr;\":\"⇔\",\"&hairsp;\":\" \",\"&half;\":\"½\",\"&hamilt;\":\"ℋ\",\"&hardcy;\":\"ъ\",\"&harr;\":\"↔\",\"&harrcir;\":\"⥈\",\"&harrw;\":\"↭\",\"&hbar;\":\"ℏ\",\"&hcirc;\":\"ĥ\",\"&hearts;\":\"♥\",\"&heartsuit;\":\"♥\",\"&hellip;\":\"…\",\"&hercon;\":\"⊹\",\"&hfr;\":\"𝔥\",\"&hksearow;\":\"⤥\",\"&hkswarow;\":\"⤦\",\"&hoarr;\":\"⇿\",\"&homtht;\":\"∻\",\"&hookleftarrow;\":\"↩\",\"&hookrightarrow;\":\"↪\",\"&hopf;\":\"𝕙\",\"&horbar;\":\"―\",\"&hscr;\":\"𝒽\",\"&hslash;\":\"ℏ\",\"&hstrok;\":\"ħ\",\"&hybull;\":\"⁃\",\"&hyphen;\":\"‐\",\"&iacute\":\"í\",\"&iacute;\":\"í\",\"&ic;\":\"⁣\",\"&icirc\":\"î\",\"&icirc;\":\"î\",\"&icy;\":\"и\",\"&iecy;\":\"е\",\"&iexcl\":\"¡\",\"&iexcl;\":\"¡\",\"&iff;\":\"⇔\",\"&ifr;\":\"𝔦\",\"&igrave\":\"ì\",\"&igrave;\":\"ì\",\"&ii;\":\"ⅈ\",\"&iiiint;\":\"⨌\",\"&iiint;\":\"∭\",\"&iinfin;\":\"⧜\",\"&iiota;\":\"℩\",\"&ijlig;\":\"ĳ\",\"&imacr;\":\"ī\",\"&image;\":\"ℑ\",\"&imagline;\":\"ℐ\",\"&imagpart;\":\"ℑ\",\"&imath;\":\"ı\",\"&imof;\":\"⊷\",\"&imped;\":\"Ƶ\",\"&in;\":\"∈\",\"&incare;\":\"℅\",\"&infin;\":\"∞\",\"&infintie;\":\"⧝\",\"&inodot;\":\"ı\",\"&int;\":\"∫\",\"&intcal;\":\"⊺\",\"&integers;\":\"ℤ\",\"&intercal;\":\"⊺\",\"&intlarhk;\":\"⨗\",\"&intprod;\":\"⨼\",\"&iocy;\":\"ё\",\"&iogon;\":\"į\",\"&iopf;\":\"𝕚\",\"&iota;\":\"ι\",\"&iprod;\":\"⨼\",\"&iquest\":\"¿\",\"&iquest;\":\"¿\",\"&iscr;\":\"𝒾\",\"&isin;\":\"∈\",\"&isinE;\":\"⋹\",\"&isindot;\":\"⋵\",\"&isins;\":\"⋴\",\"&isinsv;\":\"⋳\",\"&isinv;\":\"∈\",\"&it;\":\"⁢\",\"&itilde;\":\"ĩ\",\"&iukcy;\":\"і\",\"&iuml\":\"ï\",\"&iuml;\":\"ï\",\"&jcirc;\":\"ĵ\",\"&jcy;\":\"й\",\"&jfr;\":\"𝔧\",\"&jmath;\":\"ȷ\",\"&jopf;\":\"𝕛\",\"&jscr;\":\"𝒿\",\"&jsercy;\":\"ј\",\"&jukcy;\":\"є\",\"&kappa;\":\"κ\",\"&kappav;\":\"ϰ\",\"&kcedil;\":\"ķ\",\"&kcy;\":\"к\",\"&kfr;\":\"𝔨\",\"&kgreen;\":\"ĸ\",\"&khcy;\":\"х\",\"&kjcy;\":\"ќ\",\"&kopf;\":\"𝕜\",\"&kscr;\":\"𝓀\",\"&lAarr;\":\"⇚\",\"&lArr;\":\"⇐\",\"&lAtail;\":\"⤛\",\"&lBarr;\":\"⤎\",\"&lE;\":\"≦\",\"&lEg;\":\"⪋\",\"&lHar;\":\"⥢\",\"&lacute;\":\"ĺ\",\"&laemptyv;\":\"⦴\",\"&lagran;\":\"ℒ\",\"&lambda;\":\"λ\",\"&lang;\":\"⟨\",\"&langd;\":\"⦑\",\"&langle;\":\"⟨\",\"&lap;\":\"⪅\",\"&laquo\":\"«\",\"&laquo;\":\"«\",\"&larr;\":\"←\",\"&larrb;\":\"⇤\",\"&larrbfs;\":\"⤟\",\"&larrfs;\":\"⤝\",\"&larrhk;\":\"↩\",\"&larrlp;\":\"↫\",\"&larrpl;\":\"⤹\",\"&larrsim;\":\"⥳\",\"&larrtl;\":\"↢\",\"&lat;\":\"⪫\",\"&latail;\":\"⤙\",\"&late;\":\"⪭\",\"&lates;\":\"⪭︀\",\"&lbarr;\":\"⤌\",\"&lbbrk;\":\"❲\",\"&lbrace;\":\"{\",\"&lbrack;\":\"[\",\"&lbrke;\":\"⦋\",\"&lbrksld;\":\"⦏\",\"&lbrkslu;\":\"⦍\",\"&lcaron;\":\"ľ\",\"&lcedil;\":\"ļ\",\"&lceil;\":\"⌈\",\"&lcub;\":\"{\",\"&lcy;\":\"л\",\"&ldca;\":\"⤶\",\"&ldquo;\":\"“\",\"&ldquor;\":\"„\",\"&ldrdhar;\":\"⥧\",\"&ldrushar;\":\"⥋\",\"&ldsh;\":\"↲\",\"&le;\":\"≤\",\"&leftarrow;\":\"←\",\"&leftarrowtail;\":\"↢\",\"&leftharpoondown;\":\"↽\",\"&leftharpoonup;\":\"↼\",\"&leftleftarrows;\":\"⇇\",\"&leftrightarrow;\":\"↔\",\"&leftrightarrows;\":\"⇆\",\"&leftrightharpoons;\":\"⇋\",\"&leftrightsquigarrow;\":\"↭\",\"&leftthreetimes;\":\"⋋\",\"&leg;\":\"⋚\",\"&leq;\":\"≤\",\"&leqq;\":\"≦\",\"&leqslant;\":\"⩽\",\"&les;\":\"⩽\",\"&lescc;\":\"⪨\",\"&lesdot;\":\"⩿\",\"&lesdoto;\":\"⪁\",\"&lesdotor;\":\"⪃\",\"&lesg;\":\"⋚︀\",\"&lesges;\":\"⪓\",\"&lessapprox;\":\"⪅\",\"&lessdot;\":\"⋖\",\"&lesseqgtr;\":\"⋚\",\"&lesseqqgtr;\":\"⪋\",\"&lessgtr;\":\"≶\",\"&lesssim;\":\"≲\",\"&lfisht;\":\"⥼\",\"&lfloor;\":\"⌊\",\"&lfr;\":\"𝔩\",\"&lg;\":\"≶\",\"&lgE;\":\"⪑\",\"&lhard;\":\"↽\",\"&lharu;\":\"↼\",\"&lharul;\":\"⥪\",\"&lhblk;\":\"▄\",\"&ljcy;\":\"љ\",\"&ll;\":\"≪\",\"&llarr;\":\"⇇\",\"&llcorner;\":\"⌞\",\"&llhard;\":\"⥫\",\"&lltri;\":\"◺\",\"&lmidot;\":\"ŀ\",\"&lmoust;\":\"⎰\",\"&lmoustache;\":\"⎰\",\"&lnE;\":\"≨\",\"&lnap;\":\"⪉\",\"&lnapprox;\":\"⪉\",\"&lne;\":\"⪇\",\"&lneq;\":\"⪇\",\"&lneqq;\":\"≨\",\"&lnsim;\":\"⋦\",\"&loang;\":\"⟬\",\"&loarr;\":\"⇽\",\"&lobrk;\":\"⟦\",\"&longleftarrow;\":\"⟵\",\"&longleftrightarrow;\":\"⟷\",\"&longmapsto;\":\"⟼\",\"&longrightarrow;\":\"⟶\",\"&looparrowleft;\":\"↫\",\"&looparrowright;\":\"↬\",\"&lopar;\":\"⦅\",\"&lopf;\":\"𝕝\",\"&loplus;\":\"⨭\",\"&lotimes;\":\"⨴\",\"&lowast;\":\"∗\",\"&lowbar;\":\"_\",\"&loz;\":\"◊\",\"&lozenge;\":\"◊\",\"&lozf;\":\"⧫\",\"&lpar;\":\"(\",\"&lparlt;\":\"⦓\",\"&lrarr;\":\"⇆\",\"&lrcorner;\":\"⌟\",\"&lrhar;\":\"⇋\",\"&lrhard;\":\"⥭\",\"&lrm;\":\"‎\",\"&lrtri;\":\"⊿\",\"&lsaquo;\":\"‹\",\"&lscr;\":\"𝓁\",\"&lsh;\":\"↰\",\"&lsim;\":\"≲\",\"&lsime;\":\"⪍\",\"&lsimg;\":\"⪏\",\"&lsqb;\":\"[\",\"&lsquo;\":\"‘\",\"&lsquor;\":\"‚\",\"&lstrok;\":\"ł\",\"&lt\":\"<\",\"&lt;\":\"<\",\"&ltcc;\":\"⪦\",\"&ltcir;\":\"⩹\",\"&ltdot;\":\"⋖\",\"&lthree;\":\"⋋\",\"&ltimes;\":\"⋉\",\"&ltlarr;\":\"⥶\",\"&ltquest;\":\"⩻\",\"&ltrPar;\":\"⦖\",\"&ltri;\":\"◃\",\"&ltrie;\":\"⊴\",\"&ltrif;\":\"◂\",\"&lurdshar;\":\"⥊\",\"&luruhar;\":\"⥦\",\"&lvertneqq;\":\"≨︀\",\"&lvnE;\":\"≨︀\",\"&mDDot;\":\"∺\",\"&macr\":\"¯\",\"&macr;\":\"¯\",\"&male;\":\"♂\",\"&malt;\":\"✠\",\"&maltese;\":\"✠\",\"&map;\":\"↦\",\"&mapsto;\":\"↦\",\"&mapstodown;\":\"↧\",\"&mapstoleft;\":\"↤\",\"&mapstoup;\":\"↥\",\"&marker;\":\"▮\",\"&mcomma;\":\"⨩\",\"&mcy;\":\"м\",\"&mdash;\":\"—\",\"&measuredangle;\":\"∡\",\"&mfr;\":\"𝔪\",\"&mho;\":\"℧\",\"&micro\":\"µ\",\"&micro;\":\"µ\",\"&mid;\":\"∣\",\"&midast;\":\"*\",\"&midcir;\":\"⫰\",\"&middot\":\"·\",\"&middot;\":\"·\",\"&minus;\":\"−\",\"&minusb;\":\"⊟\",\"&minusd;\":\"∸\",\"&minusdu;\":\"⨪\",\"&mlcp;\":\"⫛\",\"&mldr;\":\"…\",\"&mnplus;\":\"∓\",\"&models;\":\"⊧\",\"&mopf;\":\"𝕞\",\"&mp;\":\"∓\",\"&mscr;\":\"𝓂\",\"&mstpos;\":\"∾\",\"&mu;\":\"μ\",\"&multimap;\":\"⊸\",\"&mumap;\":\"⊸\",\"&nGg;\":\"⋙̸\",\"&nGt;\":\"≫⃒\",\"&nGtv;\":\"≫̸\",\"&nLeftarrow;\":\"⇍\",\"&nLeftrightarrow;\":\"⇎\",\"&nLl;\":\"⋘̸\",\"&nLt;\":\"≪⃒\",\"&nLtv;\":\"≪̸\",\"&nRightarrow;\":\"⇏\",\"&nVDash;\":\"⊯\",\"&nVdash;\":\"⊮\",\"&nabla;\":\"∇\",\"&nacute;\":\"ń\",\"&nang;\":\"∠⃒\",\"&nap;\":\"≉\",\"&napE;\":\"⩰̸\",\"&napid;\":\"≋̸\",\"&napos;\":\"ŉ\",\"&napprox;\":\"≉\",\"&natur;\":\"♮\",\"&natural;\":\"♮\",\"&naturals;\":\"ℕ\",\"&nbsp\":\" \",\"&nbsp;\":\" \",\"&nbump;\":\"≎̸\",\"&nbumpe;\":\"≏̸\",\"&ncap;\":\"⩃\",\"&ncaron;\":\"ň\",\"&ncedil;\":\"ņ\",\"&ncong;\":\"≇\",\"&ncongdot;\":\"⩭̸\",\"&ncup;\":\"⩂\",\"&ncy;\":\"н\",\"&ndash;\":\"–\",\"&ne;\":\"≠\",\"&neArr;\":\"⇗\",\"&nearhk;\":\"⤤\",\"&nearr;\":\"↗\",\"&nearrow;\":\"↗\",\"&nedot;\":\"≐̸\",\"&nequiv;\":\"≢\",\"&nesear;\":\"⤨\",\"&nesim;\":\"≂̸\",\"&nexist;\":\"∄\",\"&nexists;\":\"∄\",\"&nfr;\":\"𝔫\",\"&ngE;\":\"≧̸\",\"&nge;\":\"≱\",\"&ngeq;\":\"≱\",\"&ngeqq;\":\"≧̸\",\"&ngeqslant;\":\"⩾̸\",\"&nges;\":\"⩾̸\",\"&ngsim;\":\"≵\",\"&ngt;\":\"≯\",\"&ngtr;\":\"≯\",\"&nhArr;\":\"⇎\",\"&nharr;\":\"↮\",\"&nhpar;\":\"⫲\",\"&ni;\":\"∋\",\"&nis;\":\"⋼\",\"&nisd;\":\"⋺\",\"&niv;\":\"∋\",\"&njcy;\":\"њ\",\"&nlArr;\":\"⇍\",\"&nlE;\":\"≦̸\",\"&nlarr;\":\"↚\",\"&nldr;\":\"‥\",\"&nle;\":\"≰\",\"&nleftarrow;\":\"↚\",\"&nleftrightarrow;\":\"↮\",\"&nleq;\":\"≰\",\"&nleqq;\":\"≦̸\",\"&nleqslant;\":\"⩽̸\",\"&nles;\":\"⩽̸\",\"&nless;\":\"≮\",\"&nlsim;\":\"≴\",\"&nlt;\":\"≮\",\"&nltri;\":\"⋪\",\"&nltrie;\":\"⋬\",\"&nmid;\":\"∤\",\"&nopf;\":\"𝕟\",\"&not\":\"¬\",\"&not;\":\"¬\",\"&notin;\":\"∉\",\"&notinE;\":\"⋹̸\",\"&notindot;\":\"⋵̸\",\"&notinva;\":\"∉\",\"&notinvb;\":\"⋷\",\"&notinvc;\":\"⋶\",\"&notni;\":\"∌\",\"&notniva;\":\"∌\",\"&notnivb;\":\"⋾\",\"&notnivc;\":\"⋽\",\"&npar;\":\"∦\",\"&nparallel;\":\"∦\",\"&nparsl;\":\"⫽⃥\",\"&npart;\":\"∂̸\",\"&npolint;\":\"⨔\",\"&npr;\":\"⊀\",\"&nprcue;\":\"⋠\",\"&npre;\":\"⪯̸\",\"&nprec;\":\"⊀\",\"&npreceq;\":\"⪯̸\",\"&nrArr;\":\"⇏\",\"&nrarr;\":\"↛\",\"&nrarrc;\":\"⤳̸\",\"&nrarrw;\":\"↝̸\",\"&nrightarrow;\":\"↛\",\"&nrtri;\":\"⋫\",\"&nrtrie;\":\"⋭\",\"&nsc;\":\"⊁\",\"&nsccue;\":\"⋡\",\"&nsce;\":\"⪰̸\",\"&nscr;\":\"𝓃\",\"&nshortmid;\":\"∤\",\"&nshortparallel;\":\"∦\",\"&nsim;\":\"≁\",\"&nsime;\":\"≄\",\"&nsimeq;\":\"≄\",\"&nsmid;\":\"∤\",\"&nspar;\":\"∦\",\"&nsqsube;\":\"⋢\",\"&nsqsupe;\":\"⋣\",\"&nsub;\":\"⊄\",\"&nsubE;\":\"⫅̸\",\"&nsube;\":\"⊈\",\"&nsubset;\":\"⊂⃒\",\"&nsubseteq;\":\"⊈\",\"&nsubseteqq;\":\"⫅̸\",\"&nsucc;\":\"⊁\",\"&nsucceq;\":\"⪰̸\",\"&nsup;\":\"⊅\",\"&nsupE;\":\"⫆̸\",\"&nsupe;\":\"⊉\",\"&nsupset;\":\"⊃⃒\",\"&nsupseteq;\":\"⊉\",\"&nsupseteqq;\":\"⫆̸\",\"&ntgl;\":\"≹\",\"&ntilde\":\"ñ\",\"&ntilde;\":\"ñ\",\"&ntlg;\":\"≸\",\"&ntriangleleft;\":\"⋪\",\"&ntrianglelefteq;\":\"⋬\",\"&ntriangleright;\":\"⋫\",\"&ntrianglerighteq;\":\"⋭\",\"&nu;\":\"ν\",\"&num;\":\"#\",\"&numero;\":\"№\",\"&numsp;\":\" \",\"&nvDash;\":\"⊭\",\"&nvHarr;\":\"⤄\",\"&nvap;\":\"≍⃒\",\"&nvdash;\":\"⊬\",\"&nvge;\":\"≥⃒\",\"&nvgt;\":\">⃒\",\"&nvinfin;\":\"⧞\",\"&nvlArr;\":\"⤂\",\"&nvle;\":\"≤⃒\",\"&nvlt;\":\"<⃒\",\"&nvltrie;\":\"⊴⃒\",\"&nvrArr;\":\"⤃\",\"&nvrtrie;\":\"⊵⃒\",\"&nvsim;\":\"∼⃒\",\"&nwArr;\":\"⇖\",\"&nwarhk;\":\"⤣\",\"&nwarr;\":\"↖\",\"&nwarrow;\":\"↖\",\"&nwnear;\":\"⤧\",\"&oS;\":\"Ⓢ\",\"&oacute\":\"ó\",\"&oacute;\":\"ó\",\"&oast;\":\"⊛\",\"&ocir;\":\"⊚\",\"&ocirc\":\"ô\",\"&ocirc;\":\"ô\",\"&ocy;\":\"о\",\"&odash;\":\"⊝\",\"&odblac;\":\"ő\",\"&odiv;\":\"⨸\",\"&odot;\":\"⊙\",\"&odsold;\":\"⦼\",\"&oelig;\":\"œ\",\"&ofcir;\":\"⦿\",\"&ofr;\":\"𝔬\",\"&ogon;\":\"˛\",\"&ograve\":\"ò\",\"&ograve;\":\"ò\",\"&ogt;\":\"⧁\",\"&ohbar;\":\"⦵\",\"&ohm;\":\"Ω\",\"&oint;\":\"∮\",\"&olarr;\":\"↺\",\"&olcir;\":\"⦾\",\"&olcross;\":\"⦻\",\"&oline;\":\"‾\",\"&olt;\":\"⧀\",\"&omacr;\":\"ō\",\"&omega;\":\"ω\",\"&omicron;\":\"ο\",\"&omid;\":\"⦶\",\"&ominus;\":\"⊖\",\"&oopf;\":\"𝕠\",\"&opar;\":\"⦷\",\"&operp;\":\"⦹\",\"&oplus;\":\"⊕\",\"&or;\":\"∨\",\"&orarr;\":\"↻\",\"&ord;\":\"⩝\",\"&order;\":\"ℴ\",\"&orderof;\":\"ℴ\",\"&ordf\":\"ª\",\"&ordf;\":\"ª\",\"&ordm\":\"º\",\"&ordm;\":\"º\",\"&origof;\":\"⊶\",\"&oror;\":\"⩖\",\"&orslope;\":\"⩗\",\"&orv;\":\"⩛\",\"&oscr;\":\"ℴ\",\"&oslash\":\"ø\",\"&oslash;\":\"ø\",\"&osol;\":\"⊘\",\"&otilde\":\"õ\",\"&otilde;\":\"õ\",\"&otimes;\":\"⊗\",\"&otimesas;\":\"⨶\",\"&ouml\":\"ö\",\"&ouml;\":\"ö\",\"&ovbar;\":\"⌽\",\"&par;\":\"∥\",\"&para\":\"¶\",\"&para;\":\"¶\",\"&parallel;\":\"∥\",\"&parsim;\":\"⫳\",\"&parsl;\":\"⫽\",\"&part;\":\"∂\",\"&pcy;\":\"п\",\"&percnt;\":\"%\",\"&period;\":\".\",\"&permil;\":\"‰\",\"&perp;\":\"⊥\",\"&pertenk;\":\"‱\",\"&pfr;\":\"𝔭\",\"&phi;\":\"φ\",\"&phiv;\":\"ϕ\",\"&phmmat;\":\"ℳ\",\"&phone;\":\"☎\",\"&pi;\":\"π\",\"&pitchfork;\":\"⋔\",\"&piv;\":\"ϖ\",\"&planck;\":\"ℏ\",\"&planckh;\":\"ℎ\",\"&plankv;\":\"ℏ\",\"&plus;\":\"+\",\"&plusacir;\":\"⨣\",\"&plusb;\":\"⊞\",\"&pluscir;\":\"⨢\",\"&plusdo;\":\"∔\",\"&plusdu;\":\"⨥\",\"&pluse;\":\"⩲\",\"&plusmn\":\"±\",\"&plusmn;\":\"±\",\"&plussim;\":\"⨦\",\"&plustwo;\":\"⨧\",\"&pm;\":\"±\",\"&pointint;\":\"⨕\",\"&popf;\":\"𝕡\",\"&pound\":\"£\",\"&pound;\":\"£\",\"&pr;\":\"≺\",\"&prE;\":\"⪳\",\"&prap;\":\"⪷\",\"&prcue;\":\"≼\",\"&pre;\":\"⪯\",\"&prec;\":\"≺\",\"&precapprox;\":\"⪷\",\"&preccurlyeq;\":\"≼\",\"&preceq;\":\"⪯\",\"&precnapprox;\":\"⪹\",\"&precneqq;\":\"⪵\",\"&precnsim;\":\"⋨\",\"&precsim;\":\"≾\",\"&prime;\":\"′\",\"&primes;\":\"ℙ\",\"&prnE;\":\"⪵\",\"&prnap;\":\"⪹\",\"&prnsim;\":\"⋨\",\"&prod;\":\"∏\",\"&profalar;\":\"⌮\",\"&profline;\":\"⌒\",\"&profsurf;\":\"⌓\",\"&prop;\":\"∝\",\"&propto;\":\"∝\",\"&prsim;\":\"≾\",\"&prurel;\":\"⊰\",\"&pscr;\":\"𝓅\",\"&psi;\":\"ψ\",\"&puncsp;\":\" \",\"&qfr;\":\"𝔮\",\"&qint;\":\"⨌\",\"&qopf;\":\"𝕢\",\"&qprime;\":\"⁗\",\"&qscr;\":\"𝓆\",\"&quaternions;\":\"ℍ\",\"&quatint;\":\"⨖\",\"&quest;\":\"?\",\"&questeq;\":\"≟\",\"&quot\":'\"',\"&quot;\":'\"',\"&rAarr;\":\"⇛\",\"&rArr;\":\"⇒\",\"&rAtail;\":\"⤜\",\"&rBarr;\":\"⤏\",\"&rHar;\":\"⥤\",\"&race;\":\"∽̱\",\"&racute;\":\"ŕ\",\"&radic;\":\"√\",\"&raemptyv;\":\"⦳\",\"&rang;\":\"⟩\",\"&rangd;\":\"⦒\",\"&range;\":\"⦥\",\"&rangle;\":\"⟩\",\"&raquo\":\"»\",\"&raquo;\":\"»\",\"&rarr;\":\"→\",\"&rarrap;\":\"⥵\",\"&rarrb;\":\"⇥\",\"&rarrbfs;\":\"⤠\",\"&rarrc;\":\"⤳\",\"&rarrfs;\":\"⤞\",\"&rarrhk;\":\"↪\",\"&rarrlp;\":\"↬\",\"&rarrpl;\":\"⥅\",\"&rarrsim;\":\"⥴\",\"&rarrtl;\":\"↣\",\"&rarrw;\":\"↝\",\"&ratail;\":\"⤚\",\"&ratio;\":\"∶\",\"&rationals;\":\"ℚ\",\"&rbarr;\":\"⤍\",\"&rbbrk;\":\"❳\",\"&rbrace;\":\"}\",\"&rbrack;\":\"]\",\"&rbrke;\":\"⦌\",\"&rbrksld;\":\"⦎\",\"&rbrkslu;\":\"⦐\",\"&rcaron;\":\"ř\",\"&rcedil;\":\"ŗ\",\"&rceil;\":\"⌉\",\"&rcub;\":\"}\",\"&rcy;\":\"р\",\"&rdca;\":\"⤷\",\"&rdldhar;\":\"⥩\",\"&rdquo;\":\"”\",\"&rdquor;\":\"”\",\"&rdsh;\":\"↳\",\"&real;\":\"ℜ\",\"&realine;\":\"ℛ\",\"&realpart;\":\"ℜ\",\"&reals;\":\"ℝ\",\"&rect;\":\"▭\",\"&reg\":\"®\",\"&reg;\":\"®\",\"&rfisht;\":\"⥽\",\"&rfloor;\":\"⌋\",\"&rfr;\":\"𝔯\",\"&rhard;\":\"⇁\",\"&rharu;\":\"⇀\",\"&rharul;\":\"⥬\",\"&rho;\":\"ρ\",\"&rhov;\":\"ϱ\",\"&rightarrow;\":\"→\",\"&rightarrowtail;\":\"↣\",\"&rightharpoondown;\":\"⇁\",\"&rightharpoonup;\":\"⇀\",\"&rightleftarrows;\":\"⇄\",\"&rightleftharpoons;\":\"⇌\",\"&rightrightarrows;\":\"⇉\",\"&rightsquigarrow;\":\"↝\",\"&rightthreetimes;\":\"⋌\",\"&ring;\":\"˚\",\"&risingdotseq;\":\"≓\",\"&rlarr;\":\"⇄\",\"&rlhar;\":\"⇌\",\"&rlm;\":\"‏\",\"&rmoust;\":\"⎱\",\"&rmoustache;\":\"⎱\",\"&rnmid;\":\"⫮\",\"&roang;\":\"⟭\",\"&roarr;\":\"⇾\",\"&robrk;\":\"⟧\",\"&ropar;\":\"⦆\",\"&ropf;\":\"𝕣\",\"&roplus;\":\"⨮\",\"&rotimes;\":\"⨵\",\"&rpar;\":\")\",\"&rpargt;\":\"⦔\",\"&rppolint;\":\"⨒\",\"&rrarr;\":\"⇉\",\"&rsaquo;\":\"›\",\"&rscr;\":\"𝓇\",\"&rsh;\":\"↱\",\"&rsqb;\":\"]\",\"&rsquo;\":\"’\",\"&rsquor;\":\"’\",\"&rthree;\":\"⋌\",\"&rtimes;\":\"⋊\",\"&rtri;\":\"▹\",\"&rtrie;\":\"⊵\",\"&rtrif;\":\"▸\",\"&rtriltri;\":\"⧎\",\"&ruluhar;\":\"⥨\",\"&rx;\":\"℞\",\"&sacute;\":\"ś\",\"&sbquo;\":\"‚\",\"&sc;\":\"≻\",\"&scE;\":\"⪴\",\"&scap;\":\"⪸\",\"&scaron;\":\"š\",\"&sccue;\":\"≽\",\"&sce;\":\"⪰\",\"&scedil;\":\"ş\",\"&scirc;\":\"ŝ\",\"&scnE;\":\"⪶\",\"&scnap;\":\"⪺\",\"&scnsim;\":\"⋩\",\"&scpolint;\":\"⨓\",\"&scsim;\":\"≿\",\"&scy;\":\"с\",\"&sdot;\":\"⋅\",\"&sdotb;\":\"⊡\",\"&sdote;\":\"⩦\",\"&seArr;\":\"⇘\",\"&searhk;\":\"⤥\",\"&searr;\":\"↘\",\"&searrow;\":\"↘\",\"&sect\":\"§\",\"&sect;\":\"§\",\"&semi;\":\";\",\"&seswar;\":\"⤩\",\"&setminus;\":\"∖\",\"&setmn;\":\"∖\",\"&sext;\":\"✶\",\"&sfr;\":\"𝔰\",\"&sfrown;\":\"⌢\",\"&sharp;\":\"♯\",\"&shchcy;\":\"щ\",\"&shcy;\":\"ш\",\"&shortmid;\":\"∣\",\"&shortparallel;\":\"∥\",\"&shy\":\"­\",\"&shy;\":\"­\",\"&sigma;\":\"σ\",\"&sigmaf;\":\"ς\",\"&sigmav;\":\"ς\",\"&sim;\":\"∼\",\"&simdot;\":\"⩪\",\"&sime;\":\"≃\",\"&simeq;\":\"≃\",\"&simg;\":\"⪞\",\"&simgE;\":\"⪠\",\"&siml;\":\"⪝\",\"&simlE;\":\"⪟\",\"&simne;\":\"≆\",\"&simplus;\":\"⨤\",\"&simrarr;\":\"⥲\",\"&slarr;\":\"←\",\"&smallsetminus;\":\"∖\",\"&smashp;\":\"⨳\",\"&smeparsl;\":\"⧤\",\"&smid;\":\"∣\",\"&smile;\":\"⌣\",\"&smt;\":\"⪪\",\"&smte;\":\"⪬\",\"&smtes;\":\"⪬︀\",\"&softcy;\":\"ь\",\"&sol;\":\"/\",\"&solb;\":\"⧄\",\"&solbar;\":\"⌿\",\"&sopf;\":\"𝕤\",\"&spades;\":\"♠\",\"&spadesuit;\":\"♠\",\"&spar;\":\"∥\",\"&sqcap;\":\"⊓\",\"&sqcaps;\":\"⊓︀\",\"&sqcup;\":\"⊔\",\"&sqcups;\":\"⊔︀\",\"&sqsub;\":\"⊏\",\"&sqsube;\":\"⊑\",\"&sqsubset;\":\"⊏\",\"&sqsubseteq;\":\"⊑\",\"&sqsup;\":\"⊐\",\"&sqsupe;\":\"⊒\",\"&sqsupset;\":\"⊐\",\"&sqsupseteq;\":\"⊒\",\"&squ;\":\"□\",\"&square;\":\"□\",\"&squarf;\":\"▪\",\"&squf;\":\"▪\",\"&srarr;\":\"→\",\"&sscr;\":\"𝓈\",\"&ssetmn;\":\"∖\",\"&ssmile;\":\"⌣\",\"&sstarf;\":\"⋆\",\"&star;\":\"☆\",\"&starf;\":\"★\",\"&straightepsilon;\":\"ϵ\",\"&straightphi;\":\"ϕ\",\"&strns;\":\"¯\",\"&sub;\":\"⊂\",\"&subE;\":\"⫅\",\"&subdot;\":\"⪽\",\"&sube;\":\"⊆\",\"&subedot;\":\"⫃\",\"&submult;\":\"⫁\",\"&subnE;\":\"⫋\",\"&subne;\":\"⊊\",\"&subplus;\":\"⪿\",\"&subrarr;\":\"⥹\",\"&subset;\":\"⊂\",\"&subseteq;\":\"⊆\",\"&subseteqq;\":\"⫅\",\"&subsetneq;\":\"⊊\",\"&subsetneqq;\":\"⫋\",\"&subsim;\":\"⫇\",\"&subsub;\":\"⫕\",\"&subsup;\":\"⫓\",\"&succ;\":\"≻\",\"&succapprox;\":\"⪸\",\"&succcurlyeq;\":\"≽\",\"&succeq;\":\"⪰\",\"&succnapprox;\":\"⪺\",\"&succneqq;\":\"⪶\",\"&succnsim;\":\"⋩\",\"&succsim;\":\"≿\",\"&sum;\":\"∑\",\"&sung;\":\"♪\",\"&sup1\":\"¹\",\"&sup1;\":\"¹\",\"&sup2\":\"²\",\"&sup2;\":\"²\",\"&sup3\":\"³\",\"&sup3;\":\"³\",\"&sup;\":\"⊃\",\"&supE;\":\"⫆\",\"&supdot;\":\"⪾\",\"&supdsub;\":\"⫘\",\"&supe;\":\"⊇\",\"&supedot;\":\"⫄\",\"&suphsol;\":\"⟉\",\"&suphsub;\":\"⫗\",\"&suplarr;\":\"⥻\",\"&supmult;\":\"⫂\",\"&supnE;\":\"⫌\",\"&supne;\":\"⊋\",\"&supplus;\":\"⫀\",\"&supset;\":\"⊃\",\"&supseteq;\":\"⊇\",\"&supseteqq;\":\"⫆\",\"&supsetneq;\":\"⊋\",\"&supsetneqq;\":\"⫌\",\"&supsim;\":\"⫈\",\"&supsub;\":\"⫔\",\"&supsup;\":\"⫖\",\"&swArr;\":\"⇙\",\"&swarhk;\":\"⤦\",\"&swarr;\":\"↙\",\"&swarrow;\":\"↙\",\"&swnwar;\":\"⤪\",\"&szlig\":\"ß\",\"&szlig;\":\"ß\",\"&target;\":\"⌖\",\"&tau;\":\"τ\",\"&tbrk;\":\"⎴\",\"&tcaron;\":\"ť\",\"&tcedil;\":\"ţ\",\"&tcy;\":\"т\",\"&tdot;\":\"⃛\",\"&telrec;\":\"⌕\",\"&tfr;\":\"𝔱\",\"&there4;\":\"∴\",\"&therefore;\":\"∴\",\"&theta;\":\"θ\",\"&thetasym;\":\"ϑ\",\"&thetav;\":\"ϑ\",\"&thickapprox;\":\"≈\",\"&thicksim;\":\"∼\",\"&thinsp;\":\" \",\"&thkap;\":\"≈\",\"&thksim;\":\"∼\",\"&thorn\":\"þ\",\"&thorn;\":\"þ\",\"&tilde;\":\"˜\",\"&times\":\"×\",\"&times;\":\"×\",\"&timesb;\":\"⊠\",\"&timesbar;\":\"⨱\",\"&timesd;\":\"⨰\",\"&tint;\":\"∭\",\"&toea;\":\"⤨\",\"&top;\":\"⊤\",\"&topbot;\":\"⌶\",\"&topcir;\":\"⫱\",\"&topf;\":\"𝕥\",\"&topfork;\":\"⫚\",\"&tosa;\":\"⤩\",\"&tprime;\":\"‴\",\"&trade;\":\"™\",\"&triangle;\":\"▵\",\"&triangledown;\":\"▿\",\"&triangleleft;\":\"◃\",\"&trianglelefteq;\":\"⊴\",\"&triangleq;\":\"≜\",\"&triangleright;\":\"▹\",\"&trianglerighteq;\":\"⊵\",\"&tridot;\":\"◬\",\"&trie;\":\"≜\",\"&triminus;\":\"⨺\",\"&triplus;\":\"⨹\",\"&trisb;\":\"⧍\",\"&tritime;\":\"⨻\",\"&trpezium;\":\"⏢\",\"&tscr;\":\"𝓉\",\"&tscy;\":\"ц\",\"&tshcy;\":\"ћ\",\"&tstrok;\":\"ŧ\",\"&twixt;\":\"≬\",\"&twoheadleftarrow;\":\"↞\",\"&twoheadrightarrow;\":\"↠\",\"&uArr;\":\"⇑\",\"&uHar;\":\"⥣\",\"&uacute\":\"ú\",\"&uacute;\":\"ú\",\"&uarr;\":\"↑\",\"&ubrcy;\":\"ў\",\"&ubreve;\":\"ŭ\",\"&ucirc\":\"û\",\"&ucirc;\":\"û\",\"&ucy;\":\"у\",\"&udarr;\":\"⇅\",\"&udblac;\":\"ű\",\"&udhar;\":\"⥮\",\"&ufisht;\":\"⥾\",\"&ufr;\":\"𝔲\",\"&ugrave\":\"ù\",\"&ugrave;\":\"ù\",\"&uharl;\":\"↿\",\"&uharr;\":\"↾\",\"&uhblk;\":\"▀\",\"&ulcorn;\":\"⌜\",\"&ulcorner;\":\"⌜\",\"&ulcrop;\":\"⌏\",\"&ultri;\":\"◸\",\"&umacr;\":\"ū\",\"&uml\":\"¨\",\"&uml;\":\"¨\",\"&uogon;\":\"ų\",\"&uopf;\":\"𝕦\",\"&uparrow;\":\"↑\",\"&updownarrow;\":\"↕\",\"&upharpoonleft;\":\"↿\",\"&upharpoonright;\":\"↾\",\"&uplus;\":\"⊎\",\"&upsi;\":\"υ\",\"&upsih;\":\"ϒ\",\"&upsilon;\":\"υ\",\"&upuparrows;\":\"⇈\",\"&urcorn;\":\"⌝\",\"&urcorner;\":\"⌝\",\"&urcrop;\":\"⌎\",\"&uring;\":\"ů\",\"&urtri;\":\"◹\",\"&uscr;\":\"𝓊\",\"&utdot;\":\"⋰\",\"&utilde;\":\"ũ\",\"&utri;\":\"▵\",\"&utrif;\":\"▴\",\"&uuarr;\":\"⇈\",\"&uuml\":\"ü\",\"&uuml;\":\"ü\",\"&uwangle;\":\"⦧\",\"&vArr;\":\"⇕\",\"&vBar;\":\"⫨\",\"&vBarv;\":\"⫩\",\"&vDash;\":\"⊨\",\"&vangrt;\":\"⦜\",\"&varepsilon;\":\"ϵ\",\"&varkappa;\":\"ϰ\",\"&varnothing;\":\"∅\",\"&varphi;\":\"ϕ\",\"&varpi;\":\"ϖ\",\"&varpropto;\":\"∝\",\"&varr;\":\"↕\",\"&varrho;\":\"ϱ\",\"&varsigma;\":\"ς\",\"&varsubsetneq;\":\"⊊︀\",\"&varsubsetneqq;\":\"⫋︀\",\"&varsupsetneq;\":\"⊋︀\",\"&varsupsetneqq;\":\"⫌︀\",\"&vartheta;\":\"ϑ\",\"&vartriangleleft;\":\"⊲\",\"&vartriangleright;\":\"⊳\",\"&vcy;\":\"в\",\"&vdash;\":\"⊢\",\"&vee;\":\"∨\",\"&veebar;\":\"⊻\",\"&veeeq;\":\"≚\",\"&vellip;\":\"⋮\",\"&verbar;\":\"|\",\"&vert;\":\"|\",\"&vfr;\":\"𝔳\",\"&vltri;\":\"⊲\",\"&vnsub;\":\"⊂⃒\",\"&vnsup;\":\"⊃⃒\",\"&vopf;\":\"𝕧\",\"&vprop;\":\"∝\",\"&vrtri;\":\"⊳\",\"&vscr;\":\"𝓋\",\"&vsubnE;\":\"⫋︀\",\"&vsubne;\":\"⊊︀\",\"&vsupnE;\":\"⫌︀\",\"&vsupne;\":\"⊋︀\",\"&vzigzag;\":\"⦚\",\"&wcirc;\":\"ŵ\",\"&wedbar;\":\"⩟\",\"&wedge;\":\"∧\",\"&wedgeq;\":\"≙\",\"&weierp;\":\"℘\",\"&wfr;\":\"𝔴\",\"&wopf;\":\"𝕨\",\"&wp;\":\"℘\",\"&wr;\":\"≀\",\"&wreath;\":\"≀\",\"&wscr;\":\"𝓌\",\"&xcap;\":\"⋂\",\"&xcirc;\":\"◯\",\"&xcup;\":\"⋃\",\"&xdtri;\":\"▽\",\"&xfr;\":\"𝔵\",\"&xhArr;\":\"⟺\",\"&xharr;\":\"⟷\",\"&xi;\":\"ξ\",\"&xlArr;\":\"⟸\",\"&xlarr;\":\"⟵\",\"&xmap;\":\"⟼\",\"&xnis;\":\"⋻\",\"&xodot;\":\"⨀\",\"&xopf;\":\"𝕩\",\"&xoplus;\":\"⨁\",\"&xotime;\":\"⨂\",\"&xrArr;\":\"⟹\",\"&xrarr;\":\"⟶\",\"&xscr;\":\"𝓍\",\"&xsqcup;\":\"⨆\",\"&xuplus;\":\"⨄\",\"&xutri;\":\"△\",\"&xvee;\":\"⋁\",\"&xwedge;\":\"⋀\",\"&yacute\":\"ý\",\"&yacute;\":\"ý\",\"&yacy;\":\"я\",\"&ycirc;\":\"ŷ\",\"&ycy;\":\"ы\",\"&yen\":\"¥\",\"&yen;\":\"¥\",\"&yfr;\":\"𝔶\",\"&yicy;\":\"ї\",\"&yopf;\":\"𝕪\",\"&yscr;\":\"𝓎\",\"&yucy;\":\"ю\",\"&yuml\":\"ÿ\",\"&yuml;\":\"ÿ\",\"&zacute;\":\"ź\",\"&zcaron;\":\"ž\",\"&zcy;\":\"з\",\"&zdot;\":\"ż\",\"&zeetrf;\":\"ℨ\",\"&zeta;\":\"ζ\",\"&zfr;\":\"𝔷\",\"&zhcy;\":\"ж\",\"&zigrarr;\":\"⇝\",\"&zopf;\":\"𝕫\",\"&zscr;\":\"𝓏\",\"&zwj;\":\"‍\",\"&zwnj;\":\"‌\"},characters:{\"Æ\":\"&AElig;\",\"&\":\"&amp;\",\"Á\":\"&Aacute;\",\"Ă\":\"&Abreve;\",\"Â\":\"&Acirc;\",\"А\":\"&Acy;\",\"𝔄\":\"&Afr;\",\"À\":\"&Agrave;\",\"Α\":\"&Alpha;\",\"Ā\":\"&Amacr;\",\"⩓\":\"&And;\",\"Ą\":\"&Aogon;\",\"𝔸\":\"&Aopf;\",\"⁡\":\"&af;\",\"Å\":\"&angst;\",\"𝒜\":\"&Ascr;\",\"≔\":\"&coloneq;\",\"Ã\":\"&Atilde;\",\"Ä\":\"&Auml;\",\"∖\":\"&ssetmn;\",\"⫧\":\"&Barv;\",\"⌆\":\"&doublebarwedge;\",\"Б\":\"&Bcy;\",\"∵\":\"&because;\",\"ℬ\":\"&bernou;\",\"Β\":\"&Beta;\",\"𝔅\":\"&Bfr;\",\"𝔹\":\"&Bopf;\",\"˘\":\"&breve;\",\"≎\":\"&bump;\",\"Ч\":\"&CHcy;\",\"©\":\"&copy;\",\"Ć\":\"&Cacute;\",\"⋒\":\"&Cap;\",\"ⅅ\":\"&DD;\",\"ℭ\":\"&Cfr;\",\"Č\":\"&Ccaron;\",\"Ç\":\"&Ccedil;\",\"Ĉ\":\"&Ccirc;\",\"∰\":\"&Cconint;\",\"Ċ\":\"&Cdot;\",\"¸\":\"&cedil;\",\"·\":\"&middot;\",\"Χ\":\"&Chi;\",\"⊙\":\"&odot;\",\"⊖\":\"&ominus;\",\"⊕\":\"&oplus;\",\"⊗\":\"&otimes;\",\"∲\":\"&cwconint;\",\"”\":\"&rdquor;\",\"’\":\"&rsquor;\",\"∷\":\"&Proportion;\",\"⩴\":\"&Colone;\",\"≡\":\"&equiv;\",\"∯\":\"&DoubleContourIntegral;\",\"∮\":\"&oint;\",\"ℂ\":\"&complexes;\",\"∐\":\"&coprod;\",\"∳\":\"&awconint;\",\"⨯\":\"&Cross;\",\"𝒞\":\"&Cscr;\",\"⋓\":\"&Cup;\",\"≍\":\"&asympeq;\",\"⤑\":\"&DDotrahd;\",\"Ђ\":\"&DJcy;\",\"Ѕ\":\"&DScy;\",\"Џ\":\"&DZcy;\",\"‡\":\"&ddagger;\",\"↡\":\"&Darr;\",\"⫤\":\"&DoubleLeftTee;\",\"Ď\":\"&Dcaron;\",\"Д\":\"&Dcy;\",\"∇\":\"&nabla;\",\"Δ\":\"&Delta;\",\"𝔇\":\"&Dfr;\",\"´\":\"&acute;\",\"˙\":\"&dot;\",\"˝\":\"&dblac;\",\"`\":\"&grave;\",\"˜\":\"&tilde;\",\"⋄\":\"&diamond;\",\"ⅆ\":\"&dd;\",\"𝔻\":\"&Dopf;\",\"¨\":\"&uml;\",\"⃜\":\"&DotDot;\",\"≐\":\"&esdot;\",\"⇓\":\"&dArr;\",\"⇐\":\"&lArr;\",\"⇔\":\"&iff;\",\"⟸\":\"&xlArr;\",\"⟺\":\"&xhArr;\",\"⟹\":\"&xrArr;\",\"⇒\":\"&rArr;\",\"⊨\":\"&vDash;\",\"⇑\":\"&uArr;\",\"⇕\":\"&vArr;\",\"∥\":\"&spar;\",\"↓\":\"&downarrow;\",\"⤓\":\"&DownArrowBar;\",\"⇵\":\"&duarr;\",\"̑\":\"&DownBreve;\",\"⥐\":\"&DownLeftRightVector;\",\"⥞\":\"&DownLeftTeeVector;\",\"↽\":\"&lhard;\",\"⥖\":\"&DownLeftVectorBar;\",\"⥟\":\"&DownRightTeeVector;\",\"⇁\":\"&rightharpoondown;\",\"⥗\":\"&DownRightVectorBar;\",\"⊤\":\"&top;\",\"↧\":\"&mapstodown;\",\"𝒟\":\"&Dscr;\",\"Đ\":\"&Dstrok;\",\"Ŋ\":\"&ENG;\",\"Ð\":\"&ETH;\",\"É\":\"&Eacute;\",\"Ě\":\"&Ecaron;\",\"Ê\":\"&Ecirc;\",\"Э\":\"&Ecy;\",\"Ė\":\"&Edot;\",\"𝔈\":\"&Efr;\",\"È\":\"&Egrave;\",\"∈\":\"&isinv;\",\"Ē\":\"&Emacr;\",\"◻\":\"&EmptySmallSquare;\",\"▫\":\"&EmptyVerySmallSquare;\",\"Ę\":\"&Eogon;\",\"𝔼\":\"&Eopf;\",\"Ε\":\"&Epsilon;\",\"⩵\":\"&Equal;\",\"≂\":\"&esim;\",\"⇌\":\"&rlhar;\",\"ℰ\":\"&expectation;\",\"⩳\":\"&Esim;\",\"Η\":\"&Eta;\",\"Ë\":\"&Euml;\",\"∃\":\"&exist;\",\"ⅇ\":\"&exponentiale;\",\"Ф\":\"&Fcy;\",\"𝔉\":\"&Ffr;\",\"◼\":\"&FilledSmallSquare;\",\"▪\":\"&squf;\",\"𝔽\":\"&Fopf;\",\"∀\":\"&forall;\",\"ℱ\":\"&Fscr;\",\"Ѓ\":\"&GJcy;\",\">\":\"&gt;\",\"Γ\":\"&Gamma;\",\"Ϝ\":\"&Gammad;\",\"Ğ\":\"&Gbreve;\",\"Ģ\":\"&Gcedil;\",\"Ĝ\":\"&Gcirc;\",\"Г\":\"&Gcy;\",\"Ġ\":\"&Gdot;\",\"𝔊\":\"&Gfr;\",\"⋙\":\"&ggg;\",\"𝔾\":\"&Gopf;\",\"≥\":\"&geq;\",\"⋛\":\"&gtreqless;\",\"≧\":\"&geqq;\",\"⪢\":\"&GreaterGreater;\",\"≷\":\"&gtrless;\",\"⩾\":\"&ges;\",\"≳\":\"&gtrsim;\",\"𝒢\":\"&Gscr;\",\"≫\":\"&gg;\",\"Ъ\":\"&HARDcy;\",\"ˇ\":\"&caron;\",\"^\":\"&Hat;\",\"Ĥ\":\"&Hcirc;\",\"ℌ\":\"&Poincareplane;\",\"ℋ\":\"&hamilt;\",\"ℍ\":\"&quaternions;\",\"─\":\"&boxh;\",\"Ħ\":\"&Hstrok;\",\"≏\":\"&bumpeq;\",\"Е\":\"&IEcy;\",\"Ĳ\":\"&IJlig;\",\"Ё\":\"&IOcy;\",\"Í\":\"&Iacute;\",\"Î\":\"&Icirc;\",\"И\":\"&Icy;\",\"İ\":\"&Idot;\",\"ℑ\":\"&imagpart;\",\"Ì\":\"&Igrave;\",\"Ī\":\"&Imacr;\",\"ⅈ\":\"&ii;\",\"∬\":\"&Int;\",\"∫\":\"&int;\",\"⋂\":\"&xcap;\",\"⁣\":\"&ic;\",\"⁢\":\"&it;\",\"Į\":\"&Iogon;\",\"𝕀\":\"&Iopf;\",\"Ι\":\"&Iota;\",\"ℐ\":\"&imagline;\",\"Ĩ\":\"&Itilde;\",\"І\":\"&Iukcy;\",\"Ï\":\"&Iuml;\",\"Ĵ\":\"&Jcirc;\",\"Й\":\"&Jcy;\",\"𝔍\":\"&Jfr;\",\"𝕁\":\"&Jopf;\",\"𝒥\":\"&Jscr;\",\"Ј\":\"&Jsercy;\",\"Є\":\"&Jukcy;\",\"Х\":\"&KHcy;\",\"Ќ\":\"&KJcy;\",\"Κ\":\"&Kappa;\",\"Ķ\":\"&Kcedil;\",\"К\":\"&Kcy;\",\"𝔎\":\"&Kfr;\",\"𝕂\":\"&Kopf;\",\"𝒦\":\"&Kscr;\",\"Љ\":\"&LJcy;\",\"<\":\"&lt;\",\"Ĺ\":\"&Lacute;\",\"Λ\":\"&Lambda;\",\"⟪\":\"&Lang;\",\"ℒ\":\"&lagran;\",\"↞\":\"&twoheadleftarrow;\",\"Ľ\":\"&Lcaron;\",\"Ļ\":\"&Lcedil;\",\"Л\":\"&Lcy;\",\"⟨\":\"&langle;\",\"←\":\"&slarr;\",\"⇤\":\"&larrb;\",\"⇆\":\"&lrarr;\",\"⌈\":\"&lceil;\",\"⟦\":\"&lobrk;\",\"⥡\":\"&LeftDownTeeVector;\",\"⇃\":\"&downharpoonleft;\",\"⥙\":\"&LeftDownVectorBar;\",\"⌊\":\"&lfloor;\",\"↔\":\"&leftrightarrow;\",\"⥎\":\"&LeftRightVector;\",\"⊣\":\"&dashv;\",\"↤\":\"&mapstoleft;\",\"⥚\":\"&LeftTeeVector;\",\"⊲\":\"&vltri;\",\"⧏\":\"&LeftTriangleBar;\",\"⊴\":\"&trianglelefteq;\",\"⥑\":\"&LeftUpDownVector;\",\"⥠\":\"&LeftUpTeeVector;\",\"↿\":\"&upharpoonleft;\",\"⥘\":\"&LeftUpVectorBar;\",\"↼\":\"&lharu;\",\"⥒\":\"&LeftVectorBar;\",\"⋚\":\"&lesseqgtr;\",\"≦\":\"&leqq;\",\"≶\":\"&lg;\",\"⪡\":\"&LessLess;\",\"⩽\":\"&les;\",\"≲\":\"&lsim;\",\"𝔏\":\"&Lfr;\",\"⋘\":\"&Ll;\",\"⇚\":\"&lAarr;\",\"Ŀ\":\"&Lmidot;\",\"⟵\":\"&xlarr;\",\"⟷\":\"&xharr;\",\"⟶\":\"&xrarr;\",\"𝕃\":\"&Lopf;\",\"↙\":\"&swarrow;\",\"↘\":\"&searrow;\",\"↰\":\"&lsh;\",\"Ł\":\"&Lstrok;\",\"≪\":\"&ll;\",\"⤅\":\"&Map;\",\"М\":\"&Mcy;\",\" \":\"&MediumSpace;\",\"ℳ\":\"&phmmat;\",\"𝔐\":\"&Mfr;\",\"∓\":\"&mp;\",\"𝕄\":\"&Mopf;\",\"Μ\":\"&Mu;\",\"Њ\":\"&NJcy;\",\"Ń\":\"&Nacute;\",\"Ň\":\"&Ncaron;\",\"Ņ\":\"&Ncedil;\",\"Н\":\"&Ncy;\",\"​\":\"&ZeroWidthSpace;\",\"\\n\":\"&NewLine;\",\"𝔑\":\"&Nfr;\",\"⁠\":\"&NoBreak;\",\" \":\"&nbsp;\",\"ℕ\":\"&naturals;\",\"⫬\":\"&Not;\",\"≢\":\"&nequiv;\",\"≭\":\"&NotCupCap;\",\"∦\":\"&nspar;\",\"∉\":\"&notinva;\",\"≠\":\"&ne;\",\"≂̸\":\"&nesim;\",\"∄\":\"&nexists;\",\"≯\":\"&ngtr;\",\"≱\":\"&ngeq;\",\"≧̸\":\"&ngeqq;\",\"≫̸\":\"&nGtv;\",\"≹\":\"&ntgl;\",\"⩾̸\":\"&nges;\",\"≵\":\"&ngsim;\",\"≎̸\":\"&nbump;\",\"≏̸\":\"&nbumpe;\",\"⋪\":\"&ntriangleleft;\",\"⧏̸\":\"&NotLeftTriangleBar;\",\"⋬\":\"&ntrianglelefteq;\",\"≮\":\"&nlt;\",\"≰\":\"&nleq;\",\"≸\":\"&ntlg;\",\"≪̸\":\"&nLtv;\",\"⩽̸\":\"&nles;\",\"≴\":\"&nlsim;\",\"⪢̸\":\"&NotNestedGreaterGreater;\",\"⪡̸\":\"&NotNestedLessLess;\",\"⊀\":\"&nprec;\",\"⪯̸\":\"&npreceq;\",\"⋠\":\"&nprcue;\",\"∌\":\"&notniva;\",\"⋫\":\"&ntriangleright;\",\"⧐̸\":\"&NotRightTriangleBar;\",\"⋭\":\"&ntrianglerighteq;\",\"⊏̸\":\"&NotSquareSubset;\",\"⋢\":\"&nsqsube;\",\"⊐̸\":\"&NotSquareSuperset;\",\"⋣\":\"&nsqsupe;\",\"⊂⃒\":\"&vnsub;\",\"⊈\":\"&nsubseteq;\",\"⊁\":\"&nsucc;\",\"⪰̸\":\"&nsucceq;\",\"⋡\":\"&nsccue;\",\"≿̸\":\"&NotSucceedsTilde;\",\"⊃⃒\":\"&vnsup;\",\"⊉\":\"&nsupseteq;\",\"≁\":\"&nsim;\",\"≄\":\"&nsimeq;\",\"≇\":\"&ncong;\",\"≉\":\"&napprox;\",\"∤\":\"&nsmid;\",\"𝒩\":\"&Nscr;\",\"Ñ\":\"&Ntilde;\",\"Ν\":\"&Nu;\",\"Œ\":\"&OElig;\",\"Ó\":\"&Oacute;\",\"Ô\":\"&Ocirc;\",\"О\":\"&Ocy;\",\"Ő\":\"&Odblac;\",\"𝔒\":\"&Ofr;\",\"Ò\":\"&Ograve;\",\"Ō\":\"&Omacr;\",\"Ω\":\"&ohm;\",\"Ο\":\"&Omicron;\",\"𝕆\":\"&Oopf;\",\"“\":\"&ldquo;\",\"‘\":\"&lsquo;\",\"⩔\":\"&Or;\",\"𝒪\":\"&Oscr;\",\"Ø\":\"&Oslash;\",\"Õ\":\"&Otilde;\",\"⨷\":\"&Otimes;\",\"Ö\":\"&Ouml;\",\"‾\":\"&oline;\",\"⏞\":\"&OverBrace;\",\"⎴\":\"&tbrk;\",\"⏜\":\"&OverParenthesis;\",\"∂\":\"&part;\",\"П\":\"&Pcy;\",\"𝔓\":\"&Pfr;\",\"Φ\":\"&Phi;\",\"Π\":\"&Pi;\",\"±\":\"&pm;\",\"ℙ\":\"&primes;\",\"⪻\":\"&Pr;\",\"≺\":\"&prec;\",\"⪯\":\"&preceq;\",\"≼\":\"&preccurlyeq;\",\"≾\":\"&prsim;\",\"″\":\"&Prime;\",\"∏\":\"&prod;\",\"∝\":\"&vprop;\",\"𝒫\":\"&Pscr;\",\"Ψ\":\"&Psi;\",'\"':\"&quot;\",\"𝔔\":\"&Qfr;\",\"ℚ\":\"&rationals;\",\"𝒬\":\"&Qscr;\",\"⤐\":\"&drbkarow;\",\"®\":\"&reg;\",\"Ŕ\":\"&Racute;\",\"⟫\":\"&Rang;\",\"↠\":\"&twoheadrightarrow;\",\"⤖\":\"&Rarrtl;\",\"Ř\":\"&Rcaron;\",\"Ŗ\":\"&Rcedil;\",\"Р\":\"&Rcy;\",\"ℜ\":\"&realpart;\",\"∋\":\"&niv;\",\"⇋\":\"&lrhar;\",\"⥯\":\"&duhar;\",\"Ρ\":\"&Rho;\",\"⟩\":\"&rangle;\",\"→\":\"&srarr;\",\"⇥\":\"&rarrb;\",\"⇄\":\"&rlarr;\",\"⌉\":\"&rceil;\",\"⟧\":\"&robrk;\",\"⥝\":\"&RightDownTeeVector;\",\"⇂\":\"&downharpoonright;\",\"⥕\":\"&RightDownVectorBar;\",\"⌋\":\"&rfloor;\",\"⊢\":\"&vdash;\",\"↦\":\"&mapsto;\",\"⥛\":\"&RightTeeVector;\",\"⊳\":\"&vrtri;\",\"⧐\":\"&RightTriangleBar;\",\"⊵\":\"&trianglerighteq;\",\"⥏\":\"&RightUpDownVector;\",\"⥜\":\"&RightUpTeeVector;\",\"↾\":\"&upharpoonright;\",\"⥔\":\"&RightUpVectorBar;\",\"⇀\":\"&rightharpoonup;\",\"⥓\":\"&RightVectorBar;\",\"ℝ\":\"&reals;\",\"⥰\":\"&RoundImplies;\",\"⇛\":\"&rAarr;\",\"ℛ\":\"&realine;\",\"↱\":\"&rsh;\",\"⧴\":\"&RuleDelayed;\",\"Щ\":\"&SHCHcy;\",\"Ш\":\"&SHcy;\",\"Ь\":\"&SOFTcy;\",\"Ś\":\"&Sacute;\",\"⪼\":\"&Sc;\",\"Š\":\"&Scaron;\",\"Ş\":\"&Scedil;\",\"Ŝ\":\"&Scirc;\",\"С\":\"&Scy;\",\"𝔖\":\"&Sfr;\",\"↑\":\"&uparrow;\",\"Σ\":\"&Sigma;\",\"∘\":\"&compfn;\",\"𝕊\":\"&Sopf;\",\"√\":\"&radic;\",\"□\":\"&square;\",\"⊓\":\"&sqcap;\",\"⊏\":\"&sqsubset;\",\"⊑\":\"&sqsubseteq;\",\"⊐\":\"&sqsupset;\",\"⊒\":\"&sqsupseteq;\",\"⊔\":\"&sqcup;\",\"𝒮\":\"&Sscr;\",\"⋆\":\"&sstarf;\",\"⋐\":\"&Subset;\",\"⊆\":\"&subseteq;\",\"≻\":\"&succ;\",\"⪰\":\"&succeq;\",\"≽\":\"&succcurlyeq;\",\"≿\":\"&succsim;\",\"∑\":\"&sum;\",\"⋑\":\"&Supset;\",\"⊃\":\"&supset;\",\"⊇\":\"&supseteq;\",\"Þ\":\"&THORN;\",\"™\":\"&trade;\",\"Ћ\":\"&TSHcy;\",\"Ц\":\"&TScy;\",\"\\t\":\"&Tab;\",\"Τ\":\"&Tau;\",\"Ť\":\"&Tcaron;\",\"Ţ\":\"&Tcedil;\",\"Т\":\"&Tcy;\",\"𝔗\":\"&Tfr;\",\"∴\":\"&therefore;\",\"Θ\":\"&Theta;\",\"  \":\"&ThickSpace;\",\" \":\"&thinsp;\",\"∼\":\"&thksim;\",\"≃\":\"&simeq;\",\"≅\":\"&cong;\",\"≈\":\"&thkap;\",\"𝕋\":\"&Topf;\",\"⃛\":\"&tdot;\",\"𝒯\":\"&Tscr;\",\"Ŧ\":\"&Tstrok;\",\"Ú\":\"&Uacute;\",\"↟\":\"&Uarr;\",\"⥉\":\"&Uarrocir;\",\"Ў\":\"&Ubrcy;\",\"Ŭ\":\"&Ubreve;\",\"Û\":\"&Ucirc;\",\"У\":\"&Ucy;\",\"Ű\":\"&Udblac;\",\"𝔘\":\"&Ufr;\",\"Ù\":\"&Ugrave;\",\"Ū\":\"&Umacr;\",_:\"&lowbar;\",\"⏟\":\"&UnderBrace;\",\"⎵\":\"&bbrk;\",\"⏝\":\"&UnderParenthesis;\",\"⋃\":\"&xcup;\",\"⊎\":\"&uplus;\",\"Ų\":\"&Uogon;\",\"𝕌\":\"&Uopf;\",\"⤒\":\"&UpArrowBar;\",\"⇅\":\"&udarr;\",\"↕\":\"&varr;\",\"⥮\":\"&udhar;\",\"⊥\":\"&perp;\",\"↥\":\"&mapstoup;\",\"↖\":\"&nwarrow;\",\"↗\":\"&nearrow;\",\"ϒ\":\"&upsih;\",\"Υ\":\"&Upsilon;\",\"Ů\":\"&Uring;\",\"𝒰\":\"&Uscr;\",\"Ũ\":\"&Utilde;\",\"Ü\":\"&Uuml;\",\"⊫\":\"&VDash;\",\"⫫\":\"&Vbar;\",\"В\":\"&Vcy;\",\"⊩\":\"&Vdash;\",\"⫦\":\"&Vdashl;\",\"⋁\":\"&xvee;\",\"‖\":\"&Vert;\",\"∣\":\"&smid;\",\"|\":\"&vert;\",\"❘\":\"&VerticalSeparator;\",\"≀\":\"&wreath;\",\" \":\"&hairsp;\",\"𝔙\":\"&Vfr;\",\"𝕍\":\"&Vopf;\",\"𝒱\":\"&Vscr;\",\"⊪\":\"&Vvdash;\",\"Ŵ\":\"&Wcirc;\",\"⋀\":\"&xwedge;\",\"𝔚\":\"&Wfr;\",\"𝕎\":\"&Wopf;\",\"𝒲\":\"&Wscr;\",\"𝔛\":\"&Xfr;\",\"Ξ\":\"&Xi;\",\"𝕏\":\"&Xopf;\",\"𝒳\":\"&Xscr;\",\"Я\":\"&YAcy;\",\"Ї\":\"&YIcy;\",\"Ю\":\"&YUcy;\",\"Ý\":\"&Yacute;\",\"Ŷ\":\"&Ycirc;\",\"Ы\":\"&Ycy;\",\"𝔜\":\"&Yfr;\",\"𝕐\":\"&Yopf;\",\"𝒴\":\"&Yscr;\",\"Ÿ\":\"&Yuml;\",\"Ж\":\"&ZHcy;\",\"Ź\":\"&Zacute;\",\"Ž\":\"&Zcaron;\",\"З\":\"&Zcy;\",\"Ż\":\"&Zdot;\",\"Ζ\":\"&Zeta;\",\"ℨ\":\"&zeetrf;\",\"ℤ\":\"&integers;\",\"𝒵\":\"&Zscr;\",\"á\":\"&aacute;\",\"ă\":\"&abreve;\",\"∾\":\"&mstpos;\",\"∾̳\":\"&acE;\",\"∿\":\"&acd;\",\"â\":\"&acirc;\",\"а\":\"&acy;\",\"æ\":\"&aelig;\",\"𝔞\":\"&afr;\",\"à\":\"&agrave;\",\"ℵ\":\"&aleph;\",\"α\":\"&alpha;\",\"ā\":\"&amacr;\",\"⨿\":\"&amalg;\",\"∧\":\"&wedge;\",\"⩕\":\"&andand;\",\"⩜\":\"&andd;\",\"⩘\":\"&andslope;\",\"⩚\":\"&andv;\",\"∠\":\"&angle;\",\"⦤\":\"&ange;\",\"∡\":\"&measuredangle;\",\"⦨\":\"&angmsdaa;\",\"⦩\":\"&angmsdab;\",\"⦪\":\"&angmsdac;\",\"⦫\":\"&angmsdad;\",\"⦬\":\"&angmsdae;\",\"⦭\":\"&angmsdaf;\",\"⦮\":\"&angmsdag;\",\"⦯\":\"&angmsdah;\",\"∟\":\"&angrt;\",\"⊾\":\"&angrtvb;\",\"⦝\":\"&angrtvbd;\",\"∢\":\"&angsph;\",\"⍼\":\"&angzarr;\",\"ą\":\"&aogon;\",\"𝕒\":\"&aopf;\",\"⩰\":\"&apE;\",\"⩯\":\"&apacir;\",\"≊\":\"&approxeq;\",\"≋\":\"&apid;\",\"'\":\"&apos;\",\"å\":\"&aring;\",\"𝒶\":\"&ascr;\",\"*\":\"&midast;\",\"ã\":\"&atilde;\",\"ä\":\"&auml;\",\"⨑\":\"&awint;\",\"⫭\":\"&bNot;\",\"≌\":\"&bcong;\",\"϶\":\"&bepsi;\",\"‵\":\"&bprime;\",\"∽\":\"&bsim;\",\"⋍\":\"&bsime;\",\"⊽\":\"&barvee;\",\"⌅\":\"&barwedge;\",\"⎶\":\"&bbrktbrk;\",\"б\":\"&bcy;\",\"„\":\"&ldquor;\",\"⦰\":\"&bemptyv;\",\"β\":\"&beta;\",\"ℶ\":\"&beth;\",\"≬\":\"&twixt;\",\"𝔟\":\"&bfr;\",\"◯\":\"&xcirc;\",\"⨀\":\"&xodot;\",\"⨁\":\"&xoplus;\",\"⨂\":\"&xotime;\",\"⨆\":\"&xsqcup;\",\"★\":\"&starf;\",\"▽\":\"&xdtri;\",\"△\":\"&xutri;\",\"⨄\":\"&xuplus;\",\"⤍\":\"&rbarr;\",\"⧫\":\"&lozf;\",\"▴\":\"&utrif;\",\"▾\":\"&dtrif;\",\"◂\":\"&ltrif;\",\"▸\":\"&rtrif;\",\"␣\":\"&blank;\",\"▒\":\"&blk12;\",\"░\":\"&blk14;\",\"▓\":\"&blk34;\",\"█\":\"&block;\",\"=⃥\":\"&bne;\",\"≡⃥\":\"&bnequiv;\",\"⌐\":\"&bnot;\",\"𝕓\":\"&bopf;\",\"⋈\":\"&bowtie;\",\"╗\":\"&boxDL;\",\"╔\":\"&boxDR;\",\"╖\":\"&boxDl;\",\"╓\":\"&boxDr;\",\"═\":\"&boxH;\",\"╦\":\"&boxHD;\",\"╩\":\"&boxHU;\",\"╤\":\"&boxHd;\",\"╧\":\"&boxHu;\",\"╝\":\"&boxUL;\",\"╚\":\"&boxUR;\",\"╜\":\"&boxUl;\",\"╙\":\"&boxUr;\",\"║\":\"&boxV;\",\"╬\":\"&boxVH;\",\"╣\":\"&boxVL;\",\"╠\":\"&boxVR;\",\"╫\":\"&boxVh;\",\"╢\":\"&boxVl;\",\"╟\":\"&boxVr;\",\"⧉\":\"&boxbox;\",\"╕\":\"&boxdL;\",\"╒\":\"&boxdR;\",\"┐\":\"&boxdl;\",\"┌\":\"&boxdr;\",\"╥\":\"&boxhD;\",\"╨\":\"&boxhU;\",\"┬\":\"&boxhd;\",\"┴\":\"&boxhu;\",\"⊟\":\"&minusb;\",\"⊞\":\"&plusb;\",\"⊠\":\"&timesb;\",\"╛\":\"&boxuL;\",\"╘\":\"&boxuR;\",\"┘\":\"&boxul;\",\"└\":\"&boxur;\",\"│\":\"&boxv;\",\"╪\":\"&boxvH;\",\"╡\":\"&boxvL;\",\"╞\":\"&boxvR;\",\"┼\":\"&boxvh;\",\"┤\":\"&boxvl;\",\"├\":\"&boxvr;\",\"¦\":\"&brvbar;\",\"𝒷\":\"&bscr;\",\"⁏\":\"&bsemi;\",\"\\\\\":\"&bsol;\",\"⧅\":\"&bsolb;\",\"⟈\":\"&bsolhsub;\",\"•\":\"&bullet;\",\"⪮\":\"&bumpE;\",\"ć\":\"&cacute;\",\"∩\":\"&cap;\",\"⩄\":\"&capand;\",\"⩉\":\"&capbrcup;\",\"⩋\":\"&capcap;\",\"⩇\":\"&capcup;\",\"⩀\":\"&capdot;\",\"∩︀\":\"&caps;\",\"⁁\":\"&caret;\",\"⩍\":\"&ccaps;\",\"č\":\"&ccaron;\",\"ç\":\"&ccedil;\",\"ĉ\":\"&ccirc;\",\"⩌\":\"&ccups;\",\"⩐\":\"&ccupssm;\",\"ċ\":\"&cdot;\",\"⦲\":\"&cemptyv;\",\"¢\":\"&cent;\",\"𝔠\":\"&cfr;\",\"ч\":\"&chcy;\",\"✓\":\"&checkmark;\",\"χ\":\"&chi;\",\"○\":\"&cir;\",\"⧃\":\"&cirE;\",\"ˆ\":\"&circ;\",\"≗\":\"&cire;\",\"↺\":\"&olarr;\",\"↻\":\"&orarr;\",\"Ⓢ\":\"&oS;\",\"⊛\":\"&oast;\",\"⊚\":\"&ocir;\",\"⊝\":\"&odash;\",\"⨐\":\"&cirfnint;\",\"⫯\":\"&cirmid;\",\"⧂\":\"&cirscir;\",\"♣\":\"&clubsuit;\",\":\":\"&colon;\",\",\":\"&comma;\",\"@\":\"&commat;\",\"∁\":\"&complement;\",\"⩭\":\"&congdot;\",\"𝕔\":\"&copf;\",\"℗\":\"&copysr;\",\"↵\":\"&crarr;\",\"✗\":\"&cross;\",\"𝒸\":\"&cscr;\",\"⫏\":\"&csub;\",\"⫑\":\"&csube;\",\"⫐\":\"&csup;\",\"⫒\":\"&csupe;\",\"⋯\":\"&ctdot;\",\"⤸\":\"&cudarrl;\",\"⤵\":\"&cudarrr;\",\"⋞\":\"&curlyeqprec;\",\"⋟\":\"&curlyeqsucc;\",\"↶\":\"&curvearrowleft;\",\"⤽\":\"&cularrp;\",\"∪\":\"&cup;\",\"⩈\":\"&cupbrcap;\",\"⩆\":\"&cupcap;\",\"⩊\":\"&cupcup;\",\"⊍\":\"&cupdot;\",\"⩅\":\"&cupor;\",\"∪︀\":\"&cups;\",\"↷\":\"&curvearrowright;\",\"⤼\":\"&curarrm;\",\"⋎\":\"&cuvee;\",\"⋏\":\"&cuwed;\",\"¤\":\"&curren;\",\"∱\":\"&cwint;\",\"⌭\":\"&cylcty;\",\"⥥\":\"&dHar;\",\"†\":\"&dagger;\",\"ℸ\":\"&daleth;\",\"‐\":\"&hyphen;\",\"⤏\":\"&rBarr;\",\"ď\":\"&dcaron;\",\"д\":\"&dcy;\",\"⇊\":\"&downdownarrows;\",\"⩷\":\"&eDDot;\",\"°\":\"&deg;\",\"δ\":\"&delta;\",\"⦱\":\"&demptyv;\",\"⥿\":\"&dfisht;\",\"𝔡\":\"&dfr;\",\"♦\":\"&diams;\",\"ϝ\":\"&gammad;\",\"⋲\":\"&disin;\",\"÷\":\"&divide;\",\"⋇\":\"&divonx;\",\"ђ\":\"&djcy;\",\"⌞\":\"&llcorner;\",\"⌍\":\"&dlcrop;\",$:\"&dollar;\",\"𝕕\":\"&dopf;\",\"≑\":\"&eDot;\",\"∸\":\"&minusd;\",\"∔\":\"&plusdo;\",\"⊡\":\"&sdotb;\",\"⌟\":\"&lrcorner;\",\"⌌\":\"&drcrop;\",\"𝒹\":\"&dscr;\",\"ѕ\":\"&dscy;\",\"⧶\":\"&dsol;\",\"đ\":\"&dstrok;\",\"⋱\":\"&dtdot;\",\"▿\":\"&triangledown;\",\"⦦\":\"&dwangle;\",\"џ\":\"&dzcy;\",\"⟿\":\"&dzigrarr;\",\"é\":\"&eacute;\",\"⩮\":\"&easter;\",\"ě\":\"&ecaron;\",\"≖\":\"&eqcirc;\",\"ê\":\"&ecirc;\",\"≕\":\"&eqcolon;\",\"э\":\"&ecy;\",\"ė\":\"&edot;\",\"≒\":\"&fallingdotseq;\",\"𝔢\":\"&efr;\",\"⪚\":\"&eg;\",\"è\":\"&egrave;\",\"⪖\":\"&eqslantgtr;\",\"⪘\":\"&egsdot;\",\"⪙\":\"&el;\",\"⏧\":\"&elinters;\",\"ℓ\":\"&ell;\",\"⪕\":\"&eqslantless;\",\"⪗\":\"&elsdot;\",\"ē\":\"&emacr;\",\"∅\":\"&varnothing;\",\" \":\"&emsp13;\",\" \":\"&emsp14;\",\" \":\"&emsp;\",\"ŋ\":\"&eng;\",\" \":\"&ensp;\",\"ę\":\"&eogon;\",\"𝕖\":\"&eopf;\",\"⋕\":\"&epar;\",\"⧣\":\"&eparsl;\",\"⩱\":\"&eplus;\",\"ε\":\"&epsilon;\",\"ϵ\":\"&varepsilon;\",\"=\":\"&equals;\",\"≟\":\"&questeq;\",\"⩸\":\"&equivDD;\",\"⧥\":\"&eqvparsl;\",\"≓\":\"&risingdotseq;\",\"⥱\":\"&erarr;\",\"ℯ\":\"&escr;\",\"η\":\"&eta;\",\"ð\":\"&eth;\",\"ë\":\"&euml;\",\"€\":\"&euro;\",\"!\":\"&excl;\",\"ф\":\"&fcy;\",\"♀\":\"&female;\",\"ﬃ\":\"&ffilig;\",\"ﬀ\":\"&fflig;\",\"ﬄ\":\"&ffllig;\",\"𝔣\":\"&ffr;\",\"ﬁ\":\"&filig;\",fj:\"&fjlig;\",\"♭\":\"&flat;\",\"ﬂ\":\"&fllig;\",\"▱\":\"&fltns;\",\"ƒ\":\"&fnof;\",\"𝕗\":\"&fopf;\",\"⋔\":\"&pitchfork;\",\"⫙\":\"&forkv;\",\"⨍\":\"&fpartint;\",\"½\":\"&half;\",\"⅓\":\"&frac13;\",\"¼\":\"&frac14;\",\"⅕\":\"&frac15;\",\"⅙\":\"&frac16;\",\"⅛\":\"&frac18;\",\"⅔\":\"&frac23;\",\"⅖\":\"&frac25;\",\"¾\":\"&frac34;\",\"⅗\":\"&frac35;\",\"⅜\":\"&frac38;\",\"⅘\":\"&frac45;\",\"⅚\":\"&frac56;\",\"⅝\":\"&frac58;\",\"⅞\":\"&frac78;\",\"⁄\":\"&frasl;\",\"⌢\":\"&sfrown;\",\"𝒻\":\"&fscr;\",\"⪌\":\"&gtreqqless;\",\"ǵ\":\"&gacute;\",\"γ\":\"&gamma;\",\"⪆\":\"&gtrapprox;\",\"ğ\":\"&gbreve;\",\"ĝ\":\"&gcirc;\",\"г\":\"&gcy;\",\"ġ\":\"&gdot;\",\"⪩\":\"&gescc;\",\"⪀\":\"&gesdot;\",\"⪂\":\"&gesdoto;\",\"⪄\":\"&gesdotol;\",\"⋛︀\":\"&gesl;\",\"⪔\":\"&gesles;\",\"𝔤\":\"&gfr;\",\"ℷ\":\"&gimel;\",\"ѓ\":\"&gjcy;\",\"⪒\":\"&glE;\",\"⪥\":\"&gla;\",\"⪤\":\"&glj;\",\"≩\":\"&gneqq;\",\"⪊\":\"&gnapprox;\",\"⪈\":\"&gneq;\",\"⋧\":\"&gnsim;\",\"𝕘\":\"&gopf;\",\"ℊ\":\"&gscr;\",\"⪎\":\"&gsime;\",\"⪐\":\"&gsiml;\",\"⪧\":\"&gtcc;\",\"⩺\":\"&gtcir;\",\"⋗\":\"&gtrdot;\",\"⦕\":\"&gtlPar;\",\"⩼\":\"&gtquest;\",\"⥸\":\"&gtrarr;\",\"≩︀\":\"&gvnE;\",\"ъ\":\"&hardcy;\",\"⥈\":\"&harrcir;\",\"↭\":\"&leftrightsquigarrow;\",\"ℏ\":\"&plankv;\",\"ĥ\":\"&hcirc;\",\"♥\":\"&heartsuit;\",\"…\":\"&mldr;\",\"⊹\":\"&hercon;\",\"𝔥\":\"&hfr;\",\"⤥\":\"&searhk;\",\"⤦\":\"&swarhk;\",\"⇿\":\"&hoarr;\",\"∻\":\"&homtht;\",\"↩\":\"&larrhk;\",\"↪\":\"&rarrhk;\",\"𝕙\":\"&hopf;\",\"―\":\"&horbar;\",\"𝒽\":\"&hscr;\",\"ħ\":\"&hstrok;\",\"⁃\":\"&hybull;\",\"í\":\"&iacute;\",\"î\":\"&icirc;\",\"и\":\"&icy;\",\"е\":\"&iecy;\",\"¡\":\"&iexcl;\",\"𝔦\":\"&ifr;\",\"ì\":\"&igrave;\",\"⨌\":\"&qint;\",\"∭\":\"&tint;\",\"⧜\":\"&iinfin;\",\"℩\":\"&iiota;\",\"ĳ\":\"&ijlig;\",\"ī\":\"&imacr;\",\"ı\":\"&inodot;\",\"⊷\":\"&imof;\",\"Ƶ\":\"&imped;\",\"℅\":\"&incare;\",\"∞\":\"&infin;\",\"⧝\":\"&infintie;\",\"⊺\":\"&intercal;\",\"⨗\":\"&intlarhk;\",\"⨼\":\"&iprod;\",\"ё\":\"&iocy;\",\"į\":\"&iogon;\",\"𝕚\":\"&iopf;\",\"ι\":\"&iota;\",\"¿\":\"&iquest;\",\"𝒾\":\"&iscr;\",\"⋹\":\"&isinE;\",\"⋵\":\"&isindot;\",\"⋴\":\"&isins;\",\"⋳\":\"&isinsv;\",\"ĩ\":\"&itilde;\",\"і\":\"&iukcy;\",\"ï\":\"&iuml;\",\"ĵ\":\"&jcirc;\",\"й\":\"&jcy;\",\"𝔧\":\"&jfr;\",\"ȷ\":\"&jmath;\",\"𝕛\":\"&jopf;\",\"𝒿\":\"&jscr;\",\"ј\":\"&jsercy;\",\"є\":\"&jukcy;\",\"κ\":\"&kappa;\",\"ϰ\":\"&varkappa;\",\"ķ\":\"&kcedil;\",\"к\":\"&kcy;\",\"𝔨\":\"&kfr;\",\"ĸ\":\"&kgreen;\",\"х\":\"&khcy;\",\"ќ\":\"&kjcy;\",\"𝕜\":\"&kopf;\",\"𝓀\":\"&kscr;\",\"⤛\":\"&lAtail;\",\"⤎\":\"&lBarr;\",\"⪋\":\"&lesseqqgtr;\",\"⥢\":\"&lHar;\",\"ĺ\":\"&lacute;\",\"⦴\":\"&laemptyv;\",\"λ\":\"&lambda;\",\"⦑\":\"&langd;\",\"⪅\":\"&lessapprox;\",\"«\":\"&laquo;\",\"⤟\":\"&larrbfs;\",\"⤝\":\"&larrfs;\",\"↫\":\"&looparrowleft;\",\"⤹\":\"&larrpl;\",\"⥳\":\"&larrsim;\",\"↢\":\"&leftarrowtail;\",\"⪫\":\"&lat;\",\"⤙\":\"&latail;\",\"⪭\":\"&late;\",\"⪭︀\":\"&lates;\",\"⤌\":\"&lbarr;\",\"❲\":\"&lbbrk;\",\"{\":\"&lcub;\",\"[\":\"&lsqb;\",\"⦋\":\"&lbrke;\",\"⦏\":\"&lbrksld;\",\"⦍\":\"&lbrkslu;\",\"ľ\":\"&lcaron;\",\"ļ\":\"&lcedil;\",\"л\":\"&lcy;\",\"⤶\":\"&ldca;\",\"⥧\":\"&ldrdhar;\",\"⥋\":\"&ldrushar;\",\"↲\":\"&ldsh;\",\"≤\":\"&leq;\",\"⇇\":\"&llarr;\",\"⋋\":\"&lthree;\",\"⪨\":\"&lescc;\",\"⩿\":\"&lesdot;\",\"⪁\":\"&lesdoto;\",\"⪃\":\"&lesdotor;\",\"⋚︀\":\"&lesg;\",\"⪓\":\"&lesges;\",\"⋖\":\"&ltdot;\",\"⥼\":\"&lfisht;\",\"𝔩\":\"&lfr;\",\"⪑\":\"&lgE;\",\"⥪\":\"&lharul;\",\"▄\":\"&lhblk;\",\"љ\":\"&ljcy;\",\"⥫\":\"&llhard;\",\"◺\":\"&lltri;\",\"ŀ\":\"&lmidot;\",\"⎰\":\"&lmoustache;\",\"≨\":\"&lneqq;\",\"⪉\":\"&lnapprox;\",\"⪇\":\"&lneq;\",\"⋦\":\"&lnsim;\",\"⟬\":\"&loang;\",\"⇽\":\"&loarr;\",\"⟼\":\"&xmap;\",\"↬\":\"&rarrlp;\",\"⦅\":\"&lopar;\",\"𝕝\":\"&lopf;\",\"⨭\":\"&loplus;\",\"⨴\":\"&lotimes;\",\"∗\":\"&lowast;\",\"◊\":\"&lozenge;\",\"(\":\"&lpar;\",\"⦓\":\"&lparlt;\",\"⥭\":\"&lrhard;\",\"‎\":\"&lrm;\",\"⊿\":\"&lrtri;\",\"‹\":\"&lsaquo;\",\"𝓁\":\"&lscr;\",\"⪍\":\"&lsime;\",\"⪏\":\"&lsimg;\",\"‚\":\"&sbquo;\",\"ł\":\"&lstrok;\",\"⪦\":\"&ltcc;\",\"⩹\":\"&ltcir;\",\"⋉\":\"&ltimes;\",\"⥶\":\"&ltlarr;\",\"⩻\":\"&ltquest;\",\"⦖\":\"&ltrPar;\",\"◃\":\"&triangleleft;\",\"⥊\":\"&lurdshar;\",\"⥦\":\"&luruhar;\",\"≨︀\":\"&lvnE;\",\"∺\":\"&mDDot;\",\"¯\":\"&strns;\",\"♂\":\"&male;\",\"✠\":\"&maltese;\",\"▮\":\"&marker;\",\"⨩\":\"&mcomma;\",\"м\":\"&mcy;\",\"—\":\"&mdash;\",\"𝔪\":\"&mfr;\",\"℧\":\"&mho;\",\"µ\":\"&micro;\",\"⫰\":\"&midcir;\",\"−\":\"&minus;\",\"⨪\":\"&minusdu;\",\"⫛\":\"&mlcp;\",\"⊧\":\"&models;\",\"𝕞\":\"&mopf;\",\"𝓂\":\"&mscr;\",\"μ\":\"&mu;\",\"⊸\":\"&mumap;\",\"⋙̸\":\"&nGg;\",\"≫⃒\":\"&nGt;\",\"⇍\":\"&nlArr;\",\"⇎\":\"&nhArr;\",\"⋘̸\":\"&nLl;\",\"≪⃒\":\"&nLt;\",\"⇏\":\"&nrArr;\",\"⊯\":\"&nVDash;\",\"⊮\":\"&nVdash;\",\"ń\":\"&nacute;\",\"∠⃒\":\"&nang;\",\"⩰̸\":\"&napE;\",\"≋̸\":\"&napid;\",\"ŉ\":\"&napos;\",\"♮\":\"&natural;\",\"⩃\":\"&ncap;\",\"ň\":\"&ncaron;\",\"ņ\":\"&ncedil;\",\"⩭̸\":\"&ncongdot;\",\"⩂\":\"&ncup;\",\"н\":\"&ncy;\",\"–\":\"&ndash;\",\"⇗\":\"&neArr;\",\"⤤\":\"&nearhk;\",\"≐̸\":\"&nedot;\",\"⤨\":\"&toea;\",\"𝔫\":\"&nfr;\",\"↮\":\"&nleftrightarrow;\",\"⫲\":\"&nhpar;\",\"⋼\":\"&nis;\",\"⋺\":\"&nisd;\",\"њ\":\"&njcy;\",\"≦̸\":\"&nleqq;\",\"↚\":\"&nleftarrow;\",\"‥\":\"&nldr;\",\"𝕟\":\"&nopf;\",\"¬\":\"&not;\",\"⋹̸\":\"&notinE;\",\"⋵̸\":\"&notindot;\",\"⋷\":\"&notinvb;\",\"⋶\":\"&notinvc;\",\"⋾\":\"&notnivb;\",\"⋽\":\"&notnivc;\",\"⫽⃥\":\"&nparsl;\",\"∂̸\":\"&npart;\",\"⨔\":\"&npolint;\",\"↛\":\"&nrightarrow;\",\"⤳̸\":\"&nrarrc;\",\"↝̸\":\"&nrarrw;\",\"𝓃\":\"&nscr;\",\"⊄\":\"&nsub;\",\"⫅̸\":\"&nsubseteqq;\",\"⊅\":\"&nsup;\",\"⫆̸\":\"&nsupseteqq;\",\"ñ\":\"&ntilde;\",\"ν\":\"&nu;\",\"#\":\"&num;\",\"№\":\"&numero;\",\" \":\"&numsp;\",\"⊭\":\"&nvDash;\",\"⤄\":\"&nvHarr;\",\"≍⃒\":\"&nvap;\",\"⊬\":\"&nvdash;\",\"≥⃒\":\"&nvge;\",\">⃒\":\"&nvgt;\",\"⧞\":\"&nvinfin;\",\"⤂\":\"&nvlArr;\",\"≤⃒\":\"&nvle;\",\"<⃒\":\"&nvlt;\",\"⊴⃒\":\"&nvltrie;\",\"⤃\":\"&nvrArr;\",\"⊵⃒\":\"&nvrtrie;\",\"∼⃒\":\"&nvsim;\",\"⇖\":\"&nwArr;\",\"⤣\":\"&nwarhk;\",\"⤧\":\"&nwnear;\",\"ó\":\"&oacute;\",\"ô\":\"&ocirc;\",\"о\":\"&ocy;\",\"ő\":\"&odblac;\",\"⨸\":\"&odiv;\",\"⦼\":\"&odsold;\",\"œ\":\"&oelig;\",\"⦿\":\"&ofcir;\",\"𝔬\":\"&ofr;\",\"˛\":\"&ogon;\",\"ò\":\"&ograve;\",\"⧁\":\"&ogt;\",\"⦵\":\"&ohbar;\",\"⦾\":\"&olcir;\",\"⦻\":\"&olcross;\",\"⧀\":\"&olt;\",\"ō\":\"&omacr;\",\"ω\":\"&omega;\",\"ο\":\"&omicron;\",\"⦶\":\"&omid;\",\"𝕠\":\"&oopf;\",\"⦷\":\"&opar;\",\"⦹\":\"&operp;\",\"∨\":\"&vee;\",\"⩝\":\"&ord;\",\"ℴ\":\"&oscr;\",\"ª\":\"&ordf;\",\"º\":\"&ordm;\",\"⊶\":\"&origof;\",\"⩖\":\"&oror;\",\"⩗\":\"&orslope;\",\"⩛\":\"&orv;\",\"ø\":\"&oslash;\",\"⊘\":\"&osol;\",\"õ\":\"&otilde;\",\"⨶\":\"&otimesas;\",\"ö\":\"&ouml;\",\"⌽\":\"&ovbar;\",\"¶\":\"&para;\",\"⫳\":\"&parsim;\",\"⫽\":\"&parsl;\",\"п\":\"&pcy;\",\"%\":\"&percnt;\",\".\":\"&period;\",\"‰\":\"&permil;\",\"‱\":\"&pertenk;\",\"𝔭\":\"&pfr;\",\"φ\":\"&phi;\",\"ϕ\":\"&varphi;\",\"☎\":\"&phone;\",\"π\":\"&pi;\",\"ϖ\":\"&varpi;\",\"ℎ\":\"&planckh;\",\"+\":\"&plus;\",\"⨣\":\"&plusacir;\",\"⨢\":\"&pluscir;\",\"⨥\":\"&plusdu;\",\"⩲\":\"&pluse;\",\"⨦\":\"&plussim;\",\"⨧\":\"&plustwo;\",\"⨕\":\"&pointint;\",\"𝕡\":\"&popf;\",\"£\":\"&pound;\",\"⪳\":\"&prE;\",\"⪷\":\"&precapprox;\",\"⪹\":\"&prnap;\",\"⪵\":\"&prnE;\",\"⋨\":\"&prnsim;\",\"′\":\"&prime;\",\"⌮\":\"&profalar;\",\"⌒\":\"&profline;\",\"⌓\":\"&profsurf;\",\"⊰\":\"&prurel;\",\"𝓅\":\"&pscr;\",\"ψ\":\"&psi;\",\" \":\"&puncsp;\",\"𝔮\":\"&qfr;\",\"𝕢\":\"&qopf;\",\"⁗\":\"&qprime;\",\"𝓆\":\"&qscr;\",\"⨖\":\"&quatint;\",\"?\":\"&quest;\",\"⤜\":\"&rAtail;\",\"⥤\":\"&rHar;\",\"∽̱\":\"&race;\",\"ŕ\":\"&racute;\",\"⦳\":\"&raemptyv;\",\"⦒\":\"&rangd;\",\"⦥\":\"&range;\",\"»\":\"&raquo;\",\"⥵\":\"&rarrap;\",\"⤠\":\"&rarrbfs;\",\"⤳\":\"&rarrc;\",\"⤞\":\"&rarrfs;\",\"⥅\":\"&rarrpl;\",\"⥴\":\"&rarrsim;\",\"↣\":\"&rightarrowtail;\",\"↝\":\"&rightsquigarrow;\",\"⤚\":\"&ratail;\",\"∶\":\"&ratio;\",\"❳\":\"&rbbrk;\",\"}\":\"&rcub;\",\"]\":\"&rsqb;\",\"⦌\":\"&rbrke;\",\"⦎\":\"&rbrksld;\",\"⦐\":\"&rbrkslu;\",\"ř\":\"&rcaron;\",\"ŗ\":\"&rcedil;\",\"р\":\"&rcy;\",\"⤷\":\"&rdca;\",\"⥩\":\"&rdldhar;\",\"↳\":\"&rdsh;\",\"▭\":\"&rect;\",\"⥽\":\"&rfisht;\",\"𝔯\":\"&rfr;\",\"⥬\":\"&rharul;\",\"ρ\":\"&rho;\",\"ϱ\":\"&varrho;\",\"⇉\":\"&rrarr;\",\"⋌\":\"&rthree;\",\"˚\":\"&ring;\",\"‏\":\"&rlm;\",\"⎱\":\"&rmoustache;\",\"⫮\":\"&rnmid;\",\"⟭\":\"&roang;\",\"⇾\":\"&roarr;\",\"⦆\":\"&ropar;\",\"𝕣\":\"&ropf;\",\"⨮\":\"&roplus;\",\"⨵\":\"&rotimes;\",\")\":\"&rpar;\",\"⦔\":\"&rpargt;\",\"⨒\":\"&rppolint;\",\"›\":\"&rsaquo;\",\"𝓇\":\"&rscr;\",\"⋊\":\"&rtimes;\",\"▹\":\"&triangleright;\",\"⧎\":\"&rtriltri;\",\"⥨\":\"&ruluhar;\",\"℞\":\"&rx;\",\"ś\":\"&sacute;\",\"⪴\":\"&scE;\",\"⪸\":\"&succapprox;\",\"š\":\"&scaron;\",\"ş\":\"&scedil;\",\"ŝ\":\"&scirc;\",\"⪶\":\"&succneqq;\",\"⪺\":\"&succnapprox;\",\"⋩\":\"&succnsim;\",\"⨓\":\"&scpolint;\",\"с\":\"&scy;\",\"⋅\":\"&sdot;\",\"⩦\":\"&sdote;\",\"⇘\":\"&seArr;\",\"§\":\"&sect;\",\";\":\"&semi;\",\"⤩\":\"&tosa;\",\"✶\":\"&sext;\",\"𝔰\":\"&sfr;\",\"♯\":\"&sharp;\",\"щ\":\"&shchcy;\",\"ш\":\"&shcy;\",\"­\":\"&shy;\",\"σ\":\"&sigma;\",\"ς\":\"&varsigma;\",\"⩪\":\"&simdot;\",\"⪞\":\"&simg;\",\"⪠\":\"&simgE;\",\"⪝\":\"&siml;\",\"⪟\":\"&simlE;\",\"≆\":\"&simne;\",\"⨤\":\"&simplus;\",\"⥲\":\"&simrarr;\",\"⨳\":\"&smashp;\",\"⧤\":\"&smeparsl;\",\"⌣\":\"&ssmile;\",\"⪪\":\"&smt;\",\"⪬\":\"&smte;\",\"⪬︀\":\"&smtes;\",\"ь\":\"&softcy;\",\"/\":\"&sol;\",\"⧄\":\"&solb;\",\"⌿\":\"&solbar;\",\"𝕤\":\"&sopf;\",\"♠\":\"&spadesuit;\",\"⊓︀\":\"&sqcaps;\",\"⊔︀\":\"&sqcups;\",\"𝓈\":\"&sscr;\",\"☆\":\"&star;\",\"⊂\":\"&subset;\",\"⫅\":\"&subseteqq;\",\"⪽\":\"&subdot;\",\"⫃\":\"&subedot;\",\"⫁\":\"&submult;\",\"⫋\":\"&subsetneqq;\",\"⊊\":\"&subsetneq;\",\"⪿\":\"&subplus;\",\"⥹\":\"&subrarr;\",\"⫇\":\"&subsim;\",\"⫕\":\"&subsub;\",\"⫓\":\"&subsup;\",\"♪\":\"&sung;\",\"¹\":\"&sup1;\",\"²\":\"&sup2;\",\"³\":\"&sup3;\",\"⫆\":\"&supseteqq;\",\"⪾\":\"&supdot;\",\"⫘\":\"&supdsub;\",\"⫄\":\"&supedot;\",\"⟉\":\"&suphsol;\",\"⫗\":\"&suphsub;\",\"⥻\":\"&suplarr;\",\"⫂\":\"&supmult;\",\"⫌\":\"&supsetneqq;\",\"⊋\":\"&supsetneq;\",\"⫀\":\"&supplus;\",\"⫈\":\"&supsim;\",\"⫔\":\"&supsub;\",\"⫖\":\"&supsup;\",\"⇙\":\"&swArr;\",\"⤪\":\"&swnwar;\",\"ß\":\"&szlig;\",\"⌖\":\"&target;\",\"τ\":\"&tau;\",\"ť\":\"&tcaron;\",\"ţ\":\"&tcedil;\",\"т\":\"&tcy;\",\"⌕\":\"&telrec;\",\"𝔱\":\"&tfr;\",\"θ\":\"&theta;\",\"ϑ\":\"&vartheta;\",\"þ\":\"&thorn;\",\"×\":\"&times;\",\"⨱\":\"&timesbar;\",\"⨰\":\"&timesd;\",\"⌶\":\"&topbot;\",\"⫱\":\"&topcir;\",\"𝕥\":\"&topf;\",\"⫚\":\"&topfork;\",\"‴\":\"&tprime;\",\"▵\":\"&utri;\",\"≜\":\"&trie;\",\"◬\":\"&tridot;\",\"⨺\":\"&triminus;\",\"⨹\":\"&triplus;\",\"⧍\":\"&trisb;\",\"⨻\":\"&tritime;\",\"⏢\":\"&trpezium;\",\"𝓉\":\"&tscr;\",\"ц\":\"&tscy;\",\"ћ\":\"&tshcy;\",\"ŧ\":\"&tstrok;\",\"⥣\":\"&uHar;\",\"ú\":\"&uacute;\",\"ў\":\"&ubrcy;\",\"ŭ\":\"&ubreve;\",\"û\":\"&ucirc;\",\"у\":\"&ucy;\",\"ű\":\"&udblac;\",\"⥾\":\"&ufisht;\",\"𝔲\":\"&ufr;\",\"ù\":\"&ugrave;\",\"▀\":\"&uhblk;\",\"⌜\":\"&ulcorner;\",\"⌏\":\"&ulcrop;\",\"◸\":\"&ultri;\",\"ū\":\"&umacr;\",\"ų\":\"&uogon;\",\"𝕦\":\"&uopf;\",\"υ\":\"&upsilon;\",\"⇈\":\"&uuarr;\",\"⌝\":\"&urcorner;\",\"⌎\":\"&urcrop;\",\"ů\":\"&uring;\",\"◹\":\"&urtri;\",\"𝓊\":\"&uscr;\",\"⋰\":\"&utdot;\",\"ũ\":\"&utilde;\",\"ü\":\"&uuml;\",\"⦧\":\"&uwangle;\",\"⫨\":\"&vBar;\",\"⫩\":\"&vBarv;\",\"⦜\":\"&vangrt;\",\"⊊︀\":\"&vsubne;\",\"⫋︀\":\"&vsubnE;\",\"⊋︀\":\"&vsupne;\",\"⫌︀\":\"&vsupnE;\",\"в\":\"&vcy;\",\"⊻\":\"&veebar;\",\"≚\":\"&veeeq;\",\"⋮\":\"&vellip;\",\"𝔳\":\"&vfr;\",\"𝕧\":\"&vopf;\",\"𝓋\":\"&vscr;\",\"⦚\":\"&vzigzag;\",\"ŵ\":\"&wcirc;\",\"⩟\":\"&wedbar;\",\"≙\":\"&wedgeq;\",\"℘\":\"&wp;\",\"𝔴\":\"&wfr;\",\"𝕨\":\"&wopf;\",\"𝓌\":\"&wscr;\",\"𝔵\":\"&xfr;\",\"ξ\":\"&xi;\",\"⋻\":\"&xnis;\",\"𝕩\":\"&xopf;\",\"𝓍\":\"&xscr;\",\"ý\":\"&yacute;\",\"я\":\"&yacy;\",\"ŷ\":\"&ycirc;\",\"ы\":\"&ycy;\",\"¥\":\"&yen;\",\"𝔶\":\"&yfr;\",\"ї\":\"&yicy;\",\"𝕪\":\"&yopf;\",\"𝓎\":\"&yscr;\",\"ю\":\"&yucy;\",\"ÿ\":\"&yuml;\",\"ź\":\"&zacute;\",\"ž\":\"&zcaron;\",\"з\":\"&zcy;\",\"ż\":\"&zdot;\",\"ζ\":\"&zeta;\",\"𝔷\":\"&zfr;\",\"ж\":\"&zhcy;\",\"⇝\":\"&zigrarr;\",\"𝕫\":\"&zopf;\",\"𝓏\":\"&zscr;\",\"‍\":\"&zwj;\",\"‌\":\"&zwnj;\"}}};\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/html-entities/lib/named-references.js?");
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.bodyRegExps={xml:/&(?:#\d+|#[xX][\da-fA-F]+|[0-9a-zA-Z]+);?/g,html4:/&notin;|&(?:nbsp|iexcl|cent|pound|curren|yen|brvbar|sect|uml|copy|ordf|laquo|not|shy|reg|macr|deg|plusmn|sup2|sup3|acute|micro|para|middot|cedil|sup1|ordm|raquo|frac14|frac12|frac34|iquest|Agrave|Aacute|Acirc|Atilde|Auml|Aring|AElig|Ccedil|Egrave|Eacute|Ecirc|Euml|Igrave|Iacute|Icirc|Iuml|ETH|Ntilde|Ograve|Oacute|Ocirc|Otilde|Ouml|times|Oslash|Ugrave|Uacute|Ucirc|Uuml|Yacute|THORN|szlig|agrave|aacute|acirc|atilde|auml|aring|aelig|ccedil|egrave|eacute|ecirc|euml|igrave|iacute|icirc|iuml|eth|ntilde|ograve|oacute|ocirc|otilde|ouml|divide|oslash|ugrave|uacute|ucirc|uuml|yacute|thorn|yuml|quot|amp|lt|gt|#\d+|#[xX][\da-fA-F]+|[0-9a-zA-Z]+);?/g,html5:/&centerdot;|&copysr;|&divideontimes;|&gtcc;|&gtcir;|&gtdot;|&gtlPar;|&gtquest;|&gtrapprox;|&gtrarr;|&gtrdot;|&gtreqless;|&gtreqqless;|&gtrless;|&gtrsim;|&ltcc;|&ltcir;|&ltdot;|&lthree;|&ltimes;|&ltlarr;|&ltquest;|&ltrPar;|&ltri;|&ltrie;|&ltrif;|&notin;|&notinE;|&notindot;|&notinva;|&notinvb;|&notinvc;|&notni;|&notniva;|&notnivb;|&notnivc;|&parallel;|&timesb;|&timesbar;|&timesd;|&(?:AElig|AMP|Aacute|Acirc|Agrave|Aring|Atilde|Auml|COPY|Ccedil|ETH|Eacute|Ecirc|Egrave|Euml|GT|Iacute|Icirc|Igrave|Iuml|LT|Ntilde|Oacute|Ocirc|Ograve|Oslash|Otilde|Ouml|QUOT|REG|THORN|Uacute|Ucirc|Ugrave|Uuml|Yacute|aacute|acirc|acute|aelig|agrave|amp|aring|atilde|auml|brvbar|ccedil|cedil|cent|copy|curren|deg|divide|eacute|ecirc|egrave|eth|euml|frac12|frac14|frac34|gt|iacute|icirc|iexcl|igrave|iquest|iuml|laquo|lt|macr|micro|middot|nbsp|not|ntilde|oacute|ocirc|ograve|ordf|ordm|oslash|otilde|ouml|para|plusmn|pound|quot|raquo|reg|sect|shy|sup1|sup2|sup3|szlig|thorn|times|uacute|ucirc|ugrave|uml|uuml|yacute|yen|yuml|#\d+|#[xX][\da-fA-F]+|[0-9a-zA-Z]+);?/g};exports.namedReferences={xml:{entities:{"&lt;":"<","&gt;":">","&quot;":'"',"&apos;":"'","&amp;":"&"},characters:{"<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;","&":"&amp;"}},html4:{entities:{"&apos;":"'","&nbsp":" ","&nbsp;":" ","&iexcl":"¡","&iexcl;":"¡","&cent":"¢","&cent;":"¢","&pound":"£","&pound;":"£","&curren":"¤","&curren;":"¤","&yen":"¥","&yen;":"¥","&brvbar":"¦","&brvbar;":"¦","&sect":"§","&sect;":"§","&uml":"¨","&uml;":"¨","&copy":"©","&copy;":"©","&ordf":"ª","&ordf;":"ª","&laquo":"«","&laquo;":"«","&not":"¬","&not;":"¬","&shy":"­","&shy;":"­","&reg":"®","&reg;":"®","&macr":"¯","&macr;":"¯","&deg":"°","&deg;":"°","&plusmn":"±","&plusmn;":"±","&sup2":"²","&sup2;":"²","&sup3":"³","&sup3;":"³","&acute":"´","&acute;":"´","&micro":"µ","&micro;":"µ","&para":"¶","&para;":"¶","&middot":"·","&middot;":"·","&cedil":"¸","&cedil;":"¸","&sup1":"¹","&sup1;":"¹","&ordm":"º","&ordm;":"º","&raquo":"»","&raquo;":"»","&frac14":"¼","&frac14;":"¼","&frac12":"½","&frac12;":"½","&frac34":"¾","&frac34;":"¾","&iquest":"¿","&iquest;":"¿","&Agrave":"À","&Agrave;":"À","&Aacute":"Á","&Aacute;":"Á","&Acirc":"Â","&Acirc;":"Â","&Atilde":"Ã","&Atilde;":"Ã","&Auml":"Ä","&Auml;":"Ä","&Aring":"Å","&Aring;":"Å","&AElig":"Æ","&AElig;":"Æ","&Ccedil":"Ç","&Ccedil;":"Ç","&Egrave":"È","&Egrave;":"È","&Eacute":"É","&Eacute;":"É","&Ecirc":"Ê","&Ecirc;":"Ê","&Euml":"Ë","&Euml;":"Ë","&Igrave":"Ì","&Igrave;":"Ì","&Iacute":"Í","&Iacute;":"Í","&Icirc":"Î","&Icirc;":"Î","&Iuml":"Ï","&Iuml;":"Ï","&ETH":"Ð","&ETH;":"Ð","&Ntilde":"Ñ","&Ntilde;":"Ñ","&Ograve":"Ò","&Ograve;":"Ò","&Oacute":"Ó","&Oacute;":"Ó","&Ocirc":"Ô","&Ocirc;":"Ô","&Otilde":"Õ","&Otilde;":"Õ","&Ouml":"Ö","&Ouml;":"Ö","&times":"×","&times;":"×","&Oslash":"Ø","&Oslash;":"Ø","&Ugrave":"Ù","&Ugrave;":"Ù","&Uacute":"Ú","&Uacute;":"Ú","&Ucirc":"Û","&Ucirc;":"Û","&Uuml":"Ü","&Uuml;":"Ü","&Yacute":"Ý","&Yacute;":"Ý","&THORN":"Þ","&THORN;":"Þ","&szlig":"ß","&szlig;":"ß","&agrave":"à","&agrave;":"à","&aacute":"á","&aacute;":"á","&acirc":"â","&acirc;":"â","&atilde":"ã","&atilde;":"ã","&auml":"ä","&auml;":"ä","&aring":"å","&aring;":"å","&aelig":"æ","&aelig;":"æ","&ccedil":"ç","&ccedil;":"ç","&egrave":"è","&egrave;":"è","&eacute":"é","&eacute;":"é","&ecirc":"ê","&ecirc;":"ê","&euml":"ë","&euml;":"ë","&igrave":"ì","&igrave;":"ì","&iacute":"í","&iacute;":"í","&icirc":"î","&icirc;":"î","&iuml":"ï","&iuml;":"ï","&eth":"ð","&eth;":"ð","&ntilde":"ñ","&ntilde;":"ñ","&ograve":"ò","&ograve;":"ò","&oacute":"ó","&oacute;":"ó","&ocirc":"ô","&ocirc;":"ô","&otilde":"õ","&otilde;":"õ","&ouml":"ö","&ouml;":"ö","&divide":"÷","&divide;":"÷","&oslash":"ø","&oslash;":"ø","&ugrave":"ù","&ugrave;":"ù","&uacute":"ú","&uacute;":"ú","&ucirc":"û","&ucirc;":"û","&uuml":"ü","&uuml;":"ü","&yacute":"ý","&yacute;":"ý","&thorn":"þ","&thorn;":"þ","&yuml":"ÿ","&yuml;":"ÿ","&quot":'"',"&quot;":'"',"&amp":"&","&amp;":"&","&lt":"<","&lt;":"<","&gt":">","&gt;":">","&OElig;":"Œ","&oelig;":"œ","&Scaron;":"Š","&scaron;":"š","&Yuml;":"Ÿ","&circ;":"ˆ","&tilde;":"˜","&ensp;":" ","&emsp;":" ","&thinsp;":" ","&zwnj;":"‌","&zwj;":"‍","&lrm;":"‎","&rlm;":"‏","&ndash;":"–","&mdash;":"—","&lsquo;":"‘","&rsquo;":"’","&sbquo;":"‚","&ldquo;":"“","&rdquo;":"”","&bdquo;":"„","&dagger;":"†","&Dagger;":"‡","&permil;":"‰","&lsaquo;":"‹","&rsaquo;":"›","&euro;":"€","&fnof;":"ƒ","&Alpha;":"Α","&Beta;":"Β","&Gamma;":"Γ","&Delta;":"Δ","&Epsilon;":"Ε","&Zeta;":"Ζ","&Eta;":"Η","&Theta;":"Θ","&Iota;":"Ι","&Kappa;":"Κ","&Lambda;":"Λ","&Mu;":"Μ","&Nu;":"Ν","&Xi;":"Ξ","&Omicron;":"Ο","&Pi;":"Π","&Rho;":"Ρ","&Sigma;":"Σ","&Tau;":"Τ","&Upsilon;":"Υ","&Phi;":"Φ","&Chi;":"Χ","&Psi;":"Ψ","&Omega;":"Ω","&alpha;":"α","&beta;":"β","&gamma;":"γ","&delta;":"δ","&epsilon;":"ε","&zeta;":"ζ","&eta;":"η","&theta;":"θ","&iota;":"ι","&kappa;":"κ","&lambda;":"λ","&mu;":"μ","&nu;":"ν","&xi;":"ξ","&omicron;":"ο","&pi;":"π","&rho;":"ρ","&sigmaf;":"ς","&sigma;":"σ","&tau;":"τ","&upsilon;":"υ","&phi;":"φ","&chi;":"χ","&psi;":"ψ","&omega;":"ω","&thetasym;":"ϑ","&upsih;":"ϒ","&piv;":"ϖ","&bull;":"•","&hellip;":"…","&prime;":"′","&Prime;":"″","&oline;":"‾","&frasl;":"⁄","&weierp;":"℘","&image;":"ℑ","&real;":"ℜ","&trade;":"™","&alefsym;":"ℵ","&larr;":"←","&uarr;":"↑","&rarr;":"→","&darr;":"↓","&harr;":"↔","&crarr;":"↵","&lArr;":"⇐","&uArr;":"⇑","&rArr;":"⇒","&dArr;":"⇓","&hArr;":"⇔","&forall;":"∀","&part;":"∂","&exist;":"∃","&empty;":"∅","&nabla;":"∇","&isin;":"∈","&notin;":"∉","&ni;":"∋","&prod;":"∏","&sum;":"∑","&minus;":"−","&lowast;":"∗","&radic;":"√","&prop;":"∝","&infin;":"∞","&ang;":"∠","&and;":"∧","&or;":"∨","&cap;":"∩","&cup;":"∪","&int;":"∫","&there4;":"∴","&sim;":"∼","&cong;":"≅","&asymp;":"≈","&ne;":"≠","&equiv;":"≡","&le;":"≤","&ge;":"≥","&sub;":"⊂","&sup;":"⊃","&nsub;":"⊄","&sube;":"⊆","&supe;":"⊇","&oplus;":"⊕","&otimes;":"⊗","&perp;":"⊥","&sdot;":"⋅","&lceil;":"⌈","&rceil;":"⌉","&lfloor;":"⌊","&rfloor;":"⌋","&lang;":"〈","&rang;":"〉","&loz;":"◊","&spades;":"♠","&clubs;":"♣","&hearts;":"♥","&diams;":"♦"},characters:{"'":"&apos;"," ":"&nbsp;","¡":"&iexcl;","¢":"&cent;","£":"&pound;","¤":"&curren;","¥":"&yen;","¦":"&brvbar;","§":"&sect;","¨":"&uml;","©":"&copy;","ª":"&ordf;","«":"&laquo;","¬":"&not;","­":"&shy;","®":"&reg;","¯":"&macr;","°":"&deg;","±":"&plusmn;","²":"&sup2;","³":"&sup3;","´":"&acute;","µ":"&micro;","¶":"&para;","·":"&middot;","¸":"&cedil;","¹":"&sup1;","º":"&ordm;","»":"&raquo;","¼":"&frac14;","½":"&frac12;","¾":"&frac34;","¿":"&iquest;","À":"&Agrave;","Á":"&Aacute;","Â":"&Acirc;","Ã":"&Atilde;","Ä":"&Auml;","Å":"&Aring;","Æ":"&AElig;","Ç":"&Ccedil;","È":"&Egrave;","É":"&Eacute;","Ê":"&Ecirc;","Ë":"&Euml;","Ì":"&Igrave;","Í":"&Iacute;","Î":"&Icirc;","Ï":"&Iuml;","Ð":"&ETH;","Ñ":"&Ntilde;","Ò":"&Ograve;","Ó":"&Oacute;","Ô":"&Ocirc;","Õ":"&Otilde;","Ö":"&Ouml;","×":"&times;","Ø":"&Oslash;","Ù":"&Ugrave;","Ú":"&Uacute;","Û":"&Ucirc;","Ü":"&Uuml;","Ý":"&Yacute;","Þ":"&THORN;","ß":"&szlig;","à":"&agrave;","á":"&aacute;","â":"&acirc;","ã":"&atilde;","ä":"&auml;","å":"&aring;","æ":"&aelig;","ç":"&ccedil;","è":"&egrave;","é":"&eacute;","ê":"&ecirc;","ë":"&euml;","ì":"&igrave;","í":"&iacute;","î":"&icirc;","ï":"&iuml;","ð":"&eth;","ñ":"&ntilde;","ò":"&ograve;","ó":"&oacute;","ô":"&ocirc;","õ":"&otilde;","ö":"&ouml;","÷":"&divide;","ø":"&oslash;","ù":"&ugrave;","ú":"&uacute;","û":"&ucirc;","ü":"&uuml;","ý":"&yacute;","þ":"&thorn;","ÿ":"&yuml;",'"':"&quot;","&":"&amp;","<":"&lt;",">":"&gt;","Œ":"&OElig;","œ":"&oelig;","Š":"&Scaron;","š":"&scaron;","Ÿ":"&Yuml;","ˆ":"&circ;","˜":"&tilde;"," ":"&ensp;"," ":"&emsp;"," ":"&thinsp;","‌":"&zwnj;","‍":"&zwj;","‎":"&lrm;","‏":"&rlm;","–":"&ndash;","—":"&mdash;","‘":"&lsquo;","’":"&rsquo;","‚":"&sbquo;","“":"&ldquo;","”":"&rdquo;","„":"&bdquo;","†":"&dagger;","‡":"&Dagger;","‰":"&permil;","‹":"&lsaquo;","›":"&rsaquo;","€":"&euro;","ƒ":"&fnof;","Α":"&Alpha;","Β":"&Beta;","Γ":"&Gamma;","Δ":"&Delta;","Ε":"&Epsilon;","Ζ":"&Zeta;","Η":"&Eta;","Θ":"&Theta;","Ι":"&Iota;","Κ":"&Kappa;","Λ":"&Lambda;","Μ":"&Mu;","Ν":"&Nu;","Ξ":"&Xi;","Ο":"&Omicron;","Π":"&Pi;","Ρ":"&Rho;","Σ":"&Sigma;","Τ":"&Tau;","Υ":"&Upsilon;","Φ":"&Phi;","Χ":"&Chi;","Ψ":"&Psi;","Ω":"&Omega;","α":"&alpha;","β":"&beta;","γ":"&gamma;","δ":"&delta;","ε":"&epsilon;","ζ":"&zeta;","η":"&eta;","θ":"&theta;","ι":"&iota;","κ":"&kappa;","λ":"&lambda;","μ":"&mu;","ν":"&nu;","ξ":"&xi;","ο":"&omicron;","π":"&pi;","ρ":"&rho;","ς":"&sigmaf;","σ":"&sigma;","τ":"&tau;","υ":"&upsilon;","φ":"&phi;","χ":"&chi;","ψ":"&psi;","ω":"&omega;","ϑ":"&thetasym;","ϒ":"&upsih;","ϖ":"&piv;","•":"&bull;","…":"&hellip;","′":"&prime;","″":"&Prime;","‾":"&oline;","⁄":"&frasl;","℘":"&weierp;","ℑ":"&image;","ℜ":"&real;","™":"&trade;","ℵ":"&alefsym;","←":"&larr;","↑":"&uarr;","→":"&rarr;","↓":"&darr;","↔":"&harr;","↵":"&crarr;","⇐":"&lArr;","⇑":"&uArr;","⇒":"&rArr;","⇓":"&dArr;","⇔":"&hArr;","∀":"&forall;","∂":"&part;","∃":"&exist;","∅":"&empty;","∇":"&nabla;","∈":"&isin;","∉":"&notin;","∋":"&ni;","∏":"&prod;","∑":"&sum;","−":"&minus;","∗":"&lowast;","√":"&radic;","∝":"&prop;","∞":"&infin;","∠":"&ang;","∧":"&and;","∨":"&or;","∩":"&cap;","∪":"&cup;","∫":"&int;","∴":"&there4;","∼":"&sim;","≅":"&cong;","≈":"&asymp;","≠":"&ne;","≡":"&equiv;","≤":"&le;","≥":"&ge;","⊂":"&sub;","⊃":"&sup;","⊄":"&nsub;","⊆":"&sube;","⊇":"&supe;","⊕":"&oplus;","⊗":"&otimes;","⊥":"&perp;","⋅":"&sdot;","⌈":"&lceil;","⌉":"&rceil;","⌊":"&lfloor;","⌋":"&rfloor;","〈":"&lang;","〉":"&rang;","◊":"&loz;","♠":"&spades;","♣":"&clubs;","♥":"&hearts;","♦":"&diams;"}},html5:{entities:{"&AElig":"Æ","&AElig;":"Æ","&AMP":"&","&AMP;":"&","&Aacute":"Á","&Aacute;":"Á","&Abreve;":"Ă","&Acirc":"Â","&Acirc;":"Â","&Acy;":"А","&Afr;":"𝔄","&Agrave":"À","&Agrave;":"À","&Alpha;":"Α","&Amacr;":"Ā","&And;":"⩓","&Aogon;":"Ą","&Aopf;":"𝔸","&ApplyFunction;":"⁡","&Aring":"Å","&Aring;":"Å","&Ascr;":"𝒜","&Assign;":"≔","&Atilde":"Ã","&Atilde;":"Ã","&Auml":"Ä","&Auml;":"Ä","&Backslash;":"∖","&Barv;":"⫧","&Barwed;":"⌆","&Bcy;":"Б","&Because;":"∵","&Bernoullis;":"ℬ","&Beta;":"Β","&Bfr;":"𝔅","&Bopf;":"𝔹","&Breve;":"˘","&Bscr;":"ℬ","&Bumpeq;":"≎","&CHcy;":"Ч","&COPY":"©","&COPY;":"©","&Cacute;":"Ć","&Cap;":"⋒","&CapitalDifferentialD;":"ⅅ","&Cayleys;":"ℭ","&Ccaron;":"Č","&Ccedil":"Ç","&Ccedil;":"Ç","&Ccirc;":"Ĉ","&Cconint;":"∰","&Cdot;":"Ċ","&Cedilla;":"¸","&CenterDot;":"·","&Cfr;":"ℭ","&Chi;":"Χ","&CircleDot;":"⊙","&CircleMinus;":"⊖","&CirclePlus;":"⊕","&CircleTimes;":"⊗","&ClockwiseContourIntegral;":"∲","&CloseCurlyDoubleQuote;":"”","&CloseCurlyQuote;":"’","&Colon;":"∷","&Colone;":"⩴","&Congruent;":"≡","&Conint;":"∯","&ContourIntegral;":"∮","&Copf;":"ℂ","&Coproduct;":"∐","&CounterClockwiseContourIntegral;":"∳","&Cross;":"⨯","&Cscr;":"𝒞","&Cup;":"⋓","&CupCap;":"≍","&DD;":"ⅅ","&DDotrahd;":"⤑","&DJcy;":"Ђ","&DScy;":"Ѕ","&DZcy;":"Џ","&Dagger;":"‡","&Darr;":"↡","&Dashv;":"⫤","&Dcaron;":"Ď","&Dcy;":"Д","&Del;":"∇","&Delta;":"Δ","&Dfr;":"𝔇","&DiacriticalAcute;":"´","&DiacriticalDot;":"˙","&DiacriticalDoubleAcute;":"˝","&DiacriticalGrave;":"`","&DiacriticalTilde;":"˜","&Diamond;":"⋄","&DifferentialD;":"ⅆ","&Dopf;":"𝔻","&Dot;":"¨","&DotDot;":"⃜","&DotEqual;":"≐","&DoubleContourIntegral;":"∯","&DoubleDot;":"¨","&DoubleDownArrow;":"⇓","&DoubleLeftArrow;":"⇐","&DoubleLeftRightArrow;":"⇔","&DoubleLeftTee;":"⫤","&DoubleLongLeftArrow;":"⟸","&DoubleLongLeftRightArrow;":"⟺","&DoubleLongRightArrow;":"⟹","&DoubleRightArrow;":"⇒","&DoubleRightTee;":"⊨","&DoubleUpArrow;":"⇑","&DoubleUpDownArrow;":"⇕","&DoubleVerticalBar;":"∥","&DownArrow;":"↓","&DownArrowBar;":"⤓","&DownArrowUpArrow;":"⇵","&DownBreve;":"̑","&DownLeftRightVector;":"⥐","&DownLeftTeeVector;":"⥞","&DownLeftVector;":"↽","&DownLeftVectorBar;":"⥖","&DownRightTeeVector;":"⥟","&DownRightVector;":"⇁","&DownRightVectorBar;":"⥗","&DownTee;":"⊤","&DownTeeArrow;":"↧","&Downarrow;":"⇓","&Dscr;":"𝒟","&Dstrok;":"Đ","&ENG;":"Ŋ","&ETH":"Ð","&ETH;":"Ð","&Eacute":"É","&Eacute;":"É","&Ecaron;":"Ě","&Ecirc":"Ê","&Ecirc;":"Ê","&Ecy;":"Э","&Edot;":"Ė","&Efr;":"𝔈","&Egrave":"È","&Egrave;":"È","&Element;":"∈","&Emacr;":"Ē","&EmptySmallSquare;":"◻","&EmptyVerySmallSquare;":"▫","&Eogon;":"Ę","&Eopf;":"𝔼","&Epsilon;":"Ε","&Equal;":"⩵","&EqualTilde;":"≂","&Equilibrium;":"⇌","&Escr;":"ℰ","&Esim;":"⩳","&Eta;":"Η","&Euml":"Ë","&Euml;":"Ë","&Exists;":"∃","&ExponentialE;":"ⅇ","&Fcy;":"Ф","&Ffr;":"𝔉","&FilledSmallSquare;":"◼","&FilledVerySmallSquare;":"▪","&Fopf;":"𝔽","&ForAll;":"∀","&Fouriertrf;":"ℱ","&Fscr;":"ℱ","&GJcy;":"Ѓ","&GT":">","&GT;":">","&Gamma;":"Γ","&Gammad;":"Ϝ","&Gbreve;":"Ğ","&Gcedil;":"Ģ","&Gcirc;":"Ĝ","&Gcy;":"Г","&Gdot;":"Ġ","&Gfr;":"𝔊","&Gg;":"⋙","&Gopf;":"𝔾","&GreaterEqual;":"≥","&GreaterEqualLess;":"⋛","&GreaterFullEqual;":"≧","&GreaterGreater;":"⪢","&GreaterLess;":"≷","&GreaterSlantEqual;":"⩾","&GreaterTilde;":"≳","&Gscr;":"𝒢","&Gt;":"≫","&HARDcy;":"Ъ","&Hacek;":"ˇ","&Hat;":"^","&Hcirc;":"Ĥ","&Hfr;":"ℌ","&HilbertSpace;":"ℋ","&Hopf;":"ℍ","&HorizontalLine;":"─","&Hscr;":"ℋ","&Hstrok;":"Ħ","&HumpDownHump;":"≎","&HumpEqual;":"≏","&IEcy;":"Е","&IJlig;":"Ĳ","&IOcy;":"Ё","&Iacute":"Í","&Iacute;":"Í","&Icirc":"Î","&Icirc;":"Î","&Icy;":"И","&Idot;":"İ","&Ifr;":"ℑ","&Igrave":"Ì","&Igrave;":"Ì","&Im;":"ℑ","&Imacr;":"Ī","&ImaginaryI;":"ⅈ","&Implies;":"⇒","&Int;":"∬","&Integral;":"∫","&Intersection;":"⋂","&InvisibleComma;":"⁣","&InvisibleTimes;":"⁢","&Iogon;":"Į","&Iopf;":"𝕀","&Iota;":"Ι","&Iscr;":"ℐ","&Itilde;":"Ĩ","&Iukcy;":"І","&Iuml":"Ï","&Iuml;":"Ï","&Jcirc;":"Ĵ","&Jcy;":"Й","&Jfr;":"𝔍","&Jopf;":"𝕁","&Jscr;":"𝒥","&Jsercy;":"Ј","&Jukcy;":"Є","&KHcy;":"Х","&KJcy;":"Ќ","&Kappa;":"Κ","&Kcedil;":"Ķ","&Kcy;":"К","&Kfr;":"𝔎","&Kopf;":"𝕂","&Kscr;":"𝒦","&LJcy;":"Љ","&LT":"<","&LT;":"<","&Lacute;":"Ĺ","&Lambda;":"Λ","&Lang;":"⟪","&Laplacetrf;":"ℒ","&Larr;":"↞","&Lcaron;":"Ľ","&Lcedil;":"Ļ","&Lcy;":"Л","&LeftAngleBracket;":"⟨","&LeftArrow;":"←","&LeftArrowBar;":"⇤","&LeftArrowRightArrow;":"⇆","&LeftCeiling;":"⌈","&LeftDoubleBracket;":"⟦","&LeftDownTeeVector;":"⥡","&LeftDownVector;":"⇃","&LeftDownVectorBar;":"⥙","&LeftFloor;":"⌊","&LeftRightArrow;":"↔","&LeftRightVector;":"⥎","&LeftTee;":"⊣","&LeftTeeArrow;":"↤","&LeftTeeVector;":"⥚","&LeftTriangle;":"⊲","&LeftTriangleBar;":"⧏","&LeftTriangleEqual;":"⊴","&LeftUpDownVector;":"⥑","&LeftUpTeeVector;":"⥠","&LeftUpVector;":"↿","&LeftUpVectorBar;":"⥘","&LeftVector;":"↼","&LeftVectorBar;":"⥒","&Leftarrow;":"⇐","&Leftrightarrow;":"⇔","&LessEqualGreater;":"⋚","&LessFullEqual;":"≦","&LessGreater;":"≶","&LessLess;":"⪡","&LessSlantEqual;":"⩽","&LessTilde;":"≲","&Lfr;":"𝔏","&Ll;":"⋘","&Lleftarrow;":"⇚","&Lmidot;":"Ŀ","&LongLeftArrow;":"⟵","&LongLeftRightArrow;":"⟷","&LongRightArrow;":"⟶","&Longleftarrow;":"⟸","&Longleftrightarrow;":"⟺","&Longrightarrow;":"⟹","&Lopf;":"𝕃","&LowerLeftArrow;":"↙","&LowerRightArrow;":"↘","&Lscr;":"ℒ","&Lsh;":"↰","&Lstrok;":"Ł","&Lt;":"≪","&Map;":"⤅","&Mcy;":"М","&MediumSpace;":" ","&Mellintrf;":"ℳ","&Mfr;":"𝔐","&MinusPlus;":"∓","&Mopf;":"𝕄","&Mscr;":"ℳ","&Mu;":"Μ","&NJcy;":"Њ","&Nacute;":"Ń","&Ncaron;":"Ň","&Ncedil;":"Ņ","&Ncy;":"Н","&NegativeMediumSpace;":"​","&NegativeThickSpace;":"​","&NegativeThinSpace;":"​","&NegativeVeryThinSpace;":"​","&NestedGreaterGreater;":"≫","&NestedLessLess;":"≪","&NewLine;":"\n","&Nfr;":"𝔑","&NoBreak;":"⁠","&NonBreakingSpace;":" ","&Nopf;":"ℕ","&Not;":"⫬","&NotCongruent;":"≢","&NotCupCap;":"≭","&NotDoubleVerticalBar;":"∦","&NotElement;":"∉","&NotEqual;":"≠","&NotEqualTilde;":"≂̸","&NotExists;":"∄","&NotGreater;":"≯","&NotGreaterEqual;":"≱","&NotGreaterFullEqual;":"≧̸","&NotGreaterGreater;":"≫̸","&NotGreaterLess;":"≹","&NotGreaterSlantEqual;":"⩾̸","&NotGreaterTilde;":"≵","&NotHumpDownHump;":"≎̸","&NotHumpEqual;":"≏̸","&NotLeftTriangle;":"⋪","&NotLeftTriangleBar;":"⧏̸","&NotLeftTriangleEqual;":"⋬","&NotLess;":"≮","&NotLessEqual;":"≰","&NotLessGreater;":"≸","&NotLessLess;":"≪̸","&NotLessSlantEqual;":"⩽̸","&NotLessTilde;":"≴","&NotNestedGreaterGreater;":"⪢̸","&NotNestedLessLess;":"⪡̸","&NotPrecedes;":"⊀","&NotPrecedesEqual;":"⪯̸","&NotPrecedesSlantEqual;":"⋠","&NotReverseElement;":"∌","&NotRightTriangle;":"⋫","&NotRightTriangleBar;":"⧐̸","&NotRightTriangleEqual;":"⋭","&NotSquareSubset;":"⊏̸","&NotSquareSubsetEqual;":"⋢","&NotSquareSuperset;":"⊐̸","&NotSquareSupersetEqual;":"⋣","&NotSubset;":"⊂⃒","&NotSubsetEqual;":"⊈","&NotSucceeds;":"⊁","&NotSucceedsEqual;":"⪰̸","&NotSucceedsSlantEqual;":"⋡","&NotSucceedsTilde;":"≿̸","&NotSuperset;":"⊃⃒","&NotSupersetEqual;":"⊉","&NotTilde;":"≁","&NotTildeEqual;":"≄","&NotTildeFullEqual;":"≇","&NotTildeTilde;":"≉","&NotVerticalBar;":"∤","&Nscr;":"𝒩","&Ntilde":"Ñ","&Ntilde;":"Ñ","&Nu;":"Ν","&OElig;":"Œ","&Oacute":"Ó","&Oacute;":"Ó","&Ocirc":"Ô","&Ocirc;":"Ô","&Ocy;":"О","&Odblac;":"Ő","&Ofr;":"𝔒","&Ograve":"Ò","&Ograve;":"Ò","&Omacr;":"Ō","&Omega;":"Ω","&Omicron;":"Ο","&Oopf;":"𝕆","&OpenCurlyDoubleQuote;":"“","&OpenCurlyQuote;":"‘","&Or;":"⩔","&Oscr;":"𝒪","&Oslash":"Ø","&Oslash;":"Ø","&Otilde":"Õ","&Otilde;":"Õ","&Otimes;":"⨷","&Ouml":"Ö","&Ouml;":"Ö","&OverBar;":"‾","&OverBrace;":"⏞","&OverBracket;":"⎴","&OverParenthesis;":"⏜","&PartialD;":"∂","&Pcy;":"П","&Pfr;":"𝔓","&Phi;":"Φ","&Pi;":"Π","&PlusMinus;":"±","&Poincareplane;":"ℌ","&Popf;":"ℙ","&Pr;":"⪻","&Precedes;":"≺","&PrecedesEqual;":"⪯","&PrecedesSlantEqual;":"≼","&PrecedesTilde;":"≾","&Prime;":"″","&Product;":"∏","&Proportion;":"∷","&Proportional;":"∝","&Pscr;":"𝒫","&Psi;":"Ψ","&QUOT":'"',"&QUOT;":'"',"&Qfr;":"𝔔","&Qopf;":"ℚ","&Qscr;":"𝒬","&RBarr;":"⤐","&REG":"®","&REG;":"®","&Racute;":"Ŕ","&Rang;":"⟫","&Rarr;":"↠","&Rarrtl;":"⤖","&Rcaron;":"Ř","&Rcedil;":"Ŗ","&Rcy;":"Р","&Re;":"ℜ","&ReverseElement;":"∋","&ReverseEquilibrium;":"⇋","&ReverseUpEquilibrium;":"⥯","&Rfr;":"ℜ","&Rho;":"Ρ","&RightAngleBracket;":"⟩","&RightArrow;":"→","&RightArrowBar;":"⇥","&RightArrowLeftArrow;":"⇄","&RightCeiling;":"⌉","&RightDoubleBracket;":"⟧","&RightDownTeeVector;":"⥝","&RightDownVector;":"⇂","&RightDownVectorBar;":"⥕","&RightFloor;":"⌋","&RightTee;":"⊢","&RightTeeArrow;":"↦","&RightTeeVector;":"⥛","&RightTriangle;":"⊳","&RightTriangleBar;":"⧐","&RightTriangleEqual;":"⊵","&RightUpDownVector;":"⥏","&RightUpTeeVector;":"⥜","&RightUpVector;":"↾","&RightUpVectorBar;":"⥔","&RightVector;":"⇀","&RightVectorBar;":"⥓","&Rightarrow;":"⇒","&Ropf;":"ℝ","&RoundImplies;":"⥰","&Rrightarrow;":"⇛","&Rscr;":"ℛ","&Rsh;":"↱","&RuleDelayed;":"⧴","&SHCHcy;":"Щ","&SHcy;":"Ш","&SOFTcy;":"Ь","&Sacute;":"Ś","&Sc;":"⪼","&Scaron;":"Š","&Scedil;":"Ş","&Scirc;":"Ŝ","&Scy;":"С","&Sfr;":"𝔖","&ShortDownArrow;":"↓","&ShortLeftArrow;":"←","&ShortRightArrow;":"→","&ShortUpArrow;":"↑","&Sigma;":"Σ","&SmallCircle;":"∘","&Sopf;":"𝕊","&Sqrt;":"√","&Square;":"□","&SquareIntersection;":"⊓","&SquareSubset;":"⊏","&SquareSubsetEqual;":"⊑","&SquareSuperset;":"⊐","&SquareSupersetEqual;":"⊒","&SquareUnion;":"⊔","&Sscr;":"𝒮","&Star;":"⋆","&Sub;":"⋐","&Subset;":"⋐","&SubsetEqual;":"⊆","&Succeeds;":"≻","&SucceedsEqual;":"⪰","&SucceedsSlantEqual;":"≽","&SucceedsTilde;":"≿","&SuchThat;":"∋","&Sum;":"∑","&Sup;":"⋑","&Superset;":"⊃","&SupersetEqual;":"⊇","&Supset;":"⋑","&THORN":"Þ","&THORN;":"Þ","&TRADE;":"™","&TSHcy;":"Ћ","&TScy;":"Ц","&Tab;":"\t","&Tau;":"Τ","&Tcaron;":"Ť","&Tcedil;":"Ţ","&Tcy;":"Т","&Tfr;":"𝔗","&Therefore;":"∴","&Theta;":"Θ","&ThickSpace;":"  ","&ThinSpace;":" ","&Tilde;":"∼","&TildeEqual;":"≃","&TildeFullEqual;":"≅","&TildeTilde;":"≈","&Topf;":"𝕋","&TripleDot;":"⃛","&Tscr;":"𝒯","&Tstrok;":"Ŧ","&Uacute":"Ú","&Uacute;":"Ú","&Uarr;":"↟","&Uarrocir;":"⥉","&Ubrcy;":"Ў","&Ubreve;":"Ŭ","&Ucirc":"Û","&Ucirc;":"Û","&Ucy;":"У","&Udblac;":"Ű","&Ufr;":"𝔘","&Ugrave":"Ù","&Ugrave;":"Ù","&Umacr;":"Ū","&UnderBar;":"_","&UnderBrace;":"⏟","&UnderBracket;":"⎵","&UnderParenthesis;":"⏝","&Union;":"⋃","&UnionPlus;":"⊎","&Uogon;":"Ų","&Uopf;":"𝕌","&UpArrow;":"↑","&UpArrowBar;":"⤒","&UpArrowDownArrow;":"⇅","&UpDownArrow;":"↕","&UpEquilibrium;":"⥮","&UpTee;":"⊥","&UpTeeArrow;":"↥","&Uparrow;":"⇑","&Updownarrow;":"⇕","&UpperLeftArrow;":"↖","&UpperRightArrow;":"↗","&Upsi;":"ϒ","&Upsilon;":"Υ","&Uring;":"Ů","&Uscr;":"𝒰","&Utilde;":"Ũ","&Uuml":"Ü","&Uuml;":"Ü","&VDash;":"⊫","&Vbar;":"⫫","&Vcy;":"В","&Vdash;":"⊩","&Vdashl;":"⫦","&Vee;":"⋁","&Verbar;":"‖","&Vert;":"‖","&VerticalBar;":"∣","&VerticalLine;":"|","&VerticalSeparator;":"❘","&VerticalTilde;":"≀","&VeryThinSpace;":" ","&Vfr;":"𝔙","&Vopf;":"𝕍","&Vscr;":"𝒱","&Vvdash;":"⊪","&Wcirc;":"Ŵ","&Wedge;":"⋀","&Wfr;":"𝔚","&Wopf;":"𝕎","&Wscr;":"𝒲","&Xfr;":"𝔛","&Xi;":"Ξ","&Xopf;":"𝕏","&Xscr;":"𝒳","&YAcy;":"Я","&YIcy;":"Ї","&YUcy;":"Ю","&Yacute":"Ý","&Yacute;":"Ý","&Ycirc;":"Ŷ","&Ycy;":"Ы","&Yfr;":"𝔜","&Yopf;":"𝕐","&Yscr;":"𝒴","&Yuml;":"Ÿ","&ZHcy;":"Ж","&Zacute;":"Ź","&Zcaron;":"Ž","&Zcy;":"З","&Zdot;":"Ż","&ZeroWidthSpace;":"​","&Zeta;":"Ζ","&Zfr;":"ℨ","&Zopf;":"ℤ","&Zscr;":"𝒵","&aacute":"á","&aacute;":"á","&abreve;":"ă","&ac;":"∾","&acE;":"∾̳","&acd;":"∿","&acirc":"â","&acirc;":"â","&acute":"´","&acute;":"´","&acy;":"а","&aelig":"æ","&aelig;":"æ","&af;":"⁡","&afr;":"𝔞","&agrave":"à","&agrave;":"à","&alefsym;":"ℵ","&aleph;":"ℵ","&alpha;":"α","&amacr;":"ā","&amalg;":"⨿","&amp":"&","&amp;":"&","&and;":"∧","&andand;":"⩕","&andd;":"⩜","&andslope;":"⩘","&andv;":"⩚","&ang;":"∠","&ange;":"⦤","&angle;":"∠","&angmsd;":"∡","&angmsdaa;":"⦨","&angmsdab;":"⦩","&angmsdac;":"⦪","&angmsdad;":"⦫","&angmsdae;":"⦬","&angmsdaf;":"⦭","&angmsdag;":"⦮","&angmsdah;":"⦯","&angrt;":"∟","&angrtvb;":"⊾","&angrtvbd;":"⦝","&angsph;":"∢","&angst;":"Å","&angzarr;":"⍼","&aogon;":"ą","&aopf;":"𝕒","&ap;":"≈","&apE;":"⩰","&apacir;":"⩯","&ape;":"≊","&apid;":"≋","&apos;":"'","&approx;":"≈","&approxeq;":"≊","&aring":"å","&aring;":"å","&ascr;":"𝒶","&ast;":"*","&asymp;":"≈","&asympeq;":"≍","&atilde":"ã","&atilde;":"ã","&auml":"ä","&auml;":"ä","&awconint;":"∳","&awint;":"⨑","&bNot;":"⫭","&backcong;":"≌","&backepsilon;":"϶","&backprime;":"‵","&backsim;":"∽","&backsimeq;":"⋍","&barvee;":"⊽","&barwed;":"⌅","&barwedge;":"⌅","&bbrk;":"⎵","&bbrktbrk;":"⎶","&bcong;":"≌","&bcy;":"б","&bdquo;":"„","&becaus;":"∵","&because;":"∵","&bemptyv;":"⦰","&bepsi;":"϶","&bernou;":"ℬ","&beta;":"β","&beth;":"ℶ","&between;":"≬","&bfr;":"𝔟","&bigcap;":"⋂","&bigcirc;":"◯","&bigcup;":"⋃","&bigodot;":"⨀","&bigoplus;":"⨁","&bigotimes;":"⨂","&bigsqcup;":"⨆","&bigstar;":"★","&bigtriangledown;":"▽","&bigtriangleup;":"△","&biguplus;":"⨄","&bigvee;":"⋁","&bigwedge;":"⋀","&bkarow;":"⤍","&blacklozenge;":"⧫","&blacksquare;":"▪","&blacktriangle;":"▴","&blacktriangledown;":"▾","&blacktriangleleft;":"◂","&blacktriangleright;":"▸","&blank;":"␣","&blk12;":"▒","&blk14;":"░","&blk34;":"▓","&block;":"█","&bne;":"=⃥","&bnequiv;":"≡⃥","&bnot;":"⌐","&bopf;":"𝕓","&bot;":"⊥","&bottom;":"⊥","&bowtie;":"⋈","&boxDL;":"╗","&boxDR;":"╔","&boxDl;":"╖","&boxDr;":"╓","&boxH;":"═","&boxHD;":"╦","&boxHU;":"╩","&boxHd;":"╤","&boxHu;":"╧","&boxUL;":"╝","&boxUR;":"╚","&boxUl;":"╜","&boxUr;":"╙","&boxV;":"║","&boxVH;":"╬","&boxVL;":"╣","&boxVR;":"╠","&boxVh;":"╫","&boxVl;":"╢","&boxVr;":"╟","&boxbox;":"⧉","&boxdL;":"╕","&boxdR;":"╒","&boxdl;":"┐","&boxdr;":"┌","&boxh;":"─","&boxhD;":"╥","&boxhU;":"╨","&boxhd;":"┬","&boxhu;":"┴","&boxminus;":"⊟","&boxplus;":"⊞","&boxtimes;":"⊠","&boxuL;":"╛","&boxuR;":"╘","&boxul;":"┘","&boxur;":"└","&boxv;":"│","&boxvH;":"╪","&boxvL;":"╡","&boxvR;":"╞","&boxvh;":"┼","&boxvl;":"┤","&boxvr;":"├","&bprime;":"‵","&breve;":"˘","&brvbar":"¦","&brvbar;":"¦","&bscr;":"𝒷","&bsemi;":"⁏","&bsim;":"∽","&bsime;":"⋍","&bsol;":"\\","&bsolb;":"⧅","&bsolhsub;":"⟈","&bull;":"•","&bullet;":"•","&bump;":"≎","&bumpE;":"⪮","&bumpe;":"≏","&bumpeq;":"≏","&cacute;":"ć","&cap;":"∩","&capand;":"⩄","&capbrcup;":"⩉","&capcap;":"⩋","&capcup;":"⩇","&capdot;":"⩀","&caps;":"∩︀","&caret;":"⁁","&caron;":"ˇ","&ccaps;":"⩍","&ccaron;":"č","&ccedil":"ç","&ccedil;":"ç","&ccirc;":"ĉ","&ccups;":"⩌","&ccupssm;":"⩐","&cdot;":"ċ","&cedil":"¸","&cedil;":"¸","&cemptyv;":"⦲","&cent":"¢","&cent;":"¢","&centerdot;":"·","&cfr;":"𝔠","&chcy;":"ч","&check;":"✓","&checkmark;":"✓","&chi;":"χ","&cir;":"○","&cirE;":"⧃","&circ;":"ˆ","&circeq;":"≗","&circlearrowleft;":"↺","&circlearrowright;":"↻","&circledR;":"®","&circledS;":"Ⓢ","&circledast;":"⊛","&circledcirc;":"⊚","&circleddash;":"⊝","&cire;":"≗","&cirfnint;":"⨐","&cirmid;":"⫯","&cirscir;":"⧂","&clubs;":"♣","&clubsuit;":"♣","&colon;":":","&colone;":"≔","&coloneq;":"≔","&comma;":",","&commat;":"@","&comp;":"∁","&compfn;":"∘","&complement;":"∁","&complexes;":"ℂ","&cong;":"≅","&congdot;":"⩭","&conint;":"∮","&copf;":"𝕔","&coprod;":"∐","&copy":"©","&copy;":"©","&copysr;":"℗","&crarr;":"↵","&cross;":"✗","&cscr;":"𝒸","&csub;":"⫏","&csube;":"⫑","&csup;":"⫐","&csupe;":"⫒","&ctdot;":"⋯","&cudarrl;":"⤸","&cudarrr;":"⤵","&cuepr;":"⋞","&cuesc;":"⋟","&cularr;":"↶","&cularrp;":"⤽","&cup;":"∪","&cupbrcap;":"⩈","&cupcap;":"⩆","&cupcup;":"⩊","&cupdot;":"⊍","&cupor;":"⩅","&cups;":"∪︀","&curarr;":"↷","&curarrm;":"⤼","&curlyeqprec;":"⋞","&curlyeqsucc;":"⋟","&curlyvee;":"⋎","&curlywedge;":"⋏","&curren":"¤","&curren;":"¤","&curvearrowleft;":"↶","&curvearrowright;":"↷","&cuvee;":"⋎","&cuwed;":"⋏","&cwconint;":"∲","&cwint;":"∱","&cylcty;":"⌭","&dArr;":"⇓","&dHar;":"⥥","&dagger;":"†","&daleth;":"ℸ","&darr;":"↓","&dash;":"‐","&dashv;":"⊣","&dbkarow;":"⤏","&dblac;":"˝","&dcaron;":"ď","&dcy;":"д","&dd;":"ⅆ","&ddagger;":"‡","&ddarr;":"⇊","&ddotseq;":"⩷","&deg":"°","&deg;":"°","&delta;":"δ","&demptyv;":"⦱","&dfisht;":"⥿","&dfr;":"𝔡","&dharl;":"⇃","&dharr;":"⇂","&diam;":"⋄","&diamond;":"⋄","&diamondsuit;":"♦","&diams;":"♦","&die;":"¨","&digamma;":"ϝ","&disin;":"⋲","&div;":"÷","&divide":"÷","&divide;":"÷","&divideontimes;":"⋇","&divonx;":"⋇","&djcy;":"ђ","&dlcorn;":"⌞","&dlcrop;":"⌍","&dollar;":"$","&dopf;":"𝕕","&dot;":"˙","&doteq;":"≐","&doteqdot;":"≑","&dotminus;":"∸","&dotplus;":"∔","&dotsquare;":"⊡","&doublebarwedge;":"⌆","&downarrow;":"↓","&downdownarrows;":"⇊","&downharpoonleft;":"⇃","&downharpoonright;":"⇂","&drbkarow;":"⤐","&drcorn;":"⌟","&drcrop;":"⌌","&dscr;":"𝒹","&dscy;":"ѕ","&dsol;":"⧶","&dstrok;":"đ","&dtdot;":"⋱","&dtri;":"▿","&dtrif;":"▾","&duarr;":"⇵","&duhar;":"⥯","&dwangle;":"⦦","&dzcy;":"џ","&dzigrarr;":"⟿","&eDDot;":"⩷","&eDot;":"≑","&eacute":"é","&eacute;":"é","&easter;":"⩮","&ecaron;":"ě","&ecir;":"≖","&ecirc":"ê","&ecirc;":"ê","&ecolon;":"≕","&ecy;":"э","&edot;":"ė","&ee;":"ⅇ","&efDot;":"≒","&efr;":"𝔢","&eg;":"⪚","&egrave":"è","&egrave;":"è","&egs;":"⪖","&egsdot;":"⪘","&el;":"⪙","&elinters;":"⏧","&ell;":"ℓ","&els;":"⪕","&elsdot;":"⪗","&emacr;":"ē","&empty;":"∅","&emptyset;":"∅","&emptyv;":"∅","&emsp13;":" ","&emsp14;":" ","&emsp;":" ","&eng;":"ŋ","&ensp;":" ","&eogon;":"ę","&eopf;":"𝕖","&epar;":"⋕","&eparsl;":"⧣","&eplus;":"⩱","&epsi;":"ε","&epsilon;":"ε","&epsiv;":"ϵ","&eqcirc;":"≖","&eqcolon;":"≕","&eqsim;":"≂","&eqslantgtr;":"⪖","&eqslantless;":"⪕","&equals;":"=","&equest;":"≟","&equiv;":"≡","&equivDD;":"⩸","&eqvparsl;":"⧥","&erDot;":"≓","&erarr;":"⥱","&escr;":"ℯ","&esdot;":"≐","&esim;":"≂","&eta;":"η","&eth":"ð","&eth;":"ð","&euml":"ë","&euml;":"ë","&euro;":"€","&excl;":"!","&exist;":"∃","&expectation;":"ℰ","&exponentiale;":"ⅇ","&fallingdotseq;":"≒","&fcy;":"ф","&female;":"♀","&ffilig;":"ﬃ","&fflig;":"ﬀ","&ffllig;":"ﬄ","&ffr;":"𝔣","&filig;":"ﬁ","&fjlig;":"fj","&flat;":"♭","&fllig;":"ﬂ","&fltns;":"▱","&fnof;":"ƒ","&fopf;":"𝕗","&forall;":"∀","&fork;":"⋔","&forkv;":"⫙","&fpartint;":"⨍","&frac12":"½","&frac12;":"½","&frac13;":"⅓","&frac14":"¼","&frac14;":"¼","&frac15;":"⅕","&frac16;":"⅙","&frac18;":"⅛","&frac23;":"⅔","&frac25;":"⅖","&frac34":"¾","&frac34;":"¾","&frac35;":"⅗","&frac38;":"⅜","&frac45;":"⅘","&frac56;":"⅚","&frac58;":"⅝","&frac78;":"⅞","&frasl;":"⁄","&frown;":"⌢","&fscr;":"𝒻","&gE;":"≧","&gEl;":"⪌","&gacute;":"ǵ","&gamma;":"γ","&gammad;":"ϝ","&gap;":"⪆","&gbreve;":"ğ","&gcirc;":"ĝ","&gcy;":"г","&gdot;":"ġ","&ge;":"≥","&gel;":"⋛","&geq;":"≥","&geqq;":"≧","&geqslant;":"⩾","&ges;":"⩾","&gescc;":"⪩","&gesdot;":"⪀","&gesdoto;":"⪂","&gesdotol;":"⪄","&gesl;":"⋛︀","&gesles;":"⪔","&gfr;":"𝔤","&gg;":"≫","&ggg;":"⋙","&gimel;":"ℷ","&gjcy;":"ѓ","&gl;":"≷","&glE;":"⪒","&gla;":"⪥","&glj;":"⪤","&gnE;":"≩","&gnap;":"⪊","&gnapprox;":"⪊","&gne;":"⪈","&gneq;":"⪈","&gneqq;":"≩","&gnsim;":"⋧","&gopf;":"𝕘","&grave;":"`","&gscr;":"ℊ","&gsim;":"≳","&gsime;":"⪎","&gsiml;":"⪐","&gt":">","&gt;":">","&gtcc;":"⪧","&gtcir;":"⩺","&gtdot;":"⋗","&gtlPar;":"⦕","&gtquest;":"⩼","&gtrapprox;":"⪆","&gtrarr;":"⥸","&gtrdot;":"⋗","&gtreqless;":"⋛","&gtreqqless;":"⪌","&gtrless;":"≷","&gtrsim;":"≳","&gvertneqq;":"≩︀","&gvnE;":"≩︀","&hArr;":"⇔","&hairsp;":" ","&half;":"½","&hamilt;":"ℋ","&hardcy;":"ъ","&harr;":"↔","&harrcir;":"⥈","&harrw;":"↭","&hbar;":"ℏ","&hcirc;":"ĥ","&hearts;":"♥","&heartsuit;":"♥","&hellip;":"…","&hercon;":"⊹","&hfr;":"𝔥","&hksearow;":"⤥","&hkswarow;":"⤦","&hoarr;":"⇿","&homtht;":"∻","&hookleftarrow;":"↩","&hookrightarrow;":"↪","&hopf;":"𝕙","&horbar;":"―","&hscr;":"𝒽","&hslash;":"ℏ","&hstrok;":"ħ","&hybull;":"⁃","&hyphen;":"‐","&iacute":"í","&iacute;":"í","&ic;":"⁣","&icirc":"î","&icirc;":"î","&icy;":"и","&iecy;":"е","&iexcl":"¡","&iexcl;":"¡","&iff;":"⇔","&ifr;":"𝔦","&igrave":"ì","&igrave;":"ì","&ii;":"ⅈ","&iiiint;":"⨌","&iiint;":"∭","&iinfin;":"⧜","&iiota;":"℩","&ijlig;":"ĳ","&imacr;":"ī","&image;":"ℑ","&imagline;":"ℐ","&imagpart;":"ℑ","&imath;":"ı","&imof;":"⊷","&imped;":"Ƶ","&in;":"∈","&incare;":"℅","&infin;":"∞","&infintie;":"⧝","&inodot;":"ı","&int;":"∫","&intcal;":"⊺","&integers;":"ℤ","&intercal;":"⊺","&intlarhk;":"⨗","&intprod;":"⨼","&iocy;":"ё","&iogon;":"į","&iopf;":"𝕚","&iota;":"ι","&iprod;":"⨼","&iquest":"¿","&iquest;":"¿","&iscr;":"𝒾","&isin;":"∈","&isinE;":"⋹","&isindot;":"⋵","&isins;":"⋴","&isinsv;":"⋳","&isinv;":"∈","&it;":"⁢","&itilde;":"ĩ","&iukcy;":"і","&iuml":"ï","&iuml;":"ï","&jcirc;":"ĵ","&jcy;":"й","&jfr;":"𝔧","&jmath;":"ȷ","&jopf;":"𝕛","&jscr;":"𝒿","&jsercy;":"ј","&jukcy;":"є","&kappa;":"κ","&kappav;":"ϰ","&kcedil;":"ķ","&kcy;":"к","&kfr;":"𝔨","&kgreen;":"ĸ","&khcy;":"х","&kjcy;":"ќ","&kopf;":"𝕜","&kscr;":"𝓀","&lAarr;":"⇚","&lArr;":"⇐","&lAtail;":"⤛","&lBarr;":"⤎","&lE;":"≦","&lEg;":"⪋","&lHar;":"⥢","&lacute;":"ĺ","&laemptyv;":"⦴","&lagran;":"ℒ","&lambda;":"λ","&lang;":"⟨","&langd;":"⦑","&langle;":"⟨","&lap;":"⪅","&laquo":"«","&laquo;":"«","&larr;":"←","&larrb;":"⇤","&larrbfs;":"⤟","&larrfs;":"⤝","&larrhk;":"↩","&larrlp;":"↫","&larrpl;":"⤹","&larrsim;":"⥳","&larrtl;":"↢","&lat;":"⪫","&latail;":"⤙","&late;":"⪭","&lates;":"⪭︀","&lbarr;":"⤌","&lbbrk;":"❲","&lbrace;":"{","&lbrack;":"[","&lbrke;":"⦋","&lbrksld;":"⦏","&lbrkslu;":"⦍","&lcaron;":"ľ","&lcedil;":"ļ","&lceil;":"⌈","&lcub;":"{","&lcy;":"л","&ldca;":"⤶","&ldquo;":"“","&ldquor;":"„","&ldrdhar;":"⥧","&ldrushar;":"⥋","&ldsh;":"↲","&le;":"≤","&leftarrow;":"←","&leftarrowtail;":"↢","&leftharpoondown;":"↽","&leftharpoonup;":"↼","&leftleftarrows;":"⇇","&leftrightarrow;":"↔","&leftrightarrows;":"⇆","&leftrightharpoons;":"⇋","&leftrightsquigarrow;":"↭","&leftthreetimes;":"⋋","&leg;":"⋚","&leq;":"≤","&leqq;":"≦","&leqslant;":"⩽","&les;":"⩽","&lescc;":"⪨","&lesdot;":"⩿","&lesdoto;":"⪁","&lesdotor;":"⪃","&lesg;":"⋚︀","&lesges;":"⪓","&lessapprox;":"⪅","&lessdot;":"⋖","&lesseqgtr;":"⋚","&lesseqqgtr;":"⪋","&lessgtr;":"≶","&lesssim;":"≲","&lfisht;":"⥼","&lfloor;":"⌊","&lfr;":"𝔩","&lg;":"≶","&lgE;":"⪑","&lhard;":"↽","&lharu;":"↼","&lharul;":"⥪","&lhblk;":"▄","&ljcy;":"љ","&ll;":"≪","&llarr;":"⇇","&llcorner;":"⌞","&llhard;":"⥫","&lltri;":"◺","&lmidot;":"ŀ","&lmoust;":"⎰","&lmoustache;":"⎰","&lnE;":"≨","&lnap;":"⪉","&lnapprox;":"⪉","&lne;":"⪇","&lneq;":"⪇","&lneqq;":"≨","&lnsim;":"⋦","&loang;":"⟬","&loarr;":"⇽","&lobrk;":"⟦","&longleftarrow;":"⟵","&longleftrightarrow;":"⟷","&longmapsto;":"⟼","&longrightarrow;":"⟶","&looparrowleft;":"↫","&looparrowright;":"↬","&lopar;":"⦅","&lopf;":"𝕝","&loplus;":"⨭","&lotimes;":"⨴","&lowast;":"∗","&lowbar;":"_","&loz;":"◊","&lozenge;":"◊","&lozf;":"⧫","&lpar;":"(","&lparlt;":"⦓","&lrarr;":"⇆","&lrcorner;":"⌟","&lrhar;":"⇋","&lrhard;":"⥭","&lrm;":"‎","&lrtri;":"⊿","&lsaquo;":"‹","&lscr;":"𝓁","&lsh;":"↰","&lsim;":"≲","&lsime;":"⪍","&lsimg;":"⪏","&lsqb;":"[","&lsquo;":"‘","&lsquor;":"‚","&lstrok;":"ł","&lt":"<","&lt;":"<","&ltcc;":"⪦","&ltcir;":"⩹","&ltdot;":"⋖","&lthree;":"⋋","&ltimes;":"⋉","&ltlarr;":"⥶","&ltquest;":"⩻","&ltrPar;":"⦖","&ltri;":"◃","&ltrie;":"⊴","&ltrif;":"◂","&lurdshar;":"⥊","&luruhar;":"⥦","&lvertneqq;":"≨︀","&lvnE;":"≨︀","&mDDot;":"∺","&macr":"¯","&macr;":"¯","&male;":"♂","&malt;":"✠","&maltese;":"✠","&map;":"↦","&mapsto;":"↦","&mapstodown;":"↧","&mapstoleft;":"↤","&mapstoup;":"↥","&marker;":"▮","&mcomma;":"⨩","&mcy;":"м","&mdash;":"—","&measuredangle;":"∡","&mfr;":"𝔪","&mho;":"℧","&micro":"µ","&micro;":"µ","&mid;":"∣","&midast;":"*","&midcir;":"⫰","&middot":"·","&middot;":"·","&minus;":"−","&minusb;":"⊟","&minusd;":"∸","&minusdu;":"⨪","&mlcp;":"⫛","&mldr;":"…","&mnplus;":"∓","&models;":"⊧","&mopf;":"𝕞","&mp;":"∓","&mscr;":"𝓂","&mstpos;":"∾","&mu;":"μ","&multimap;":"⊸","&mumap;":"⊸","&nGg;":"⋙̸","&nGt;":"≫⃒","&nGtv;":"≫̸","&nLeftarrow;":"⇍","&nLeftrightarrow;":"⇎","&nLl;":"⋘̸","&nLt;":"≪⃒","&nLtv;":"≪̸","&nRightarrow;":"⇏","&nVDash;":"⊯","&nVdash;":"⊮","&nabla;":"∇","&nacute;":"ń","&nang;":"∠⃒","&nap;":"≉","&napE;":"⩰̸","&napid;":"≋̸","&napos;":"ŉ","&napprox;":"≉","&natur;":"♮","&natural;":"♮","&naturals;":"ℕ","&nbsp":" ","&nbsp;":" ","&nbump;":"≎̸","&nbumpe;":"≏̸","&ncap;":"⩃","&ncaron;":"ň","&ncedil;":"ņ","&ncong;":"≇","&ncongdot;":"⩭̸","&ncup;":"⩂","&ncy;":"н","&ndash;":"–","&ne;":"≠","&neArr;":"⇗","&nearhk;":"⤤","&nearr;":"↗","&nearrow;":"↗","&nedot;":"≐̸","&nequiv;":"≢","&nesear;":"⤨","&nesim;":"≂̸","&nexist;":"∄","&nexists;":"∄","&nfr;":"𝔫","&ngE;":"≧̸","&nge;":"≱","&ngeq;":"≱","&ngeqq;":"≧̸","&ngeqslant;":"⩾̸","&nges;":"⩾̸","&ngsim;":"≵","&ngt;":"≯","&ngtr;":"≯","&nhArr;":"⇎","&nharr;":"↮","&nhpar;":"⫲","&ni;":"∋","&nis;":"⋼","&nisd;":"⋺","&niv;":"∋","&njcy;":"њ","&nlArr;":"⇍","&nlE;":"≦̸","&nlarr;":"↚","&nldr;":"‥","&nle;":"≰","&nleftarrow;":"↚","&nleftrightarrow;":"↮","&nleq;":"≰","&nleqq;":"≦̸","&nleqslant;":"⩽̸","&nles;":"⩽̸","&nless;":"≮","&nlsim;":"≴","&nlt;":"≮","&nltri;":"⋪","&nltrie;":"⋬","&nmid;":"∤","&nopf;":"𝕟","&not":"¬","&not;":"¬","&notin;":"∉","&notinE;":"⋹̸","&notindot;":"⋵̸","&notinva;":"∉","&notinvb;":"⋷","&notinvc;":"⋶","&notni;":"∌","&notniva;":"∌","&notnivb;":"⋾","&notnivc;":"⋽","&npar;":"∦","&nparallel;":"∦","&nparsl;":"⫽⃥","&npart;":"∂̸","&npolint;":"⨔","&npr;":"⊀","&nprcue;":"⋠","&npre;":"⪯̸","&nprec;":"⊀","&npreceq;":"⪯̸","&nrArr;":"⇏","&nrarr;":"↛","&nrarrc;":"⤳̸","&nrarrw;":"↝̸","&nrightarrow;":"↛","&nrtri;":"⋫","&nrtrie;":"⋭","&nsc;":"⊁","&nsccue;":"⋡","&nsce;":"⪰̸","&nscr;":"𝓃","&nshortmid;":"∤","&nshortparallel;":"∦","&nsim;":"≁","&nsime;":"≄","&nsimeq;":"≄","&nsmid;":"∤","&nspar;":"∦","&nsqsube;":"⋢","&nsqsupe;":"⋣","&nsub;":"⊄","&nsubE;":"⫅̸","&nsube;":"⊈","&nsubset;":"⊂⃒","&nsubseteq;":"⊈","&nsubseteqq;":"⫅̸","&nsucc;":"⊁","&nsucceq;":"⪰̸","&nsup;":"⊅","&nsupE;":"⫆̸","&nsupe;":"⊉","&nsupset;":"⊃⃒","&nsupseteq;":"⊉","&nsupseteqq;":"⫆̸","&ntgl;":"≹","&ntilde":"ñ","&ntilde;":"ñ","&ntlg;":"≸","&ntriangleleft;":"⋪","&ntrianglelefteq;":"⋬","&ntriangleright;":"⋫","&ntrianglerighteq;":"⋭","&nu;":"ν","&num;":"#","&numero;":"№","&numsp;":" ","&nvDash;":"⊭","&nvHarr;":"⤄","&nvap;":"≍⃒","&nvdash;":"⊬","&nvge;":"≥⃒","&nvgt;":">⃒","&nvinfin;":"⧞","&nvlArr;":"⤂","&nvle;":"≤⃒","&nvlt;":"<⃒","&nvltrie;":"⊴⃒","&nvrArr;":"⤃","&nvrtrie;":"⊵⃒","&nvsim;":"∼⃒","&nwArr;":"⇖","&nwarhk;":"⤣","&nwarr;":"↖","&nwarrow;":"↖","&nwnear;":"⤧","&oS;":"Ⓢ","&oacute":"ó","&oacute;":"ó","&oast;":"⊛","&ocir;":"⊚","&ocirc":"ô","&ocirc;":"ô","&ocy;":"о","&odash;":"⊝","&odblac;":"ő","&odiv;":"⨸","&odot;":"⊙","&odsold;":"⦼","&oelig;":"œ","&ofcir;":"⦿","&ofr;":"𝔬","&ogon;":"˛","&ograve":"ò","&ograve;":"ò","&ogt;":"⧁","&ohbar;":"⦵","&ohm;":"Ω","&oint;":"∮","&olarr;":"↺","&olcir;":"⦾","&olcross;":"⦻","&oline;":"‾","&olt;":"⧀","&omacr;":"ō","&omega;":"ω","&omicron;":"ο","&omid;":"⦶","&ominus;":"⊖","&oopf;":"𝕠","&opar;":"⦷","&operp;":"⦹","&oplus;":"⊕","&or;":"∨","&orarr;":"↻","&ord;":"⩝","&order;":"ℴ","&orderof;":"ℴ","&ordf":"ª","&ordf;":"ª","&ordm":"º","&ordm;":"º","&origof;":"⊶","&oror;":"⩖","&orslope;":"⩗","&orv;":"⩛","&oscr;":"ℴ","&oslash":"ø","&oslash;":"ø","&osol;":"⊘","&otilde":"õ","&otilde;":"õ","&otimes;":"⊗","&otimesas;":"⨶","&ouml":"ö","&ouml;":"ö","&ovbar;":"⌽","&par;":"∥","&para":"¶","&para;":"¶","&parallel;":"∥","&parsim;":"⫳","&parsl;":"⫽","&part;":"∂","&pcy;":"п","&percnt;":"%","&period;":".","&permil;":"‰","&perp;":"⊥","&pertenk;":"‱","&pfr;":"𝔭","&phi;":"φ","&phiv;":"ϕ","&phmmat;":"ℳ","&phone;":"☎","&pi;":"π","&pitchfork;":"⋔","&piv;":"ϖ","&planck;":"ℏ","&planckh;":"ℎ","&plankv;":"ℏ","&plus;":"+","&plusacir;":"⨣","&plusb;":"⊞","&pluscir;":"⨢","&plusdo;":"∔","&plusdu;":"⨥","&pluse;":"⩲","&plusmn":"±","&plusmn;":"±","&plussim;":"⨦","&plustwo;":"⨧","&pm;":"±","&pointint;":"⨕","&popf;":"𝕡","&pound":"£","&pound;":"£","&pr;":"≺","&prE;":"⪳","&prap;":"⪷","&prcue;":"≼","&pre;":"⪯","&prec;":"≺","&precapprox;":"⪷","&preccurlyeq;":"≼","&preceq;":"⪯","&precnapprox;":"⪹","&precneqq;":"⪵","&precnsim;":"⋨","&precsim;":"≾","&prime;":"′","&primes;":"ℙ","&prnE;":"⪵","&prnap;":"⪹","&prnsim;":"⋨","&prod;":"∏","&profalar;":"⌮","&profline;":"⌒","&profsurf;":"⌓","&prop;":"∝","&propto;":"∝","&prsim;":"≾","&prurel;":"⊰","&pscr;":"𝓅","&psi;":"ψ","&puncsp;":" ","&qfr;":"𝔮","&qint;":"⨌","&qopf;":"𝕢","&qprime;":"⁗","&qscr;":"𝓆","&quaternions;":"ℍ","&quatint;":"⨖","&quest;":"?","&questeq;":"≟","&quot":'"',"&quot;":'"',"&rAarr;":"⇛","&rArr;":"⇒","&rAtail;":"⤜","&rBarr;":"⤏","&rHar;":"⥤","&race;":"∽̱","&racute;":"ŕ","&radic;":"√","&raemptyv;":"⦳","&rang;":"⟩","&rangd;":"⦒","&range;":"⦥","&rangle;":"⟩","&raquo":"»","&raquo;":"»","&rarr;":"→","&rarrap;":"⥵","&rarrb;":"⇥","&rarrbfs;":"⤠","&rarrc;":"⤳","&rarrfs;":"⤞","&rarrhk;":"↪","&rarrlp;":"↬","&rarrpl;":"⥅","&rarrsim;":"⥴","&rarrtl;":"↣","&rarrw;":"↝","&ratail;":"⤚","&ratio;":"∶","&rationals;":"ℚ","&rbarr;":"⤍","&rbbrk;":"❳","&rbrace;":"}","&rbrack;":"]","&rbrke;":"⦌","&rbrksld;":"⦎","&rbrkslu;":"⦐","&rcaron;":"ř","&rcedil;":"ŗ","&rceil;":"⌉","&rcub;":"}","&rcy;":"р","&rdca;":"⤷","&rdldhar;":"⥩","&rdquo;":"”","&rdquor;":"”","&rdsh;":"↳","&real;":"ℜ","&realine;":"ℛ","&realpart;":"ℜ","&reals;":"ℝ","&rect;":"▭","&reg":"®","&reg;":"®","&rfisht;":"⥽","&rfloor;":"⌋","&rfr;":"𝔯","&rhard;":"⇁","&rharu;":"⇀","&rharul;":"⥬","&rho;":"ρ","&rhov;":"ϱ","&rightarrow;":"→","&rightarrowtail;":"↣","&rightharpoondown;":"⇁","&rightharpoonup;":"⇀","&rightleftarrows;":"⇄","&rightleftharpoons;":"⇌","&rightrightarrows;":"⇉","&rightsquigarrow;":"↝","&rightthreetimes;":"⋌","&ring;":"˚","&risingdotseq;":"≓","&rlarr;":"⇄","&rlhar;":"⇌","&rlm;":"‏","&rmoust;":"⎱","&rmoustache;":"⎱","&rnmid;":"⫮","&roang;":"⟭","&roarr;":"⇾","&robrk;":"⟧","&ropar;":"⦆","&ropf;":"𝕣","&roplus;":"⨮","&rotimes;":"⨵","&rpar;":")","&rpargt;":"⦔","&rppolint;":"⨒","&rrarr;":"⇉","&rsaquo;":"›","&rscr;":"𝓇","&rsh;":"↱","&rsqb;":"]","&rsquo;":"’","&rsquor;":"’","&rthree;":"⋌","&rtimes;":"⋊","&rtri;":"▹","&rtrie;":"⊵","&rtrif;":"▸","&rtriltri;":"⧎","&ruluhar;":"⥨","&rx;":"℞","&sacute;":"ś","&sbquo;":"‚","&sc;":"≻","&scE;":"⪴","&scap;":"⪸","&scaron;":"š","&sccue;":"≽","&sce;":"⪰","&scedil;":"ş","&scirc;":"ŝ","&scnE;":"⪶","&scnap;":"⪺","&scnsim;":"⋩","&scpolint;":"⨓","&scsim;":"≿","&scy;":"с","&sdot;":"⋅","&sdotb;":"⊡","&sdote;":"⩦","&seArr;":"⇘","&searhk;":"⤥","&searr;":"↘","&searrow;":"↘","&sect":"§","&sect;":"§","&semi;":";","&seswar;":"⤩","&setminus;":"∖","&setmn;":"∖","&sext;":"✶","&sfr;":"𝔰","&sfrown;":"⌢","&sharp;":"♯","&shchcy;":"щ","&shcy;":"ш","&shortmid;":"∣","&shortparallel;":"∥","&shy":"­","&shy;":"­","&sigma;":"σ","&sigmaf;":"ς","&sigmav;":"ς","&sim;":"∼","&simdot;":"⩪","&sime;":"≃","&simeq;":"≃","&simg;":"⪞","&simgE;":"⪠","&siml;":"⪝","&simlE;":"⪟","&simne;":"≆","&simplus;":"⨤","&simrarr;":"⥲","&slarr;":"←","&smallsetminus;":"∖","&smashp;":"⨳","&smeparsl;":"⧤","&smid;":"∣","&smile;":"⌣","&smt;":"⪪","&smte;":"⪬","&smtes;":"⪬︀","&softcy;":"ь","&sol;":"/","&solb;":"⧄","&solbar;":"⌿","&sopf;":"𝕤","&spades;":"♠","&spadesuit;":"♠","&spar;":"∥","&sqcap;":"⊓","&sqcaps;":"⊓︀","&sqcup;":"⊔","&sqcups;":"⊔︀","&sqsub;":"⊏","&sqsube;":"⊑","&sqsubset;":"⊏","&sqsubseteq;":"⊑","&sqsup;":"⊐","&sqsupe;":"⊒","&sqsupset;":"⊐","&sqsupseteq;":"⊒","&squ;":"□","&square;":"□","&squarf;":"▪","&squf;":"▪","&srarr;":"→","&sscr;":"𝓈","&ssetmn;":"∖","&ssmile;":"⌣","&sstarf;":"⋆","&star;":"☆","&starf;":"★","&straightepsilon;":"ϵ","&straightphi;":"ϕ","&strns;":"¯","&sub;":"⊂","&subE;":"⫅","&subdot;":"⪽","&sube;":"⊆","&subedot;":"⫃","&submult;":"⫁","&subnE;":"⫋","&subne;":"⊊","&subplus;":"⪿","&subrarr;":"⥹","&subset;":"⊂","&subseteq;":"⊆","&subseteqq;":"⫅","&subsetneq;":"⊊","&subsetneqq;":"⫋","&subsim;":"⫇","&subsub;":"⫕","&subsup;":"⫓","&succ;":"≻","&succapprox;":"⪸","&succcurlyeq;":"≽","&succeq;":"⪰","&succnapprox;":"⪺","&succneqq;":"⪶","&succnsim;":"⋩","&succsim;":"≿","&sum;":"∑","&sung;":"♪","&sup1":"¹","&sup1;":"¹","&sup2":"²","&sup2;":"²","&sup3":"³","&sup3;":"³","&sup;":"⊃","&supE;":"⫆","&supdot;":"⪾","&supdsub;":"⫘","&supe;":"⊇","&supedot;":"⫄","&suphsol;":"⟉","&suphsub;":"⫗","&suplarr;":"⥻","&supmult;":"⫂","&supnE;":"⫌","&supne;":"⊋","&supplus;":"⫀","&supset;":"⊃","&supseteq;":"⊇","&supseteqq;":"⫆","&supsetneq;":"⊋","&supsetneqq;":"⫌","&supsim;":"⫈","&supsub;":"⫔","&supsup;":"⫖","&swArr;":"⇙","&swarhk;":"⤦","&swarr;":"↙","&swarrow;":"↙","&swnwar;":"⤪","&szlig":"ß","&szlig;":"ß","&target;":"⌖","&tau;":"τ","&tbrk;":"⎴","&tcaron;":"ť","&tcedil;":"ţ","&tcy;":"т","&tdot;":"⃛","&telrec;":"⌕","&tfr;":"𝔱","&there4;":"∴","&therefore;":"∴","&theta;":"θ","&thetasym;":"ϑ","&thetav;":"ϑ","&thickapprox;":"≈","&thicksim;":"∼","&thinsp;":" ","&thkap;":"≈","&thksim;":"∼","&thorn":"þ","&thorn;":"þ","&tilde;":"˜","&times":"×","&times;":"×","&timesb;":"⊠","&timesbar;":"⨱","&timesd;":"⨰","&tint;":"∭","&toea;":"⤨","&top;":"⊤","&topbot;":"⌶","&topcir;":"⫱","&topf;":"𝕥","&topfork;":"⫚","&tosa;":"⤩","&tprime;":"‴","&trade;":"™","&triangle;":"▵","&triangledown;":"▿","&triangleleft;":"◃","&trianglelefteq;":"⊴","&triangleq;":"≜","&triangleright;":"▹","&trianglerighteq;":"⊵","&tridot;":"◬","&trie;":"≜","&triminus;":"⨺","&triplus;":"⨹","&trisb;":"⧍","&tritime;":"⨻","&trpezium;":"⏢","&tscr;":"𝓉","&tscy;":"ц","&tshcy;":"ћ","&tstrok;":"ŧ","&twixt;":"≬","&twoheadleftarrow;":"↞","&twoheadrightarrow;":"↠","&uArr;":"⇑","&uHar;":"⥣","&uacute":"ú","&uacute;":"ú","&uarr;":"↑","&ubrcy;":"ў","&ubreve;":"ŭ","&ucirc":"û","&ucirc;":"û","&ucy;":"у","&udarr;":"⇅","&udblac;":"ű","&udhar;":"⥮","&ufisht;":"⥾","&ufr;":"𝔲","&ugrave":"ù","&ugrave;":"ù","&uharl;":"↿","&uharr;":"↾","&uhblk;":"▀","&ulcorn;":"⌜","&ulcorner;":"⌜","&ulcrop;":"⌏","&ultri;":"◸","&umacr;":"ū","&uml":"¨","&uml;":"¨","&uogon;":"ų","&uopf;":"𝕦","&uparrow;":"↑","&updownarrow;":"↕","&upharpoonleft;":"↿","&upharpoonright;":"↾","&uplus;":"⊎","&upsi;":"υ","&upsih;":"ϒ","&upsilon;":"υ","&upuparrows;":"⇈","&urcorn;":"⌝","&urcorner;":"⌝","&urcrop;":"⌎","&uring;":"ů","&urtri;":"◹","&uscr;":"𝓊","&utdot;":"⋰","&utilde;":"ũ","&utri;":"▵","&utrif;":"▴","&uuarr;":"⇈","&uuml":"ü","&uuml;":"ü","&uwangle;":"⦧","&vArr;":"⇕","&vBar;":"⫨","&vBarv;":"⫩","&vDash;":"⊨","&vangrt;":"⦜","&varepsilon;":"ϵ","&varkappa;":"ϰ","&varnothing;":"∅","&varphi;":"ϕ","&varpi;":"ϖ","&varpropto;":"∝","&varr;":"↕","&varrho;":"ϱ","&varsigma;":"ς","&varsubsetneq;":"⊊︀","&varsubsetneqq;":"⫋︀","&varsupsetneq;":"⊋︀","&varsupsetneqq;":"⫌︀","&vartheta;":"ϑ","&vartriangleleft;":"⊲","&vartriangleright;":"⊳","&vcy;":"в","&vdash;":"⊢","&vee;":"∨","&veebar;":"⊻","&veeeq;":"≚","&vellip;":"⋮","&verbar;":"|","&vert;":"|","&vfr;":"𝔳","&vltri;":"⊲","&vnsub;":"⊂⃒","&vnsup;":"⊃⃒","&vopf;":"𝕧","&vprop;":"∝","&vrtri;":"⊳","&vscr;":"𝓋","&vsubnE;":"⫋︀","&vsubne;":"⊊︀","&vsupnE;":"⫌︀","&vsupne;":"⊋︀","&vzigzag;":"⦚","&wcirc;":"ŵ","&wedbar;":"⩟","&wedge;":"∧","&wedgeq;":"≙","&weierp;":"℘","&wfr;":"𝔴","&wopf;":"𝕨","&wp;":"℘","&wr;":"≀","&wreath;":"≀","&wscr;":"𝓌","&xcap;":"⋂","&xcirc;":"◯","&xcup;":"⋃","&xdtri;":"▽","&xfr;":"𝔵","&xhArr;":"⟺","&xharr;":"⟷","&xi;":"ξ","&xlArr;":"⟸","&xlarr;":"⟵","&xmap;":"⟼","&xnis;":"⋻","&xodot;":"⨀","&xopf;":"𝕩","&xoplus;":"⨁","&xotime;":"⨂","&xrArr;":"⟹","&xrarr;":"⟶","&xscr;":"𝓍","&xsqcup;":"⨆","&xuplus;":"⨄","&xutri;":"△","&xvee;":"⋁","&xwedge;":"⋀","&yacute":"ý","&yacute;":"ý","&yacy;":"я","&ycirc;":"ŷ","&ycy;":"ы","&yen":"¥","&yen;":"¥","&yfr;":"𝔶","&yicy;":"ї","&yopf;":"𝕪","&yscr;":"𝓎","&yucy;":"ю","&yuml":"ÿ","&yuml;":"ÿ","&zacute;":"ź","&zcaron;":"ž","&zcy;":"з","&zdot;":"ż","&zeetrf;":"ℨ","&zeta;":"ζ","&zfr;":"𝔷","&zhcy;":"ж","&zigrarr;":"⇝","&zopf;":"𝕫","&zscr;":"𝓏","&zwj;":"‍","&zwnj;":"‌"},characters:{"Æ":"&AElig;","&":"&amp;","Á":"&Aacute;","Ă":"&Abreve;","Â":"&Acirc;","А":"&Acy;","𝔄":"&Afr;","À":"&Agrave;","Α":"&Alpha;","Ā":"&Amacr;","⩓":"&And;","Ą":"&Aogon;","𝔸":"&Aopf;","⁡":"&af;","Å":"&angst;","𝒜":"&Ascr;","≔":"&coloneq;","Ã":"&Atilde;","Ä":"&Auml;","∖":"&ssetmn;","⫧":"&Barv;","⌆":"&doublebarwedge;","Б":"&Bcy;","∵":"&because;","ℬ":"&bernou;","Β":"&Beta;","𝔅":"&Bfr;","𝔹":"&Bopf;","˘":"&breve;","≎":"&bump;","Ч":"&CHcy;","©":"&copy;","Ć":"&Cacute;","⋒":"&Cap;","ⅅ":"&DD;","ℭ":"&Cfr;","Č":"&Ccaron;","Ç":"&Ccedil;","Ĉ":"&Ccirc;","∰":"&Cconint;","Ċ":"&Cdot;","¸":"&cedil;","·":"&middot;","Χ":"&Chi;","⊙":"&odot;","⊖":"&ominus;","⊕":"&oplus;","⊗":"&otimes;","∲":"&cwconint;","”":"&rdquor;","’":"&rsquor;","∷":"&Proportion;","⩴":"&Colone;","≡":"&equiv;","∯":"&DoubleContourIntegral;","∮":"&oint;","ℂ":"&complexes;","∐":"&coprod;","∳":"&awconint;","⨯":"&Cross;","𝒞":"&Cscr;","⋓":"&Cup;","≍":"&asympeq;","⤑":"&DDotrahd;","Ђ":"&DJcy;","Ѕ":"&DScy;","Џ":"&DZcy;","‡":"&ddagger;","↡":"&Darr;","⫤":"&DoubleLeftTee;","Ď":"&Dcaron;","Д":"&Dcy;","∇":"&nabla;","Δ":"&Delta;","𝔇":"&Dfr;","´":"&acute;","˙":"&dot;","˝":"&dblac;","`":"&grave;","˜":"&tilde;","⋄":"&diamond;","ⅆ":"&dd;","𝔻":"&Dopf;","¨":"&uml;","⃜":"&DotDot;","≐":"&esdot;","⇓":"&dArr;","⇐":"&lArr;","⇔":"&iff;","⟸":"&xlArr;","⟺":"&xhArr;","⟹":"&xrArr;","⇒":"&rArr;","⊨":"&vDash;","⇑":"&uArr;","⇕":"&vArr;","∥":"&spar;","↓":"&downarrow;","⤓":"&DownArrowBar;","⇵":"&duarr;","̑":"&DownBreve;","⥐":"&DownLeftRightVector;","⥞":"&DownLeftTeeVector;","↽":"&lhard;","⥖":"&DownLeftVectorBar;","⥟":"&DownRightTeeVector;","⇁":"&rightharpoondown;","⥗":"&DownRightVectorBar;","⊤":"&top;","↧":"&mapstodown;","𝒟":"&Dscr;","Đ":"&Dstrok;","Ŋ":"&ENG;","Ð":"&ETH;","É":"&Eacute;","Ě":"&Ecaron;","Ê":"&Ecirc;","Э":"&Ecy;","Ė":"&Edot;","𝔈":"&Efr;","È":"&Egrave;","∈":"&isinv;","Ē":"&Emacr;","◻":"&EmptySmallSquare;","▫":"&EmptyVerySmallSquare;","Ę":"&Eogon;","𝔼":"&Eopf;","Ε":"&Epsilon;","⩵":"&Equal;","≂":"&esim;","⇌":"&rlhar;","ℰ":"&expectation;","⩳":"&Esim;","Η":"&Eta;","Ë":"&Euml;","∃":"&exist;","ⅇ":"&exponentiale;","Ф":"&Fcy;","𝔉":"&Ffr;","◼":"&FilledSmallSquare;","▪":"&squf;","𝔽":"&Fopf;","∀":"&forall;","ℱ":"&Fscr;","Ѓ":"&GJcy;",">":"&gt;","Γ":"&Gamma;","Ϝ":"&Gammad;","Ğ":"&Gbreve;","Ģ":"&Gcedil;","Ĝ":"&Gcirc;","Г":"&Gcy;","Ġ":"&Gdot;","𝔊":"&Gfr;","⋙":"&ggg;","𝔾":"&Gopf;","≥":"&geq;","⋛":"&gtreqless;","≧":"&geqq;","⪢":"&GreaterGreater;","≷":"&gtrless;","⩾":"&ges;","≳":"&gtrsim;","𝒢":"&Gscr;","≫":"&gg;","Ъ":"&HARDcy;","ˇ":"&caron;","^":"&Hat;","Ĥ":"&Hcirc;","ℌ":"&Poincareplane;","ℋ":"&hamilt;","ℍ":"&quaternions;","─":"&boxh;","Ħ":"&Hstrok;","≏":"&bumpeq;","Е":"&IEcy;","Ĳ":"&IJlig;","Ё":"&IOcy;","Í":"&Iacute;","Î":"&Icirc;","И":"&Icy;","İ":"&Idot;","ℑ":"&imagpart;","Ì":"&Igrave;","Ī":"&Imacr;","ⅈ":"&ii;","∬":"&Int;","∫":"&int;","⋂":"&xcap;","⁣":"&ic;","⁢":"&it;","Į":"&Iogon;","𝕀":"&Iopf;","Ι":"&Iota;","ℐ":"&imagline;","Ĩ":"&Itilde;","І":"&Iukcy;","Ï":"&Iuml;","Ĵ":"&Jcirc;","Й":"&Jcy;","𝔍":"&Jfr;","𝕁":"&Jopf;","𝒥":"&Jscr;","Ј":"&Jsercy;","Є":"&Jukcy;","Х":"&KHcy;","Ќ":"&KJcy;","Κ":"&Kappa;","Ķ":"&Kcedil;","К":"&Kcy;","𝔎":"&Kfr;","𝕂":"&Kopf;","𝒦":"&Kscr;","Љ":"&LJcy;","<":"&lt;","Ĺ":"&Lacute;","Λ":"&Lambda;","⟪":"&Lang;","ℒ":"&lagran;","↞":"&twoheadleftarrow;","Ľ":"&Lcaron;","Ļ":"&Lcedil;","Л":"&Lcy;","⟨":"&langle;","←":"&slarr;","⇤":"&larrb;","⇆":"&lrarr;","⌈":"&lceil;","⟦":"&lobrk;","⥡":"&LeftDownTeeVector;","⇃":"&downharpoonleft;","⥙":"&LeftDownVectorBar;","⌊":"&lfloor;","↔":"&leftrightarrow;","⥎":"&LeftRightVector;","⊣":"&dashv;","↤":"&mapstoleft;","⥚":"&LeftTeeVector;","⊲":"&vltri;","⧏":"&LeftTriangleBar;","⊴":"&trianglelefteq;","⥑":"&LeftUpDownVector;","⥠":"&LeftUpTeeVector;","↿":"&upharpoonleft;","⥘":"&LeftUpVectorBar;","↼":"&lharu;","⥒":"&LeftVectorBar;","⋚":"&lesseqgtr;","≦":"&leqq;","≶":"&lg;","⪡":"&LessLess;","⩽":"&les;","≲":"&lsim;","𝔏":"&Lfr;","⋘":"&Ll;","⇚":"&lAarr;","Ŀ":"&Lmidot;","⟵":"&xlarr;","⟷":"&xharr;","⟶":"&xrarr;","𝕃":"&Lopf;","↙":"&swarrow;","↘":"&searrow;","↰":"&lsh;","Ł":"&Lstrok;","≪":"&ll;","⤅":"&Map;","М":"&Mcy;"," ":"&MediumSpace;","ℳ":"&phmmat;","𝔐":"&Mfr;","∓":"&mp;","𝕄":"&Mopf;","Μ":"&Mu;","Њ":"&NJcy;","Ń":"&Nacute;","Ň":"&Ncaron;","Ņ":"&Ncedil;","Н":"&Ncy;","​":"&ZeroWidthSpace;","\n":"&NewLine;","𝔑":"&Nfr;","⁠":"&NoBreak;"," ":"&nbsp;","ℕ":"&naturals;","⫬":"&Not;","≢":"&nequiv;","≭":"&NotCupCap;","∦":"&nspar;","∉":"&notinva;","≠":"&ne;","≂̸":"&nesim;","∄":"&nexists;","≯":"&ngtr;","≱":"&ngeq;","≧̸":"&ngeqq;","≫̸":"&nGtv;","≹":"&ntgl;","⩾̸":"&nges;","≵":"&ngsim;","≎̸":"&nbump;","≏̸":"&nbumpe;","⋪":"&ntriangleleft;","⧏̸":"&NotLeftTriangleBar;","⋬":"&ntrianglelefteq;","≮":"&nlt;","≰":"&nleq;","≸":"&ntlg;","≪̸":"&nLtv;","⩽̸":"&nles;","≴":"&nlsim;","⪢̸":"&NotNestedGreaterGreater;","⪡̸":"&NotNestedLessLess;","⊀":"&nprec;","⪯̸":"&npreceq;","⋠":"&nprcue;","∌":"&notniva;","⋫":"&ntriangleright;","⧐̸":"&NotRightTriangleBar;","⋭":"&ntrianglerighteq;","⊏̸":"&NotSquareSubset;","⋢":"&nsqsube;","⊐̸":"&NotSquareSuperset;","⋣":"&nsqsupe;","⊂⃒":"&vnsub;","⊈":"&nsubseteq;","⊁":"&nsucc;","⪰̸":"&nsucceq;","⋡":"&nsccue;","≿̸":"&NotSucceedsTilde;","⊃⃒":"&vnsup;","⊉":"&nsupseteq;","≁":"&nsim;","≄":"&nsimeq;","≇":"&ncong;","≉":"&napprox;","∤":"&nsmid;","𝒩":"&Nscr;","Ñ":"&Ntilde;","Ν":"&Nu;","Œ":"&OElig;","Ó":"&Oacute;","Ô":"&Ocirc;","О":"&Ocy;","Ő":"&Odblac;","𝔒":"&Ofr;","Ò":"&Ograve;","Ō":"&Omacr;","Ω":"&ohm;","Ο":"&Omicron;","𝕆":"&Oopf;","“":"&ldquo;","‘":"&lsquo;","⩔":"&Or;","𝒪":"&Oscr;","Ø":"&Oslash;","Õ":"&Otilde;","⨷":"&Otimes;","Ö":"&Ouml;","‾":"&oline;","⏞":"&OverBrace;","⎴":"&tbrk;","⏜":"&OverParenthesis;","∂":"&part;","П":"&Pcy;","𝔓":"&Pfr;","Φ":"&Phi;","Π":"&Pi;","±":"&pm;","ℙ":"&primes;","⪻":"&Pr;","≺":"&prec;","⪯":"&preceq;","≼":"&preccurlyeq;","≾":"&prsim;","″":"&Prime;","∏":"&prod;","∝":"&vprop;","𝒫":"&Pscr;","Ψ":"&Psi;",'"':"&quot;","𝔔":"&Qfr;","ℚ":"&rationals;","𝒬":"&Qscr;","⤐":"&drbkarow;","®":"&reg;","Ŕ":"&Racute;","⟫":"&Rang;","↠":"&twoheadrightarrow;","⤖":"&Rarrtl;","Ř":"&Rcaron;","Ŗ":"&Rcedil;","Р":"&Rcy;","ℜ":"&realpart;","∋":"&niv;","⇋":"&lrhar;","⥯":"&duhar;","Ρ":"&Rho;","⟩":"&rangle;","→":"&srarr;","⇥":"&rarrb;","⇄":"&rlarr;","⌉":"&rceil;","⟧":"&robrk;","⥝":"&RightDownTeeVector;","⇂":"&downharpoonright;","⥕":"&RightDownVectorBar;","⌋":"&rfloor;","⊢":"&vdash;","↦":"&mapsto;","⥛":"&RightTeeVector;","⊳":"&vrtri;","⧐":"&RightTriangleBar;","⊵":"&trianglerighteq;","⥏":"&RightUpDownVector;","⥜":"&RightUpTeeVector;","↾":"&upharpoonright;","⥔":"&RightUpVectorBar;","⇀":"&rightharpoonup;","⥓":"&RightVectorBar;","ℝ":"&reals;","⥰":"&RoundImplies;","⇛":"&rAarr;","ℛ":"&realine;","↱":"&rsh;","⧴":"&RuleDelayed;","Щ":"&SHCHcy;","Ш":"&SHcy;","Ь":"&SOFTcy;","Ś":"&Sacute;","⪼":"&Sc;","Š":"&Scaron;","Ş":"&Scedil;","Ŝ":"&Scirc;","С":"&Scy;","𝔖":"&Sfr;","↑":"&uparrow;","Σ":"&Sigma;","∘":"&compfn;","𝕊":"&Sopf;","√":"&radic;","□":"&square;","⊓":"&sqcap;","⊏":"&sqsubset;","⊑":"&sqsubseteq;","⊐":"&sqsupset;","⊒":"&sqsupseteq;","⊔":"&sqcup;","𝒮":"&Sscr;","⋆":"&sstarf;","⋐":"&Subset;","⊆":"&subseteq;","≻":"&succ;","⪰":"&succeq;","≽":"&succcurlyeq;","≿":"&succsim;","∑":"&sum;","⋑":"&Supset;","⊃":"&supset;","⊇":"&supseteq;","Þ":"&THORN;","™":"&trade;","Ћ":"&TSHcy;","Ц":"&TScy;","\t":"&Tab;","Τ":"&Tau;","Ť":"&Tcaron;","Ţ":"&Tcedil;","Т":"&Tcy;","𝔗":"&Tfr;","∴":"&therefore;","Θ":"&Theta;","  ":"&ThickSpace;"," ":"&thinsp;","∼":"&thksim;","≃":"&simeq;","≅":"&cong;","≈":"&thkap;","𝕋":"&Topf;","⃛":"&tdot;","𝒯":"&Tscr;","Ŧ":"&Tstrok;","Ú":"&Uacute;","↟":"&Uarr;","⥉":"&Uarrocir;","Ў":"&Ubrcy;","Ŭ":"&Ubreve;","Û":"&Ucirc;","У":"&Ucy;","Ű":"&Udblac;","𝔘":"&Ufr;","Ù":"&Ugrave;","Ū":"&Umacr;",_:"&lowbar;","⏟":"&UnderBrace;","⎵":"&bbrk;","⏝":"&UnderParenthesis;","⋃":"&xcup;","⊎":"&uplus;","Ų":"&Uogon;","𝕌":"&Uopf;","⤒":"&UpArrowBar;","⇅":"&udarr;","↕":"&varr;","⥮":"&udhar;","⊥":"&perp;","↥":"&mapstoup;","↖":"&nwarrow;","↗":"&nearrow;","ϒ":"&upsih;","Υ":"&Upsilon;","Ů":"&Uring;","𝒰":"&Uscr;","Ũ":"&Utilde;","Ü":"&Uuml;","⊫":"&VDash;","⫫":"&Vbar;","В":"&Vcy;","⊩":"&Vdash;","⫦":"&Vdashl;","⋁":"&xvee;","‖":"&Vert;","∣":"&smid;","|":"&vert;","❘":"&VerticalSeparator;","≀":"&wreath;"," ":"&hairsp;","𝔙":"&Vfr;","𝕍":"&Vopf;","𝒱":"&Vscr;","⊪":"&Vvdash;","Ŵ":"&Wcirc;","⋀":"&xwedge;","𝔚":"&Wfr;","𝕎":"&Wopf;","𝒲":"&Wscr;","𝔛":"&Xfr;","Ξ":"&Xi;","𝕏":"&Xopf;","𝒳":"&Xscr;","Я":"&YAcy;","Ї":"&YIcy;","Ю":"&YUcy;","Ý":"&Yacute;","Ŷ":"&Ycirc;","Ы":"&Ycy;","𝔜":"&Yfr;","𝕐":"&Yopf;","𝒴":"&Yscr;","Ÿ":"&Yuml;","Ж":"&ZHcy;","Ź":"&Zacute;","Ž":"&Zcaron;","З":"&Zcy;","Ż":"&Zdot;","Ζ":"&Zeta;","ℨ":"&zeetrf;","ℤ":"&integers;","𝒵":"&Zscr;","á":"&aacute;","ă":"&abreve;","∾":"&mstpos;","∾̳":"&acE;","∿":"&acd;","â":"&acirc;","а":"&acy;","æ":"&aelig;","𝔞":"&afr;","à":"&agrave;","ℵ":"&aleph;","α":"&alpha;","ā":"&amacr;","⨿":"&amalg;","∧":"&wedge;","⩕":"&andand;","⩜":"&andd;","⩘":"&andslope;","⩚":"&andv;","∠":"&angle;","⦤":"&ange;","∡":"&measuredangle;","⦨":"&angmsdaa;","⦩":"&angmsdab;","⦪":"&angmsdac;","⦫":"&angmsdad;","⦬":"&angmsdae;","⦭":"&angmsdaf;","⦮":"&angmsdag;","⦯":"&angmsdah;","∟":"&angrt;","⊾":"&angrtvb;","⦝":"&angrtvbd;","∢":"&angsph;","⍼":"&angzarr;","ą":"&aogon;","𝕒":"&aopf;","⩰":"&apE;","⩯":"&apacir;","≊":"&approxeq;","≋":"&apid;","'":"&apos;","å":"&aring;","𝒶":"&ascr;","*":"&midast;","ã":"&atilde;","ä":"&auml;","⨑":"&awint;","⫭":"&bNot;","≌":"&bcong;","϶":"&bepsi;","‵":"&bprime;","∽":"&bsim;","⋍":"&bsime;","⊽":"&barvee;","⌅":"&barwedge;","⎶":"&bbrktbrk;","б":"&bcy;","„":"&ldquor;","⦰":"&bemptyv;","β":"&beta;","ℶ":"&beth;","≬":"&twixt;","𝔟":"&bfr;","◯":"&xcirc;","⨀":"&xodot;","⨁":"&xoplus;","⨂":"&xotime;","⨆":"&xsqcup;","★":"&starf;","▽":"&xdtri;","△":"&xutri;","⨄":"&xuplus;","⤍":"&rbarr;","⧫":"&lozf;","▴":"&utrif;","▾":"&dtrif;","◂":"&ltrif;","▸":"&rtrif;","␣":"&blank;","▒":"&blk12;","░":"&blk14;","▓":"&blk34;","█":"&block;","=⃥":"&bne;","≡⃥":"&bnequiv;","⌐":"&bnot;","𝕓":"&bopf;","⋈":"&bowtie;","╗":"&boxDL;","╔":"&boxDR;","╖":"&boxDl;","╓":"&boxDr;","═":"&boxH;","╦":"&boxHD;","╩":"&boxHU;","╤":"&boxHd;","╧":"&boxHu;","╝":"&boxUL;","╚":"&boxUR;","╜":"&boxUl;","╙":"&boxUr;","║":"&boxV;","╬":"&boxVH;","╣":"&boxVL;","╠":"&boxVR;","╫":"&boxVh;","╢":"&boxVl;","╟":"&boxVr;","⧉":"&boxbox;","╕":"&boxdL;","╒":"&boxdR;","┐":"&boxdl;","┌":"&boxdr;","╥":"&boxhD;","╨":"&boxhU;","┬":"&boxhd;","┴":"&boxhu;","⊟":"&minusb;","⊞":"&plusb;","⊠":"&timesb;","╛":"&boxuL;","╘":"&boxuR;","┘":"&boxul;","└":"&boxur;","│":"&boxv;","╪":"&boxvH;","╡":"&boxvL;","╞":"&boxvR;","┼":"&boxvh;","┤":"&boxvl;","├":"&boxvr;","¦":"&brvbar;","𝒷":"&bscr;","⁏":"&bsemi;","\\":"&bsol;","⧅":"&bsolb;","⟈":"&bsolhsub;","•":"&bullet;","⪮":"&bumpE;","ć":"&cacute;","∩":"&cap;","⩄":"&capand;","⩉":"&capbrcup;","⩋":"&capcap;","⩇":"&capcup;","⩀":"&capdot;","∩︀":"&caps;","⁁":"&caret;","⩍":"&ccaps;","č":"&ccaron;","ç":"&ccedil;","ĉ":"&ccirc;","⩌":"&ccups;","⩐":"&ccupssm;","ċ":"&cdot;","⦲":"&cemptyv;","¢":"&cent;","𝔠":"&cfr;","ч":"&chcy;","✓":"&checkmark;","χ":"&chi;","○":"&cir;","⧃":"&cirE;","ˆ":"&circ;","≗":"&cire;","↺":"&olarr;","↻":"&orarr;","Ⓢ":"&oS;","⊛":"&oast;","⊚":"&ocir;","⊝":"&odash;","⨐":"&cirfnint;","⫯":"&cirmid;","⧂":"&cirscir;","♣":"&clubsuit;",":":"&colon;",",":"&comma;","@":"&commat;","∁":"&complement;","⩭":"&congdot;","𝕔":"&copf;","℗":"&copysr;","↵":"&crarr;","✗":"&cross;","𝒸":"&cscr;","⫏":"&csub;","⫑":"&csube;","⫐":"&csup;","⫒":"&csupe;","⋯":"&ctdot;","⤸":"&cudarrl;","⤵":"&cudarrr;","⋞":"&curlyeqprec;","⋟":"&curlyeqsucc;","↶":"&curvearrowleft;","⤽":"&cularrp;","∪":"&cup;","⩈":"&cupbrcap;","⩆":"&cupcap;","⩊":"&cupcup;","⊍":"&cupdot;","⩅":"&cupor;","∪︀":"&cups;","↷":"&curvearrowright;","⤼":"&curarrm;","⋎":"&cuvee;","⋏":"&cuwed;","¤":"&curren;","∱":"&cwint;","⌭":"&cylcty;","⥥":"&dHar;","†":"&dagger;","ℸ":"&daleth;","‐":"&hyphen;","⤏":"&rBarr;","ď":"&dcaron;","д":"&dcy;","⇊":"&downdownarrows;","⩷":"&eDDot;","°":"&deg;","δ":"&delta;","⦱":"&demptyv;","⥿":"&dfisht;","𝔡":"&dfr;","♦":"&diams;","ϝ":"&gammad;","⋲":"&disin;","÷":"&divide;","⋇":"&divonx;","ђ":"&djcy;","⌞":"&llcorner;","⌍":"&dlcrop;",$:"&dollar;","𝕕":"&dopf;","≑":"&eDot;","∸":"&minusd;","∔":"&plusdo;","⊡":"&sdotb;","⌟":"&lrcorner;","⌌":"&drcrop;","𝒹":"&dscr;","ѕ":"&dscy;","⧶":"&dsol;","đ":"&dstrok;","⋱":"&dtdot;","▿":"&triangledown;","⦦":"&dwangle;","џ":"&dzcy;","⟿":"&dzigrarr;","é":"&eacute;","⩮":"&easter;","ě":"&ecaron;","≖":"&eqcirc;","ê":"&ecirc;","≕":"&eqcolon;","э":"&ecy;","ė":"&edot;","≒":"&fallingdotseq;","𝔢":"&efr;","⪚":"&eg;","è":"&egrave;","⪖":"&eqslantgtr;","⪘":"&egsdot;","⪙":"&el;","⏧":"&elinters;","ℓ":"&ell;","⪕":"&eqslantless;","⪗":"&elsdot;","ē":"&emacr;","∅":"&varnothing;"," ":"&emsp13;"," ":"&emsp14;"," ":"&emsp;","ŋ":"&eng;"," ":"&ensp;","ę":"&eogon;","𝕖":"&eopf;","⋕":"&epar;","⧣":"&eparsl;","⩱":"&eplus;","ε":"&epsilon;","ϵ":"&varepsilon;","=":"&equals;","≟":"&questeq;","⩸":"&equivDD;","⧥":"&eqvparsl;","≓":"&risingdotseq;","⥱":"&erarr;","ℯ":"&escr;","η":"&eta;","ð":"&eth;","ë":"&euml;","€":"&euro;","!":"&excl;","ф":"&fcy;","♀":"&female;","ﬃ":"&ffilig;","ﬀ":"&fflig;","ﬄ":"&ffllig;","𝔣":"&ffr;","ﬁ":"&filig;",fj:"&fjlig;","♭":"&flat;","ﬂ":"&fllig;","▱":"&fltns;","ƒ":"&fnof;","𝕗":"&fopf;","⋔":"&pitchfork;","⫙":"&forkv;","⨍":"&fpartint;","½":"&half;","⅓":"&frac13;","¼":"&frac14;","⅕":"&frac15;","⅙":"&frac16;","⅛":"&frac18;","⅔":"&frac23;","⅖":"&frac25;","¾":"&frac34;","⅗":"&frac35;","⅜":"&frac38;","⅘":"&frac45;","⅚":"&frac56;","⅝":"&frac58;","⅞":"&frac78;","⁄":"&frasl;","⌢":"&sfrown;","𝒻":"&fscr;","⪌":"&gtreqqless;","ǵ":"&gacute;","γ":"&gamma;","⪆":"&gtrapprox;","ğ":"&gbreve;","ĝ":"&gcirc;","г":"&gcy;","ġ":"&gdot;","⪩":"&gescc;","⪀":"&gesdot;","⪂":"&gesdoto;","⪄":"&gesdotol;","⋛︀":"&gesl;","⪔":"&gesles;","𝔤":"&gfr;","ℷ":"&gimel;","ѓ":"&gjcy;","⪒":"&glE;","⪥":"&gla;","⪤":"&glj;","≩":"&gneqq;","⪊":"&gnapprox;","⪈":"&gneq;","⋧":"&gnsim;","𝕘":"&gopf;","ℊ":"&gscr;","⪎":"&gsime;","⪐":"&gsiml;","⪧":"&gtcc;","⩺":"&gtcir;","⋗":"&gtrdot;","⦕":"&gtlPar;","⩼":"&gtquest;","⥸":"&gtrarr;","≩︀":"&gvnE;","ъ":"&hardcy;","⥈":"&harrcir;","↭":"&leftrightsquigarrow;","ℏ":"&plankv;","ĥ":"&hcirc;","♥":"&heartsuit;","…":"&mldr;","⊹":"&hercon;","𝔥":"&hfr;","⤥":"&searhk;","⤦":"&swarhk;","⇿":"&hoarr;","∻":"&homtht;","↩":"&larrhk;","↪":"&rarrhk;","𝕙":"&hopf;","―":"&horbar;","𝒽":"&hscr;","ħ":"&hstrok;","⁃":"&hybull;","í":"&iacute;","î":"&icirc;","и":"&icy;","е":"&iecy;","¡":"&iexcl;","𝔦":"&ifr;","ì":"&igrave;","⨌":"&qint;","∭":"&tint;","⧜":"&iinfin;","℩":"&iiota;","ĳ":"&ijlig;","ī":"&imacr;","ı":"&inodot;","⊷":"&imof;","Ƶ":"&imped;","℅":"&incare;","∞":"&infin;","⧝":"&infintie;","⊺":"&intercal;","⨗":"&intlarhk;","⨼":"&iprod;","ё":"&iocy;","į":"&iogon;","𝕚":"&iopf;","ι":"&iota;","¿":"&iquest;","𝒾":"&iscr;","⋹":"&isinE;","⋵":"&isindot;","⋴":"&isins;","⋳":"&isinsv;","ĩ":"&itilde;","і":"&iukcy;","ï":"&iuml;","ĵ":"&jcirc;","й":"&jcy;","𝔧":"&jfr;","ȷ":"&jmath;","𝕛":"&jopf;","𝒿":"&jscr;","ј":"&jsercy;","є":"&jukcy;","κ":"&kappa;","ϰ":"&varkappa;","ķ":"&kcedil;","к":"&kcy;","𝔨":"&kfr;","ĸ":"&kgreen;","х":"&khcy;","ќ":"&kjcy;","𝕜":"&kopf;","𝓀":"&kscr;","⤛":"&lAtail;","⤎":"&lBarr;","⪋":"&lesseqqgtr;","⥢":"&lHar;","ĺ":"&lacute;","⦴":"&laemptyv;","λ":"&lambda;","⦑":"&langd;","⪅":"&lessapprox;","«":"&laquo;","⤟":"&larrbfs;","⤝":"&larrfs;","↫":"&looparrowleft;","⤹":"&larrpl;","⥳":"&larrsim;","↢":"&leftarrowtail;","⪫":"&lat;","⤙":"&latail;","⪭":"&late;","⪭︀":"&lates;","⤌":"&lbarr;","❲":"&lbbrk;","{":"&lcub;","[":"&lsqb;","⦋":"&lbrke;","⦏":"&lbrksld;","⦍":"&lbrkslu;","ľ":"&lcaron;","ļ":"&lcedil;","л":"&lcy;","⤶":"&ldca;","⥧":"&ldrdhar;","⥋":"&ldrushar;","↲":"&ldsh;","≤":"&leq;","⇇":"&llarr;","⋋":"&lthree;","⪨":"&lescc;","⩿":"&lesdot;","⪁":"&lesdoto;","⪃":"&lesdotor;","⋚︀":"&lesg;","⪓":"&lesges;","⋖":"&ltdot;","⥼":"&lfisht;","𝔩":"&lfr;","⪑":"&lgE;","⥪":"&lharul;","▄":"&lhblk;","љ":"&ljcy;","⥫":"&llhard;","◺":"&lltri;","ŀ":"&lmidot;","⎰":"&lmoustache;","≨":"&lneqq;","⪉":"&lnapprox;","⪇":"&lneq;","⋦":"&lnsim;","⟬":"&loang;","⇽":"&loarr;","⟼":"&xmap;","↬":"&rarrlp;","⦅":"&lopar;","𝕝":"&lopf;","⨭":"&loplus;","⨴":"&lotimes;","∗":"&lowast;","◊":"&lozenge;","(":"&lpar;","⦓":"&lparlt;","⥭":"&lrhard;","‎":"&lrm;","⊿":"&lrtri;","‹":"&lsaquo;","𝓁":"&lscr;","⪍":"&lsime;","⪏":"&lsimg;","‚":"&sbquo;","ł":"&lstrok;","⪦":"&ltcc;","⩹":"&ltcir;","⋉":"&ltimes;","⥶":"&ltlarr;","⩻":"&ltquest;","⦖":"&ltrPar;","◃":"&triangleleft;","⥊":"&lurdshar;","⥦":"&luruhar;","≨︀":"&lvnE;","∺":"&mDDot;","¯":"&strns;","♂":"&male;","✠":"&maltese;","▮":"&marker;","⨩":"&mcomma;","м":"&mcy;","—":"&mdash;","𝔪":"&mfr;","℧":"&mho;","µ":"&micro;","⫰":"&midcir;","−":"&minus;","⨪":"&minusdu;","⫛":"&mlcp;","⊧":"&models;","𝕞":"&mopf;","𝓂":"&mscr;","μ":"&mu;","⊸":"&mumap;","⋙̸":"&nGg;","≫⃒":"&nGt;","⇍":"&nlArr;","⇎":"&nhArr;","⋘̸":"&nLl;","≪⃒":"&nLt;","⇏":"&nrArr;","⊯":"&nVDash;","⊮":"&nVdash;","ń":"&nacute;","∠⃒":"&nang;","⩰̸":"&napE;","≋̸":"&napid;","ŉ":"&napos;","♮":"&natural;","⩃":"&ncap;","ň":"&ncaron;","ņ":"&ncedil;","⩭̸":"&ncongdot;","⩂":"&ncup;","н":"&ncy;","–":"&ndash;","⇗":"&neArr;","⤤":"&nearhk;","≐̸":"&nedot;","⤨":"&toea;","𝔫":"&nfr;","↮":"&nleftrightarrow;","⫲":"&nhpar;","⋼":"&nis;","⋺":"&nisd;","њ":"&njcy;","≦̸":"&nleqq;","↚":"&nleftarrow;","‥":"&nldr;","𝕟":"&nopf;","¬":"&not;","⋹̸":"&notinE;","⋵̸":"&notindot;","⋷":"&notinvb;","⋶":"&notinvc;","⋾":"&notnivb;","⋽":"&notnivc;","⫽⃥":"&nparsl;","∂̸":"&npart;","⨔":"&npolint;","↛":"&nrightarrow;","⤳̸":"&nrarrc;","↝̸":"&nrarrw;","𝓃":"&nscr;","⊄":"&nsub;","⫅̸":"&nsubseteqq;","⊅":"&nsup;","⫆̸":"&nsupseteqq;","ñ":"&ntilde;","ν":"&nu;","#":"&num;","№":"&numero;"," ":"&numsp;","⊭":"&nvDash;","⤄":"&nvHarr;","≍⃒":"&nvap;","⊬":"&nvdash;","≥⃒":"&nvge;",">⃒":"&nvgt;","⧞":"&nvinfin;","⤂":"&nvlArr;","≤⃒":"&nvle;","<⃒":"&nvlt;","⊴⃒":"&nvltrie;","⤃":"&nvrArr;","⊵⃒":"&nvrtrie;","∼⃒":"&nvsim;","⇖":"&nwArr;","⤣":"&nwarhk;","⤧":"&nwnear;","ó":"&oacute;","ô":"&ocirc;","о":"&ocy;","ő":"&odblac;","⨸":"&odiv;","⦼":"&odsold;","œ":"&oelig;","⦿":"&ofcir;","𝔬":"&ofr;","˛":"&ogon;","ò":"&ograve;","⧁":"&ogt;","⦵":"&ohbar;","⦾":"&olcir;","⦻":"&olcross;","⧀":"&olt;","ō":"&omacr;","ω":"&omega;","ο":"&omicron;","⦶":"&omid;","𝕠":"&oopf;","⦷":"&opar;","⦹":"&operp;","∨":"&vee;","⩝":"&ord;","ℴ":"&oscr;","ª":"&ordf;","º":"&ordm;","⊶":"&origof;","⩖":"&oror;","⩗":"&orslope;","⩛":"&orv;","ø":"&oslash;","⊘":"&osol;","õ":"&otilde;","⨶":"&otimesas;","ö":"&ouml;","⌽":"&ovbar;","¶":"&para;","⫳":"&parsim;","⫽":"&parsl;","п":"&pcy;","%":"&percnt;",".":"&period;","‰":"&permil;","‱":"&pertenk;","𝔭":"&pfr;","φ":"&phi;","ϕ":"&varphi;","☎":"&phone;","π":"&pi;","ϖ":"&varpi;","ℎ":"&planckh;","+":"&plus;","⨣":"&plusacir;","⨢":"&pluscir;","⨥":"&plusdu;","⩲":"&pluse;","⨦":"&plussim;","⨧":"&plustwo;","⨕":"&pointint;","𝕡":"&popf;","£":"&pound;","⪳":"&prE;","⪷":"&precapprox;","⪹":"&prnap;","⪵":"&prnE;","⋨":"&prnsim;","′":"&prime;","⌮":"&profalar;","⌒":"&profline;","⌓":"&profsurf;","⊰":"&prurel;","𝓅":"&pscr;","ψ":"&psi;"," ":"&puncsp;","𝔮":"&qfr;","𝕢":"&qopf;","⁗":"&qprime;","𝓆":"&qscr;","⨖":"&quatint;","?":"&quest;","⤜":"&rAtail;","⥤":"&rHar;","∽̱":"&race;","ŕ":"&racute;","⦳":"&raemptyv;","⦒":"&rangd;","⦥":"&range;","»":"&raquo;","⥵":"&rarrap;","⤠":"&rarrbfs;","⤳":"&rarrc;","⤞":"&rarrfs;","⥅":"&rarrpl;","⥴":"&rarrsim;","↣":"&rightarrowtail;","↝":"&rightsquigarrow;","⤚":"&ratail;","∶":"&ratio;","❳":"&rbbrk;","}":"&rcub;","]":"&rsqb;","⦌":"&rbrke;","⦎":"&rbrksld;","⦐":"&rbrkslu;","ř":"&rcaron;","ŗ":"&rcedil;","р":"&rcy;","⤷":"&rdca;","⥩":"&rdldhar;","↳":"&rdsh;","▭":"&rect;","⥽":"&rfisht;","𝔯":"&rfr;","⥬":"&rharul;","ρ":"&rho;","ϱ":"&varrho;","⇉":"&rrarr;","⋌":"&rthree;","˚":"&ring;","‏":"&rlm;","⎱":"&rmoustache;","⫮":"&rnmid;","⟭":"&roang;","⇾":"&roarr;","⦆":"&ropar;","𝕣":"&ropf;","⨮":"&roplus;","⨵":"&rotimes;",")":"&rpar;","⦔":"&rpargt;","⨒":"&rppolint;","›":"&rsaquo;","𝓇":"&rscr;","⋊":"&rtimes;","▹":"&triangleright;","⧎":"&rtriltri;","⥨":"&ruluhar;","℞":"&rx;","ś":"&sacute;","⪴":"&scE;","⪸":"&succapprox;","š":"&scaron;","ş":"&scedil;","ŝ":"&scirc;","⪶":"&succneqq;","⪺":"&succnapprox;","⋩":"&succnsim;","⨓":"&scpolint;","с":"&scy;","⋅":"&sdot;","⩦":"&sdote;","⇘":"&seArr;","§":"&sect;",";":"&semi;","⤩":"&tosa;","✶":"&sext;","𝔰":"&sfr;","♯":"&sharp;","щ":"&shchcy;","ш":"&shcy;","­":"&shy;","σ":"&sigma;","ς":"&varsigma;","⩪":"&simdot;","⪞":"&simg;","⪠":"&simgE;","⪝":"&siml;","⪟":"&simlE;","≆":"&simne;","⨤":"&simplus;","⥲":"&simrarr;","⨳":"&smashp;","⧤":"&smeparsl;","⌣":"&ssmile;","⪪":"&smt;","⪬":"&smte;","⪬︀":"&smtes;","ь":"&softcy;","/":"&sol;","⧄":"&solb;","⌿":"&solbar;","𝕤":"&sopf;","♠":"&spadesuit;","⊓︀":"&sqcaps;","⊔︀":"&sqcups;","𝓈":"&sscr;","☆":"&star;","⊂":"&subset;","⫅":"&subseteqq;","⪽":"&subdot;","⫃":"&subedot;","⫁":"&submult;","⫋":"&subsetneqq;","⊊":"&subsetneq;","⪿":"&subplus;","⥹":"&subrarr;","⫇":"&subsim;","⫕":"&subsub;","⫓":"&subsup;","♪":"&sung;","¹":"&sup1;","²":"&sup2;","³":"&sup3;","⫆":"&supseteqq;","⪾":"&supdot;","⫘":"&supdsub;","⫄":"&supedot;","⟉":"&suphsol;","⫗":"&suphsub;","⥻":"&suplarr;","⫂":"&supmult;","⫌":"&supsetneqq;","⊋":"&supsetneq;","⫀":"&supplus;","⫈":"&supsim;","⫔":"&supsub;","⫖":"&supsup;","⇙":"&swArr;","⤪":"&swnwar;","ß":"&szlig;","⌖":"&target;","τ":"&tau;","ť":"&tcaron;","ţ":"&tcedil;","т":"&tcy;","⌕":"&telrec;","𝔱":"&tfr;","θ":"&theta;","ϑ":"&vartheta;","þ":"&thorn;","×":"&times;","⨱":"&timesbar;","⨰":"&timesd;","⌶":"&topbot;","⫱":"&topcir;","𝕥":"&topf;","⫚":"&topfork;","‴":"&tprime;","▵":"&utri;","≜":"&trie;","◬":"&tridot;","⨺":"&triminus;","⨹":"&triplus;","⧍":"&trisb;","⨻":"&tritime;","⏢":"&trpezium;","𝓉":"&tscr;","ц":"&tscy;","ћ":"&tshcy;","ŧ":"&tstrok;","⥣":"&uHar;","ú":"&uacute;","ў":"&ubrcy;","ŭ":"&ubreve;","û":"&ucirc;","у":"&ucy;","ű":"&udblac;","⥾":"&ufisht;","𝔲":"&ufr;","ù":"&ugrave;","▀":"&uhblk;","⌜":"&ulcorner;","⌏":"&ulcrop;","◸":"&ultri;","ū":"&umacr;","ų":"&uogon;","𝕦":"&uopf;","υ":"&upsilon;","⇈":"&uuarr;","⌝":"&urcorner;","⌎":"&urcrop;","ů":"&uring;","◹":"&urtri;","𝓊":"&uscr;","⋰":"&utdot;","ũ":"&utilde;","ü":"&uuml;","⦧":"&uwangle;","⫨":"&vBar;","⫩":"&vBarv;","⦜":"&vangrt;","⊊︀":"&vsubne;","⫋︀":"&vsubnE;","⊋︀":"&vsupne;","⫌︀":"&vsupnE;","в":"&vcy;","⊻":"&veebar;","≚":"&veeeq;","⋮":"&vellip;","𝔳":"&vfr;","𝕧":"&vopf;","𝓋":"&vscr;","⦚":"&vzigzag;","ŵ":"&wcirc;","⩟":"&wedbar;","≙":"&wedgeq;","℘":"&wp;","𝔴":"&wfr;","𝕨":"&wopf;","𝓌":"&wscr;","𝔵":"&xfr;","ξ":"&xi;","⋻":"&xnis;","𝕩":"&xopf;","𝓍":"&xscr;","ý":"&yacute;","я":"&yacy;","ŷ":"&ycirc;","ы":"&ycy;","¥":"&yen;","𝔶":"&yfr;","ї":"&yicy;","𝕪":"&yopf;","𝓎":"&yscr;","ю":"&yucy;","ÿ":"&yuml;","ź":"&zacute;","ž":"&zcaron;","з":"&zcy;","ż":"&zdot;","ζ":"&zeta;","𝔷":"&zfr;","ж":"&zhcy;","⇝":"&zigrarr;","𝕫":"&zopf;","𝓏":"&zscr;","‍":"&zwj;","‌":"&zwnj;"}}};
 
 /***/ }),
 
@@ -60,7 +915,7 @@ eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.bod
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
-eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.numericUnicodeMap={0:65533,128:8364,130:8218,131:402,132:8222,133:8230,134:8224,135:8225,136:710,137:8240,138:352,139:8249,140:338,142:381,145:8216,146:8217,147:8220,148:8221,149:8226,150:8211,151:8212,152:732,153:8482,154:353,155:8250,156:339,158:382,159:376};\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/html-entities/lib/numeric-unicode-map.js?");
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.numericUnicodeMap={0:65533,128:8364,130:8218,131:402,132:8222,133:8230,134:8224,135:8225,136:710,137:8240,138:352,139:8249,140:338,142:381,145:8216,146:8217,147:8220,148:8221,149:8226,150:8211,151:8212,152:732,153:8482,154:353,155:8250,156:339,158:382,159:376};
 
 /***/ }),
 
@@ -71,7 +926,7 @@ eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.num
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
-eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.fromCodePoint=String.fromCodePoint||function(astralCodePoint){return String.fromCharCode(Math.floor((astralCodePoint-65536)/1024)+55296,(astralCodePoint-65536)%1024+56320)};exports.getCodePoint=String.prototype.codePointAt?function(input,position){return input.codePointAt(position)}:function(input,position){return(input.charCodeAt(position)-55296)*1024+input.charCodeAt(position+1)-56320+65536};exports.highSurrogateFrom=55296;exports.highSurrogateTo=56319;\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/html-entities/lib/surrogate-pairs.js?");
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.fromCodePoint=String.fromCodePoint||function(astralCodePoint){return String.fromCharCode(Math.floor((astralCodePoint-65536)/1024)+55296,(astralCodePoint-65536)%1024+56320)};exports.getCodePoint=String.prototype.codePointAt?function(input,position){return input.codePointAt(position)}:function(input,position){return(input.charCodeAt(position)-55296)*1024+input.charCodeAt(position+1)-56320+65536};exports.highSurrogateFrom=55296;exports.highSurrogateTo=56319;
 
 /***/ }),
 
@@ -82,7 +937,37 @@ eval("Object.defineProperty(exports, \"__esModule\", ({value:true}));exports.fro
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
-eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\nexports.base = exports.EXPLOSION_KEYS = exports.mapTileInfo = exports.COUNT_TILES = exports.TILES = exports.SCALE_RATIO = exports.GRAVITY = exports.VELOCITY_BASE = exports.SWAP_OFFSET = exports.SWAP_DURATION = exports.MATCH_4_POINT = exports.GAIN_TURN = exports.TILE_OFFSET = exports.TILE_SIZE = exports.SCREEN_SIZE = exports.CELL_SIZE = exports.MAP_WIDTH_1 = exports.MAP_WIDTH = exports.APP_NAME = void 0;\r\nexports.APP_NAME = \"Loạn 12 Sứ Quân\";\r\nexports.MAP_WIDTH = 8;\r\nexports.MAP_WIDTH_1 = exports.MAP_WIDTH - 1;\r\nexports.CELL_SIZE = 60;\r\nexports.SCREEN_SIZE = exports.MAP_WIDTH * exports.CELL_SIZE;\r\nexports.TILE_SIZE = 54;\r\nexports.TILE_OFFSET = Math.floor((exports.CELL_SIZE - exports.TILE_SIZE) / 2);\r\nexports.GAIN_TURN = 3;\r\nexports.MATCH_4_POINT = 50;\r\nexports.SWAP_DURATION = 10;\r\nexports.SWAP_OFFSET = exports.CELL_SIZE / exports.SWAP_DURATION;\r\nexports.VELOCITY_BASE = 2;\r\nexports.GRAVITY = 0.4;\r\nexports.SCALE_RATIO = exports.TILE_SIZE / 22;\r\nexports.TILES = { SWORD: 0, HEART: 1, GOLD: 2, ENERGY: 3, MANA: 4, EXP: 5, SWORDRED: 6 };\r\nexports.COUNT_TILES = Object.keys(exports.TILES).length;\r\nexports.mapTileInfo = {\r\n    [exports.TILES.SWORD]: { compatible: [exports.TILES.SWORDRED], probability: 100, point: 10, texture: null, explosions: [] },\r\n    [exports.TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null, explosions: [] },\r\n    [exports.TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null, explosions: [] },\r\n    [exports.TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null, explosions: [] },\r\n    [exports.TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null, explosions: [] },\r\n    [exports.TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null, explosions: [] },\r\n    [exports.TILES.SWORDRED]: { compatible: [exports.TILES.SWORD], probability: 10, point: 30, texture: null, explosions: [] },\r\n};\r\nexports.EXPLOSION_KEYS = [\"SWORD\", \"HEART\", \"GOLD\", \"ENERGY\", \"MANA\", \"EXP\"];\r\nexports.base = {};\r\n\n\n//# sourceURL=webpack://loan-12-su-quan/./src/configs/consts.ts?");
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.base = exports.EXPLOSION_KEYS = exports.mapTileInfo = exports.COUNT_TILES = exports.TILES = exports.SCALE_RATIO = exports.GRAVITY = exports.VELOCITY_BASE = exports.SWAP_OFFSET = exports.SWAP_DURATION = exports.MATCH_4_POINT = exports.GAIN_TURN = exports.TILE_OFFSET = exports.TILE_SIZE = exports.SCREEN_SIZE = exports.CELL_SIZE = exports.MAP_WIDTH_1 = exports.MAP_WIDTH = exports.APP_NAME = void 0;
+exports.APP_NAME = "Loạn 12 Sứ Quân";
+exports.MAP_WIDTH = 8;
+exports.MAP_WIDTH_1 = exports.MAP_WIDTH - 1;
+exports.CELL_SIZE = 60;
+exports.SCREEN_SIZE = exports.MAP_WIDTH * exports.CELL_SIZE;
+exports.TILE_SIZE = 54;
+exports.TILE_OFFSET = Math.floor((exports.CELL_SIZE - exports.TILE_SIZE) / 2);
+exports.GAIN_TURN = 3;
+exports.MATCH_4_POINT = 50;
+exports.SWAP_DURATION = 10;
+exports.SWAP_OFFSET = exports.CELL_SIZE / exports.SWAP_DURATION;
+exports.VELOCITY_BASE = 2;
+exports.GRAVITY = 0.4;
+exports.SCALE_RATIO = exports.TILE_SIZE / 22;
+exports.TILES = { SWORD: 0, HEART: 1, GOLD: 2, ENERGY: 3, MANA: 4, EXP: 5, SWORDRED: 6 };
+exports.COUNT_TILES = Object.keys(exports.TILES).length;
+exports.mapTileInfo = {
+    [exports.TILES.SWORD]: { compatible: [exports.TILES.SWORDRED], probability: 100, point: 10, texture: null, explosions: [] },
+    [exports.TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null, explosions: [] },
+    [exports.TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null, explosions: [] },
+    [exports.TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null, explosions: [] },
+    [exports.TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null, explosions: [] },
+    [exports.TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null, explosions: [] },
+    [exports.TILES.SWORDRED]: { compatible: [exports.TILES.SWORD], probability: 10, point: 30, texture: null, explosions: [] },
+};
+exports.EXPLOSION_KEYS = ["SWORD", "HEART", "GOLD", "ENERGY", "MANA", "EXP"];
+exports.base = {};
+
 
 /***/ }),
 
@@ -93,7 +978,41 @@ eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\n
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
-eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\nconst consts_1 = __webpack_require__(/*! ./configs/consts */ \"./src/configs/consts.ts\");\r\nconst game_1 = __webpack_require__(/*! ./objs/game */ \"./src/objs/game.ts\");\r\nconst common_1 = __webpack_require__(/*! ./utils/common */ \"./src/utils/common.ts\");\r\nconst game = new game_1.Game();\r\nconst init = () => {\r\n    const canvas = document.getElementById(\"canvas\");\r\n    const context = canvas.getContext(\"2d\");\r\n    canvas.width = canvas.height = consts_1.SCREEN_SIZE;\r\n    consts_1.base.canvas = canvas;\r\n    consts_1.base.context = context;\r\n};\r\n// Timer\r\nlet then = 0;\r\nconst update = (now = 0) => {\r\n    requestAnimationFrame(update);\r\n    const elapsed = (now - then) / 1000;\r\n    if (elapsed < 0)\r\n        return;\r\n    then = now;\r\n    game.update();\r\n    game.render();\r\n};\r\nconst main = async () => {\r\n    init();\r\n    await (0, common_1.initImages)();\r\n    game.init();\r\n    document.addEventListener(\"click\", (e) => {\r\n        game.onClick(e);\r\n    });\r\n    update();\r\n};\r\nmain();\r\n\n\n//# sourceURL=webpack://loan-12-su-quan/./src/index.ts?");
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const consts_1 = __webpack_require__(/*! ./configs/consts */ "./src/configs/consts.ts");
+const game_1 = __webpack_require__(/*! ./objs/game */ "./src/objs/game.ts");
+const common_1 = __webpack_require__(/*! ./utils/common */ "./src/utils/common.ts");
+const game = new game_1.Game();
+const init = () => {
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = canvas.height = consts_1.SCREEN_SIZE;
+    consts_1.base.canvas = canvas;
+    consts_1.base.context = context;
+};
+// Timer
+let then = 0;
+const update = (now = 0) => {
+    requestAnimationFrame(update);
+    const elapsed = (now - then) / 1000;
+    if (elapsed < 0)
+        return;
+    then = now;
+    game.update();
+    game.render();
+};
+const main = async () => {
+    init();
+    await (0, common_1.initImages)();
+    game.init();
+    document.addEventListener("click", (e) => {
+        game.onClick(e);
+    });
+    update();
+};
+main();
+
 
 /***/ }),
 
@@ -104,7 +1023,336 @@ eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\n
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
-eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\nexports.Game = void 0;\r\nconst consts_1 = __webpack_require__(/*! @/configs/consts */ \"./src/configs/consts.ts\");\r\nconst common_1 = __webpack_require__(/*! @/utils/common */ \"./src/utils/common.ts\");\r\nclass Game {\r\n    state;\r\n    selected;\r\n    swapped;\r\n    reswap;\r\n    fall;\r\n    explosions;\r\n    explodedTiles;\r\n    tSwap;\r\n    tExplode;\r\n    tExplode2;\r\n    constructor() { }\r\n    init() {\r\n        consts_1.base.map = (0, common_1.generateMap)();\r\n        this.state = \"IDLE\";\r\n        this.selected = null;\r\n        this.swapped = null;\r\n        this.reswap = false;\r\n        this.fall = {};\r\n        this.explosions = [];\r\n        this.tSwap = 0;\r\n        this.tExplode = 0;\r\n        this.tExplode2 = 0;\r\n    }\r\n    matchPosition(x, y) {\r\n        let h = [];\r\n        let v = [];\r\n        let newX, newY;\r\n        const posValue = consts_1.base.map[y][x];\r\n        const compatible = consts_1.mapTileInfo[posValue].compatible;\r\n        newX = x - 1;\r\n        while (newX >= 0) {\r\n            const value = consts_1.base.map[y][newX];\r\n            if (!(0, common_1.check)(value, posValue, compatible))\r\n                break;\r\n            h.push({ x: newX, y, point: consts_1.mapTileInfo[value].point });\r\n            newX -= 1;\r\n        }\r\n        newX = x + 1;\r\n        while (newX < consts_1.MAP_WIDTH) {\r\n            const value = consts_1.base.map[y][newX];\r\n            if (!(0, common_1.check)(value, posValue, compatible))\r\n                break;\r\n            h.push({ x: newX, y, point: consts_1.mapTileInfo[value].point });\r\n            newX += 1;\r\n        }\r\n        newY = y - 1;\r\n        while (newY >= 0) {\r\n            const value = consts_1.base.map[newY][x];\r\n            if (!(0, common_1.check)(value, posValue, compatible))\r\n                break;\r\n            v.push({ x, y: newY, point: consts_1.mapTileInfo[value].point });\r\n            newY -= 1;\r\n        }\r\n        newY = y + 1;\r\n        while (newY < consts_1.MAP_WIDTH) {\r\n            const value = consts_1.base.map[newY][x];\r\n            if (!(0, common_1.check)(value, posValue, compatible))\r\n                break;\r\n            v.push({ x, y: newY, point: consts_1.mapTileInfo[value].point });\r\n            newY += 1;\r\n        }\r\n        let hasH = true;\r\n        let hasV = true;\r\n        if (h.length < 2) {\r\n            h = [];\r\n            hasH = false;\r\n        }\r\n        if (v.length < 2) {\r\n            v = [];\r\n            hasV = false;\r\n        }\r\n        const matched = hasH || hasV;\r\n        const tiles = matched ? [...h, ...v, { x, y, point: consts_1.mapTileInfo[consts_1.base.map[y][x]].point }] : [];\r\n        return {\r\n            matched,\r\n            tiles,\r\n            point: tiles.reduce((a, b) => a + b.point, 0) +\r\n                (h.length >= consts_1.GAIN_TURN ? consts_1.MATCH_4_POINT : 0) +\r\n                (v.length >= consts_1.GAIN_TURN ? consts_1.MATCH_4_POINT : 0),\r\n            turn: Number(h.length >= consts_1.GAIN_TURN) + Number(v.length >= consts_1.GAIN_TURN),\r\n        };\r\n    }\r\n    swap(x0, y0, x1, y1) {\r\n        const tmp = consts_1.base.map[y0][x0];\r\n        consts_1.base.map[y0][x0] = consts_1.base.map[y1][x1];\r\n        consts_1.base.map[y1][x1] = tmp;\r\n    }\r\n    addMatchedPosition(allMatchedPositions, x0, y0, x1, y1) {\r\n        this.swap(x0, y0, x1, y1);\r\n        const { matched: m0, point: p0 } = this.matchPosition(x0, y0);\r\n        const { matched: m1, point: p1 } = this.matchPosition(x1, y1);\r\n        if (m0 || m1)\r\n            allMatchedPositions.push({ x0, y0, x1, y1, point: p0 + p1 });\r\n        this.swap(x0, y0, x1, y1);\r\n    }\r\n    findAllMatchedPositions() {\r\n        const allMatchedPositions = [];\r\n        for (let i = 0; i < consts_1.MAP_WIDTH_1; i += 1) {\r\n            for (let j = 0; j < consts_1.MAP_WIDTH_1; j += 1) {\r\n                this.addMatchedPosition(allMatchedPositions, j, i, j + 1, i);\r\n                this.addMatchedPosition(allMatchedPositions, j, i, j, i + 1);\r\n            }\r\n        }\r\n        for (let i = 0; i < consts_1.MAP_WIDTH_1; i += 1)\r\n            this.addMatchedPosition(allMatchedPositions, consts_1.MAP_WIDTH_1, i, consts_1.MAP_WIDTH_1, i + 1);\r\n        for (let j = 0; j < consts_1.MAP_WIDTH_1; j += 1)\r\n            this.addMatchedPosition(allMatchedPositions, j, consts_1.MAP_WIDTH_1, j + 1, consts_1.MAP_WIDTH_1);\r\n        allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));\r\n        return allMatchedPositions;\r\n    }\r\n    onClick(e) {\r\n        if (this.state !== \"IDLE\" && this.state !== \"SELECT\")\r\n            return;\r\n        const x = Math.floor(e.offsetX / consts_1.CELL_SIZE);\r\n        const y = Math.floor(e.offsetY / consts_1.CELL_SIZE);\r\n        if (x < 0 || x >= consts_1.MAP_WIDTH || y < 0 || y >= consts_1.MAP_WIDTH)\r\n            return;\r\n        if (!this.selected) {\r\n            this.selected = { x, y, value: consts_1.base.map[y][x] };\r\n            consts_1.base.map[y][x] = -1;\r\n            this.state = \"SELECT\";\r\n            return;\r\n        }\r\n        if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {\r\n            this.selected = null;\r\n            this.state = \"IDLE\";\r\n            return;\r\n        }\r\n        this.swapped = { x, y, value: consts_1.base.map[y][x] };\r\n        consts_1.base.map[y][x] = -1;\r\n        this.tSwap = 0;\r\n    }\r\n    render() {\r\n        for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {\r\n            for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {\r\n                consts_1.base.context.fillStyle = (i + j) % 2 ? \"#554933\" : \"#3e3226\";\r\n                const x = j * consts_1.CELL_SIZE;\r\n                const y = i * consts_1.CELL_SIZE;\r\n                consts_1.base.context.fillRect(x, y, consts_1.CELL_SIZE, consts_1.CELL_SIZE);\r\n                if (consts_1.base.map[i][j] === -1)\r\n                    continue;\r\n                consts_1.base.context.drawImage(consts_1.mapTileInfo[consts_1.base.map[i][j]].texture, x + consts_1.TILE_OFFSET, y + consts_1.TILE_OFFSET);\r\n            }\r\n        }\r\n        switch (this.state) {\r\n            case \"SELECT\":\r\n                const offset = this.tSwap * consts_1.SWAP_OFFSET;\r\n                const { x: x0, y: y0, value: v0 } = this.selected;\r\n                const { x: x1, y: y1, value: v1 } = this.swapped || this.selected;\r\n                consts_1.base.context.drawImage(consts_1.mapTileInfo[v0].texture, x0 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (x1 - x0) * offset, y0 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (y1 - y0) * offset);\r\n                if (!this.swapped) {\r\n                    consts_1.base.context.lineWidth = 4;\r\n                    consts_1.base.context.strokeStyle = \"cyan\";\r\n                    consts_1.base.context.strokeRect(this.selected.x * consts_1.CELL_SIZE + 2, this.selected.y * consts_1.CELL_SIZE + 2, consts_1.CELL_SIZE - 4, consts_1.CELL_SIZE - 4);\r\n                }\r\n                else\r\n                    consts_1.base.context.drawImage(consts_1.mapTileInfo[v1].texture, x1 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (x0 - x1) * offset, y1 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (y0 - y1) * offset);\r\n                break;\r\n            case \"EXPLODE\":\r\n                this.explosions.forEach(({ x, y, value }) => {\r\n                    const texture = consts_1.mapTileInfo[value].explosions[this.tExplode];\r\n                    consts_1.base.context.drawImage(texture, x * consts_1.CELL_SIZE + Math.floor((consts_1.CELL_SIZE - texture.width) / 2), y * consts_1.CELL_SIZE + Math.floor((consts_1.CELL_SIZE - texture.height) / 2));\r\n                });\r\n                break;\r\n            case \"FALL\":\r\n                (0, common_1.getKeys)(this.fall).forEach((col) => {\r\n                    this.fall[col].list.forEach(({ x, y, value, offset }) => {\r\n                        consts_1.base.context.drawImage(consts_1.mapTileInfo[value].texture, x * consts_1.CELL_SIZE + consts_1.TILE_OFFSET, y * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + offset);\r\n                    });\r\n                });\r\n                break;\r\n        }\r\n    }\r\n    update() {\r\n        switch (this.state) {\r\n            case \"SELECT\":\r\n                if (this.swapped) {\r\n                    this.tSwap += 1;\r\n                    if (this.tSwap > consts_1.SWAP_DURATION) {\r\n                        this.tSwap = consts_1.SWAP_DURATION;\r\n                        const { x: x0, y: y0, value: v0 } = this.selected;\r\n                        const { x: x1, y: y1, value: v1 } = this.swapped;\r\n                        consts_1.base.map[y0][x0] = v0;\r\n                        consts_1.base.map[y1][x1] = v1;\r\n                        this.swap(x0, y0, x1, y1);\r\n                        if (this.reswap) {\r\n                            this.reswap = false;\r\n                            this.selected = this.swapped = null;\r\n                        }\r\n                        else {\r\n                            const { matched: m0, tiles: t0 } = this.matchPosition(x0, y0);\r\n                            const { matched: m1, tiles: t1 } = this.matchPosition(x1, y1);\r\n                            if (m0 || m1) {\r\n                                this.selected = this.swapped = null;\r\n                                this.explodedTiles = (0, common_1.combine)([t0, t1]);\r\n                                this.explosions = [];\r\n                                this.explodedTiles.forEach(({ x, y }) => {\r\n                                    this.explosions.push({ x, y, value: consts_1.base.map[y][x] });\r\n                                    consts_1.base.map[y][x] = -1;\r\n                                });\r\n                                this.state = \"EXPLODE\";\r\n                            }\r\n                            else {\r\n                                this.reswap = true;\r\n                                this.tSwap = 0;\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n                break;\r\n            case \"EXPLODE\":\r\n                this.tExplode2 += 1;\r\n                if (this.tExplode2 % 2 === 0) {\r\n                    this.tExplode += 1;\r\n                    if (this.tExplode === 4) {\r\n                        this.tExplode = 0;\r\n                        this.state = \"FALL\";\r\n                        this.fall = {};\r\n                        this.explodedTiles.forEach(({ x, y }) => {\r\n                            consts_1.base.map[y][x] = -1;\r\n                            if (this.fall[x]) {\r\n                                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&\r\n                                    this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });\r\n                            }\r\n                            else\r\n                                this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };\r\n                        });\r\n                        (0, common_1.getKeys)(this.fall).forEach((key) => {\r\n                            this.fall[key].below = (0, common_1.findBelow)(this.fall[key].list);\r\n                            const needAdd = this.fall[key].list.length;\r\n                            this.fall[key].list = [];\r\n                            key = Number(key);\r\n                            for (let i = this.fall[key].below; i >= 0; i -= 1) {\r\n                                if (consts_1.base.map[i][key] !== -1) {\r\n                                    this.fall[key].list.push({ x: key, y: i, v: consts_1.VELOCITY_BASE, offset: 0, value: consts_1.base.map[i][key] });\r\n                                    consts_1.base.map[i][key] = -1;\r\n                                }\r\n                            }\r\n                            for (let i = 0; i < needAdd; i += 1) {\r\n                                this.fall[key].list.push({ x: key, y: -1 - i, v: consts_1.VELOCITY_BASE, offset: 0, value: (0, common_1.randomTile)() });\r\n                            }\r\n                        });\r\n                    }\r\n                }\r\n                break;\r\n            case \"FALL\":\r\n                let newFalling = false;\r\n                (0, common_1.getKeys)(this.fall).forEach((col) => {\r\n                    const colData = this.fall[col];\r\n                    col = Number(col);\r\n                    let shift = false;\r\n                    colData.list.forEach((i, index) => {\r\n                        i.v += consts_1.GRAVITY;\r\n                        i.offset += i.v;\r\n                        const newY = i.y + Math.floor((i.offset + 6) / consts_1.CELL_SIZE);\r\n                        if (index === 0) {\r\n                            if (newY >= colData.below) {\r\n                                shift = true;\r\n                                consts_1.base.map[colData.below][col] = i.value;\r\n                                colData.below -= 1;\r\n                            }\r\n                        }\r\n                        else {\r\n                            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {\r\n                                i.v = consts_1.VELOCITY_BASE;\r\n                                i.offset = Math.floor(i.offset / consts_1.CELL_SIZE) * consts_1.CELL_SIZE;\r\n                            }\r\n                        }\r\n                    });\r\n                    if (shift)\r\n                        colData.list.shift();\r\n                    if (colData.list.length)\r\n                        newFalling = true;\r\n                });\r\n                if (!newFalling) {\r\n                    const t = [];\r\n                    for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {\r\n                        for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {\r\n                            const { matched: m0, tiles: t0 } = this.matchPosition(j, i);\r\n                            if (m0)\r\n                                t.push(...t0);\r\n                        }\r\n                    }\r\n                    if (t.length) {\r\n                        this.fall = {};\r\n                        t.forEach(({ x, y }) => {\r\n                            consts_1.base.map[y][x] = -1;\r\n                            if (this.fall[x]) {\r\n                                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&\r\n                                    this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });\r\n                            }\r\n                            else\r\n                                this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };\r\n                        });\r\n                        const findBelow = (list) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);\r\n                        (0, common_1.getKeys)(this.fall).forEach((key) => {\r\n                            this.fall[key].below = findBelow(this.fall[key].list);\r\n                            const needAdd = this.fall[key].list.length;\r\n                            this.fall[key].list = [];\r\n                            key = Number(key);\r\n                            for (let i = this.fall[key].below; i >= 0; i -= 1) {\r\n                                if (consts_1.base.map[i][key] !== -1) {\r\n                                    this.fall[key].list.push({ x: key, y: i, v: consts_1.VELOCITY_BASE, offset: 0, value: consts_1.base.map[i][key] });\r\n                                    consts_1.base.map[i][key] = -1;\r\n                                }\r\n                            }\r\n                            for (let i = 0; i < needAdd; i += 1) {\r\n                                this.fall[key].list.push({ x: key, y: -1 - i, v: consts_1.VELOCITY_BASE, offset: 0, value: (0, common_1.randomTile)() });\r\n                            }\r\n                        });\r\n                        // falling = true;\r\n                    }\r\n                }\r\n                break;\r\n        }\r\n    }\r\n}\r\nexports.Game = Game;\r\n\n\n//# sourceURL=webpack://loan-12-su-quan/./src/objs/game.ts?");
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Game = void 0;
+const consts_1 = __webpack_require__(/*! @/configs/consts */ "./src/configs/consts.ts");
+const common_1 = __webpack_require__(/*! @/utils/common */ "./src/utils/common.ts");
+class Game {
+    state;
+    selected;
+    swapped;
+    reswap;
+    fall;
+    explosions;
+    explodedTiles;
+    tSwap;
+    tExplode;
+    tExplode2;
+    constructor() { }
+    init() {
+        consts_1.base.map = (0, common_1.generateMap)();
+        this.state = "IDLE";
+        this.selected = null;
+        this.swapped = null;
+        this.reswap = false;
+        this.fall = {};
+        this.explosions = [];
+        this.tSwap = 0;
+        this.tExplode = 0;
+        this.tExplode2 = 0;
+    }
+    matchPosition(x, y) {
+        let h = [];
+        let v = [];
+        let newX, newY;
+        const posValue = consts_1.base.map[y][x];
+        const compatible = consts_1.mapTileInfo[posValue].compatible;
+        newX = x - 1;
+        while (newX >= 0) {
+            const value = consts_1.base.map[y][newX];
+            if (!(0, common_1.check)(value, posValue, compatible))
+                break;
+            h.push({ x: newX, y, point: consts_1.mapTileInfo[value].point });
+            newX -= 1;
+        }
+        newX = x + 1;
+        while (newX < consts_1.MAP_WIDTH) {
+            const value = consts_1.base.map[y][newX];
+            if (!(0, common_1.check)(value, posValue, compatible))
+                break;
+            h.push({ x: newX, y, point: consts_1.mapTileInfo[value].point });
+            newX += 1;
+        }
+        newY = y - 1;
+        while (newY >= 0) {
+            const value = consts_1.base.map[newY][x];
+            if (!(0, common_1.check)(value, posValue, compatible))
+                break;
+            v.push({ x, y: newY, point: consts_1.mapTileInfo[value].point });
+            newY -= 1;
+        }
+        newY = y + 1;
+        while (newY < consts_1.MAP_WIDTH) {
+            const value = consts_1.base.map[newY][x];
+            if (!(0, common_1.check)(value, posValue, compatible))
+                break;
+            v.push({ x, y: newY, point: consts_1.mapTileInfo[value].point });
+            newY += 1;
+        }
+        let hasH = true;
+        let hasV = true;
+        if (h.length < 2) {
+            h = [];
+            hasH = false;
+        }
+        if (v.length < 2) {
+            v = [];
+            hasV = false;
+        }
+        const matched = hasH || hasV;
+        const tiles = matched ? [...h, ...v, { x, y, point: consts_1.mapTileInfo[consts_1.base.map[y][x]].point }] : [];
+        return {
+            matched,
+            tiles,
+            point: tiles.reduce((a, b) => a + b.point, 0) +
+                (h.length >= consts_1.GAIN_TURN ? consts_1.MATCH_4_POINT : 0) +
+                (v.length >= consts_1.GAIN_TURN ? consts_1.MATCH_4_POINT : 0),
+            turn: Number(h.length >= consts_1.GAIN_TURN) + Number(v.length >= consts_1.GAIN_TURN),
+        };
+    }
+    swap(x0, y0, x1, y1) {
+        const tmp = consts_1.base.map[y0][x0];
+        consts_1.base.map[y0][x0] = consts_1.base.map[y1][x1];
+        consts_1.base.map[y1][x1] = tmp;
+    }
+    addMatchedPosition(allMatchedPositions, x0, y0, x1, y1) {
+        this.swap(x0, y0, x1, y1);
+        const { matched: m0, point: p0 } = this.matchPosition(x0, y0);
+        const { matched: m1, point: p1 } = this.matchPosition(x1, y1);
+        if (m0 || m1)
+            allMatchedPositions.push({ x0, y0, x1, y1, point: p0 + p1 });
+        this.swap(x0, y0, x1, y1);
+    }
+    findAllMatchedPositions() {
+        const allMatchedPositions = [];
+        for (let i = 0; i < consts_1.MAP_WIDTH_1; i += 1) {
+            for (let j = 0; j < consts_1.MAP_WIDTH_1; j += 1) {
+                this.addMatchedPosition(allMatchedPositions, j, i, j + 1, i);
+                this.addMatchedPosition(allMatchedPositions, j, i, j, i + 1);
+            }
+        }
+        for (let i = 0; i < consts_1.MAP_WIDTH_1; i += 1)
+            this.addMatchedPosition(allMatchedPositions, consts_1.MAP_WIDTH_1, i, consts_1.MAP_WIDTH_1, i + 1);
+        for (let j = 0; j < consts_1.MAP_WIDTH_1; j += 1)
+            this.addMatchedPosition(allMatchedPositions, j, consts_1.MAP_WIDTH_1, j + 1, consts_1.MAP_WIDTH_1);
+        allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
+        return allMatchedPositions;
+    }
+    onClick(e) {
+        if (this.state !== "IDLE" && this.state !== "SELECT")
+            return;
+        const x = Math.floor(e.offsetX / consts_1.CELL_SIZE);
+        const y = Math.floor(e.offsetY / consts_1.CELL_SIZE);
+        if (x < 0 || x >= consts_1.MAP_WIDTH || y < 0 || y >= consts_1.MAP_WIDTH)
+            return;
+        this.tSwap = 0;
+        if (!this.selected) {
+            this.selected = { x, y, value: consts_1.base.map[y][x] };
+            consts_1.base.map[y][x] = -1;
+            this.state = "SELECT";
+            return;
+        }
+        if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
+            const { x, y, value } = this.selected;
+            consts_1.base.map[y][x] = value;
+            this.selected = null;
+            this.state = "IDLE";
+            return;
+        }
+        this.swapped = { x, y, value: consts_1.base.map[y][x] };
+        consts_1.base.map[y][x] = -1;
+    }
+    render() {
+        for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {
+            for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {
+                consts_1.base.context.fillStyle = (i + j) % 2 ? "#554933" : "#3e3226";
+                const x = j * consts_1.CELL_SIZE;
+                const y = i * consts_1.CELL_SIZE;
+                consts_1.base.context.fillRect(x, y, consts_1.CELL_SIZE, consts_1.CELL_SIZE);
+                if (consts_1.base.map[i][j] === -1)
+                    continue;
+                consts_1.base.context.drawImage(consts_1.mapTileInfo[consts_1.base.map[i][j]].texture, x + consts_1.TILE_OFFSET, y + consts_1.TILE_OFFSET);
+            }
+        }
+        switch (this.state) {
+            case "SELECT":
+                const offset = this.tSwap * consts_1.SWAP_OFFSET;
+                const { x: x0, y: y0, value: v0 } = this.selected;
+                const { x: x1, y: y1, value: v1 } = this.swapped || this.selected;
+                consts_1.base.context.drawImage(consts_1.mapTileInfo[v0].texture, x0 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (x1 - x0) * offset, y0 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (y1 - y0) * offset);
+                if (!this.swapped) {
+                    consts_1.base.context.lineWidth = 4;
+                    consts_1.base.context.strokeStyle = "cyan";
+                    consts_1.base.context.strokeRect(this.selected.x * consts_1.CELL_SIZE + 2, this.selected.y * consts_1.CELL_SIZE + 2, consts_1.CELL_SIZE - 4, consts_1.CELL_SIZE - 4);
+                }
+                else
+                    consts_1.base.context.drawImage(consts_1.mapTileInfo[v1].texture, x1 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (x0 - x1) * offset, y1 * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + (y0 - y1) * offset);
+                break;
+            case "EXPLODE":
+                this.explosions.forEach(({ x, y, value }) => {
+                    const texture = consts_1.mapTileInfo[value].explosions[this.tExplode];
+                    consts_1.base.context.drawImage(texture, x * consts_1.CELL_SIZE + Math.floor((consts_1.CELL_SIZE - texture.width) / 2), y * consts_1.CELL_SIZE + Math.floor((consts_1.CELL_SIZE - texture.height) / 2));
+                });
+                break;
+            case "FALL":
+                (0, common_1.getKeys)(this.fall).forEach((col) => {
+                    this.fall[col].list.forEach(({ x, y, value, offset }) => {
+                        consts_1.base.context.drawImage(consts_1.mapTileInfo[value].texture, x * consts_1.CELL_SIZE + consts_1.TILE_OFFSET, y * consts_1.CELL_SIZE + consts_1.TILE_OFFSET + offset);
+                    });
+                });
+                break;
+        }
+    }
+    update() {
+        switch (this.state) {
+            case "SELECT":
+                if (this.swapped) {
+                    this.tSwap += 1;
+                    if (this.tSwap > consts_1.SWAP_DURATION) {
+                        this.tSwap = consts_1.SWAP_DURATION;
+                        const { x: x0, y: y0, value: v0 } = this.selected;
+                        const { x: x1, y: y1, value: v1 } = this.swapped;
+                        consts_1.base.map[y0][x0] = v0;
+                        consts_1.base.map[y1][x1] = v1;
+                        this.swap(x0, y0, x1, y1);
+                        if (this.reswap) {
+                            this.reswap = false;
+                            this.selected = this.swapped = null;
+                            this.state = "IDLE";
+                        }
+                        else {
+                            const { matched: m0, tiles: t0 } = this.matchPosition(x0, y0);
+                            const { matched: m1, tiles: t1 } = this.matchPosition(x1, y1);
+                            if (m0 || m1) {
+                                this.selected = this.swapped = null;
+                                this.explodedTiles = (0, common_1.combine)([t0, t1]);
+                                this.explosions = [];
+                                this.explodedTiles.forEach(({ x, y }) => {
+                                    this.explosions.push({ x, y, value: consts_1.base.map[y][x] });
+                                    consts_1.base.map[y][x] = -1;
+                                });
+                                this.state = "EXPLODE";
+                            }
+                            else {
+                                this.reswap = true;
+                                this.tSwap = 0;
+                            }
+                        }
+                    }
+                }
+                break;
+            case "EXPLODE":
+                this.tExplode2 += 1;
+                if (this.tExplode2 % 2 === 0) {
+                    this.tExplode += 1;
+                    if (this.tExplode === 4) {
+                        this.tExplode = 0;
+                        this.state = "FALL";
+                        this.fall = {};
+                        this.explodedTiles.forEach(({ x, y }) => {
+                            consts_1.base.map[y][x] = -1;
+                            if (this.fall[x]) {
+                                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                                    this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+                            }
+                            else
+                                this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+                        });
+                        (0, common_1.getKeys)(this.fall).forEach((key) => {
+                            this.fall[key].below = (0, common_1.findBelow)(this.fall[key].list);
+                            const needAdd = this.fall[key].list.length;
+                            this.fall[key].list = [];
+                            key = Number(key);
+                            for (let i = this.fall[key].below; i >= 0; i -= 1) {
+                                if (consts_1.base.map[i][key] !== -1) {
+                                    this.fall[key].list.push({ x: key, y: i, v: consts_1.VELOCITY_BASE, offset: 0, value: consts_1.base.map[i][key] });
+                                    consts_1.base.map[i][key] = -1;
+                                }
+                            }
+                            for (let i = 0; i < needAdd; i += 1) {
+                                this.fall[key].list.push({ x: key, y: -1 - i, v: consts_1.VELOCITY_BASE, offset: 0, value: (0, common_1.randomTile)() });
+                            }
+                        });
+                    }
+                }
+                break;
+            case "FALL":
+                let newFalling = false;
+                (0, common_1.getKeys)(this.fall).forEach((col) => {
+                    const colData = this.fall[col];
+                    col = Number(col);
+                    let shift = false;
+                    colData.list.forEach((i, index) => {
+                        i.v += consts_1.GRAVITY;
+                        i.offset += i.v;
+                        const newY = i.y + Math.floor((i.offset + 6) / consts_1.CELL_SIZE);
+                        if (index === 0) {
+                            if (newY >= colData.below) {
+                                shift = true;
+                                consts_1.base.map[colData.below][col] = i.value;
+                                colData.below -= 1;
+                            }
+                        }
+                        else {
+                            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
+                                i.v = consts_1.VELOCITY_BASE;
+                                i.offset = Math.floor(i.offset / consts_1.CELL_SIZE) * consts_1.CELL_SIZE;
+                            }
+                        }
+                    });
+                    if (shift)
+                        colData.list.shift();
+                    if (colData.list.length)
+                        newFalling = true;
+                });
+                if (!newFalling) {
+                    const t = [];
+                    for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {
+                        for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {
+                            const { matched: m0, tiles: t0 } = this.matchPosition(j, i);
+                            if (m0)
+                                t.push(...t0);
+                        }
+                    }
+                    if (t.length) {
+                        this.fall = {};
+                        t.forEach(({ x, y }) => {
+                            consts_1.base.map[y][x] = -1;
+                            if (this.fall[x]) {
+                                !this.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                                    this.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+                            }
+                            else
+                                this.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+                        });
+                        const findBelow = (list) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+                        (0, common_1.getKeys)(this.fall).forEach((key) => {
+                            this.fall[key].below = findBelow(this.fall[key].list);
+                            const needAdd = this.fall[key].list.length;
+                            this.fall[key].list = [];
+                            key = Number(key);
+                            for (let i = this.fall[key].below; i >= 0; i -= 1) {
+                                if (consts_1.base.map[i][key] !== -1) {
+                                    this.fall[key].list.push({ x: key, y: i, v: consts_1.VELOCITY_BASE, offset: 0, value: consts_1.base.map[i][key] });
+                                    consts_1.base.map[i][key] = -1;
+                                }
+                            }
+                            for (let i = 0; i < needAdd; i += 1) {
+                                this.fall[key].list.push({ x: key, y: -1 - i, v: consts_1.VELOCITY_BASE, offset: 0, value: (0, common_1.randomTile)() });
+                            }
+                        });
+                        newFalling = true;
+                    }
+                }
+                if (!newFalling)
+                    this.state = "IDLE";
+                break;
+        }
+    }
+}
+exports.Game = Game;
+
 
 /***/ }),
 
@@ -115,7 +1363,150 @@ eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\n
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
-eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\nexports.combine = exports.getKey = exports.findBelow = exports.initImages = exports.check = exports.generateMap = exports.randomTile = exports.random = exports.getImageSrc = exports.getKeys = exports.getAppName = void 0;\r\nconst consts_1 = __webpack_require__(/*! @/configs/consts */ \"./src/configs/consts.ts\");\r\nconst getAppName = () => consts_1.APP_NAME;\r\nexports.getAppName = getAppName;\r\nexports.getKeys = Object.keys;\r\nconst getImageSrc = (src, ext = \"png\") => `/static/images/${src}.${ext}`;\r\nexports.getImageSrc = getImageSrc;\r\nconst random = (min, max) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max\r\nexports.random = random;\r\nlet sumProbability = 0;\r\nconst tileProbabilities = Array.from({ length: consts_1.COUNT_TILES }).map((_, index) => {\r\n    const probability = consts_1.mapTileInfo[index].probability;\r\n    sumProbability += probability;\r\n    return sumProbability;\r\n});\r\nconst randomTile = () => {\r\n    const rd = (0, exports.random)(0, sumProbability);\r\n    for (let i = 0; i < consts_1.COUNT_TILES; i += 1) {\r\n        if (rd <= tileProbabilities[i])\r\n            return i;\r\n    }\r\n    return -1;\r\n};\r\nexports.randomTile = randomTile;\r\nconst generateMap = () => {\r\n    const genBase = () => Array.from({ length: consts_1.MAP_WIDTH }).map(() => Array.from({ length: consts_1.MAP_WIDTH }).map(exports.randomTile));\r\n    const mapBase = genBase();\r\n    const check = (x, y, posValue, compatible) => {\r\n        const value = mapBase[y][x];\r\n        return value === posValue || compatible.includes(value);\r\n    };\r\n    const checkMatched = (x, y) => {\r\n        let h = 0;\r\n        let v = 0;\r\n        const posValue = mapBase[y][x];\r\n        const compatible = consts_1.mapTileInfo[posValue].compatible;\r\n        let newX = x + 1;\r\n        while (newX < consts_1.MAP_WIDTH) {\r\n            if (!check(newX, y, posValue, compatible))\r\n                break;\r\n            h += 1;\r\n            newX += 1;\r\n        }\r\n        if (h >= 2)\r\n            return true;\r\n        let newY = y + 1;\r\n        while (newY < consts_1.MAP_WIDTH) {\r\n            if (!check(x, newY, posValue, compatible))\r\n                break;\r\n            v += 1;\r\n            newY += 1;\r\n        }\r\n        if (v >= 2)\r\n            return true;\r\n        return false;\r\n    };\r\n    let matched = true;\r\n    while (matched) {\r\n        matched = false;\r\n        for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {\r\n            for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {\r\n                if (!checkMatched(j, i))\r\n                    continue;\r\n                matched = true;\r\n                mapBase[i][j] = (0, exports.randomTile)();\r\n            }\r\n        }\r\n    }\r\n    return mapBase;\r\n};\r\nexports.generateMap = generateMap;\r\nconst check = (value, posValue, compatible) => value === posValue || compatible.includes(value);\r\nexports.check = check;\r\nconst initImages = async () => {\r\n    consts_1.base.context.imageSmoothingEnabled = false;\r\n    const loadTile = (key, src) => {\r\n        const image = new Image();\r\n        image.src = (0, exports.getImageSrc)(`tiles/${src}`);\r\n        return new Promise((res) => (image.onload = () => {\r\n            const canvas = document.createElement(\"canvas\");\r\n            canvas.width = consts_1.TILE_SIZE;\r\n            canvas.height = consts_1.TILE_SIZE;\r\n            const context = canvas.getContext(\"2d\");\r\n            context.imageSmoothingEnabled = false;\r\n            context.drawImage(image, 0, 0, consts_1.TILE_SIZE, consts_1.TILE_SIZE);\r\n            const image2 = new Image();\r\n            image2.src = canvas.toDataURL(\"image/png\");\r\n            image2.onload = () => {\r\n                consts_1.mapTileInfo[key].texture = image2;\r\n                res(null);\r\n            };\r\n        }));\r\n    };\r\n    await Promise.all((0, exports.getKeys)(consts_1.TILES).map((tile) => loadTile(consts_1.TILES[tile], tile.toLowerCase())));\r\n    const loadExplosion = (key, src) => {\r\n        const image = new Image();\r\n        image.src = (0, exports.getImageSrc)(`explosions/${src}`);\r\n        return new Promise((res) => (image.onload = () => {\r\n            consts_1.mapTileInfo[key].explosions = [];\r\n            for (let i = 0; i < 4; i += 1) {\r\n                const width = Math.floor((image.width / 4) * consts_1.SCALE_RATIO);\r\n                const height = Math.floor(image.height * consts_1.SCALE_RATIO);\r\n                const canvas = document.createElement(\"canvas\");\r\n                canvas.width = width;\r\n                canvas.height = height;\r\n                const context = canvas.getContext(\"2d\");\r\n                context.imageSmoothingEnabled = false;\r\n                context.drawImage(image, (image.width / 4) * i, 0, Math.floor(image.width / 4), image.height, 0, 0, width, height);\r\n                const image2 = new Image();\r\n                image2.src = canvas.toDataURL(\"image/png\");\r\n                image2.onload = () => {\r\n                    consts_1.mapTileInfo[key].explosions[i] = image2;\r\n                    res(null);\r\n                };\r\n            }\r\n        }));\r\n    };\r\n    await Promise.all(consts_1.EXPLOSION_KEYS.map((tile) => loadExplosion(consts_1.TILES[tile], tile.toLowerCase())));\r\n    consts_1.mapTileInfo[consts_1.TILES.SWORDRED].explosions = consts_1.mapTileInfo[consts_1.TILES.SWORD].explosions;\r\n};\r\nexports.initImages = initImages;\r\nconst findBelow = (list) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);\r\nexports.findBelow = findBelow;\r\nconst getKey = (x, y) => y * consts_1.MAP_WIDTH + x;\r\nexports.getKey = getKey;\r\nconst combine = (arr) => {\r\n    const lst = [];\r\n    const has = {};\r\n    arr.forEach((tiles) => {\r\n        tiles.forEach((tile) => {\r\n            const { x, y } = tile;\r\n            const key = (0, exports.getKey)(x, y);\r\n            if (has[key])\r\n                return;\r\n            has[key] = true;\r\n            lst.push(tile);\r\n        });\r\n    });\r\n    return lst;\r\n};\r\nexports.combine = combine;\r\n\n\n//# sourceURL=webpack://loan-12-su-quan/./src/utils/common.ts?");
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.combine = exports.getKey = exports.findBelow = exports.initImages = exports.check = exports.generateMap = exports.randomTile = exports.random = exports.getImageSrc = exports.getKeys = exports.getAppName = void 0;
+const consts_1 = __webpack_require__(/*! @/configs/consts */ "./src/configs/consts.ts");
+const getAppName = () => consts_1.APP_NAME;
+exports.getAppName = getAppName;
+exports.getKeys = Object.keys;
+const getImageSrc = (src, ext = "png") => `/static/images/${src}.${ext}`;
+exports.getImageSrc = getImageSrc;
+const random = (min, max) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max
+exports.random = random;
+let sumProbability = 0;
+const tileProbabilities = Array.from({ length: consts_1.COUNT_TILES }).map((_, index) => {
+    const probability = consts_1.mapTileInfo[index].probability;
+    sumProbability += probability;
+    return sumProbability;
+});
+const randomTile = () => {
+    const rd = (0, exports.random)(0, sumProbability);
+    for (let i = 0; i < consts_1.COUNT_TILES; i += 1) {
+        if (rd <= tileProbabilities[i])
+            return i;
+    }
+    return -1;
+};
+exports.randomTile = randomTile;
+const generateMap = () => {
+    const genBase = () => Array.from({ length: consts_1.MAP_WIDTH }).map(() => Array.from({ length: consts_1.MAP_WIDTH }).map(exports.randomTile));
+    const mapBase = genBase();
+    const check = (x, y, posValue, compatible) => {
+        const value = mapBase[y][x];
+        return value === posValue || compatible.includes(value);
+    };
+    const checkMatched = (x, y) => {
+        let h = 0;
+        let v = 0;
+        const posValue = mapBase[y][x];
+        const compatible = consts_1.mapTileInfo[posValue].compatible;
+        let newX = x + 1;
+        while (newX < consts_1.MAP_WIDTH) {
+            if (!check(newX, y, posValue, compatible))
+                break;
+            h += 1;
+            newX += 1;
+        }
+        if (h >= 2)
+            return true;
+        let newY = y + 1;
+        while (newY < consts_1.MAP_WIDTH) {
+            if (!check(x, newY, posValue, compatible))
+                break;
+            v += 1;
+            newY += 1;
+        }
+        if (v >= 2)
+            return true;
+        return false;
+    };
+    let matched = true;
+    while (matched) {
+        matched = false;
+        for (let i = 0; i < consts_1.MAP_WIDTH; i += 1) {
+            for (let j = 0; j < consts_1.MAP_WIDTH; j += 1) {
+                if (!checkMatched(j, i))
+                    continue;
+                matched = true;
+                mapBase[i][j] = (0, exports.randomTile)();
+            }
+        }
+    }
+    return mapBase;
+};
+exports.generateMap = generateMap;
+const check = (value, posValue, compatible) => value === posValue || compatible.includes(value);
+exports.check = check;
+const initImages = async () => {
+    consts_1.base.context.imageSmoothingEnabled = false;
+    const loadTile = (key, src) => {
+        const image = new Image();
+        image.src = (0, exports.getImageSrc)(`tiles/${src}`);
+        return new Promise((res) => (image.onload = () => {
+            const canvas = document.createElement("canvas");
+            canvas.width = consts_1.TILE_SIZE;
+            canvas.height = consts_1.TILE_SIZE;
+            const context = canvas.getContext("2d");
+            context.imageSmoothingEnabled = false;
+            context.drawImage(image, 0, 0, consts_1.TILE_SIZE, consts_1.TILE_SIZE);
+            const image2 = new Image();
+            image2.src = canvas.toDataURL("image/png");
+            image2.onload = () => {
+                consts_1.mapTileInfo[key].texture = image2;
+                res(null);
+            };
+        }));
+    };
+    await Promise.all((0, exports.getKeys)(consts_1.TILES).map((tile) => loadTile(consts_1.TILES[tile], tile.toLowerCase())));
+    const loadExplosion = (key, src) => {
+        const image = new Image();
+        image.src = (0, exports.getImageSrc)(`explosions/${src}`);
+        return new Promise((res) => (image.onload = () => {
+            consts_1.mapTileInfo[key].explosions = [];
+            for (let i = 0; i < 4; i += 1) {
+                const width = Math.floor((image.width / 4) * consts_1.SCALE_RATIO);
+                const height = Math.floor(image.height * consts_1.SCALE_RATIO);
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = height;
+                const context = canvas.getContext("2d");
+                context.imageSmoothingEnabled = false;
+                context.drawImage(image, (image.width / 4) * i, 0, Math.floor(image.width / 4), image.height, 0, 0, width, height);
+                const image2 = new Image();
+                image2.src = canvas.toDataURL("image/png");
+                image2.onload = () => {
+                    consts_1.mapTileInfo[key].explosions[i] = image2;
+                    res(null);
+                };
+            }
+        }));
+    };
+    await Promise.all(consts_1.EXPLOSION_KEYS.map((tile) => loadExplosion(consts_1.TILES[tile], tile.toLowerCase())));
+    consts_1.mapTileInfo[consts_1.TILES.SWORDRED].explosions = consts_1.mapTileInfo[consts_1.TILES.SWORD].explosions;
+};
+exports.initImages = initImages;
+const findBelow = (list) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+exports.findBelow = findBelow;
+const getKey = (x, y) => y * consts_1.MAP_WIDTH + x;
+exports.getKey = getKey;
+const combine = (arr) => {
+    const lst = [];
+    const has = {};
+    arr.forEach((tiles) => {
+        tiles.forEach((tile) => {
+            const { x, y } = tile;
+            const key = (0, exports.getKey)(x, y);
+            if (has[key])
+                return;
+            has[key] = true;
+            lst.push(tile);
+        });
+    });
+    return lst;
+};
+exports.combine = combine;
+
 
 /***/ }),
 
@@ -126,7 +1517,62 @@ eval("\r\nObject.defineProperty(exports, \"__esModule\", ({ value: true }));\r\n
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (/* binding */ WebSocketClient)\n/* harmony export */ });\n/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/log.js */ \"./node_modules/webpack-dev-server/client/utils/log.js\");\nfunction _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError(\"Cannot call a class as a function\"); } }\nfunction _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if (\"value\" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }\nfunction _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, \"prototype\", { writable: false }); return Constructor; }\nfunction _toPropertyKey(arg) { var key = _toPrimitive(arg, \"string\"); return typeof key === \"symbol\" ? key : String(key); }\nfunction _toPrimitive(input, hint) { if (typeof input !== \"object\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \"default\"); if (typeof res !== \"object\") return res; throw new TypeError(\"@@toPrimitive must return a primitive value.\"); } return (hint === \"string\" ? String : Number)(input); }\n\nvar WebSocketClient = /*#__PURE__*/function () {\n  /**\n   * @param {string} url\n   */\n  function WebSocketClient(url) {\n    _classCallCheck(this, WebSocketClient);\n    this.client = new WebSocket(url);\n    this.client.onerror = function (error) {\n      _utils_log_js__WEBPACK_IMPORTED_MODULE_0__.log.error(error);\n    };\n  }\n\n  /**\n   * @param {(...args: any[]) => void} f\n   */\n  _createClass(WebSocketClient, [{\n    key: \"onOpen\",\n    value: function onOpen(f) {\n      this.client.onopen = f;\n    }\n\n    /**\n     * @param {(...args: any[]) => void} f\n     */\n  }, {\n    key: \"onClose\",\n    value: function onClose(f) {\n      this.client.onclose = f;\n    }\n\n    // call f with the message string as the first argument\n    /**\n     * @param {(...args: any[]) => void} f\n     */\n  }, {\n    key: \"onMessage\",\n    value: function onMessage(f) {\n      this.client.onmessage = function (e) {\n        f(e.data);\n      };\n    }\n  }]);\n  return WebSocketClient;\n}();\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/clients/WebSocketClient.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ WebSocketClient)
+/* harmony export */ });
+/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/log.js */ "./node_modules/webpack-dev-server/client/utils/log.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor); } }
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+
+var WebSocketClient = /*#__PURE__*/function () {
+  /**
+   * @param {string} url
+   */
+  function WebSocketClient(url) {
+    _classCallCheck(this, WebSocketClient);
+    this.client = new WebSocket(url);
+    this.client.onerror = function (error) {
+      _utils_log_js__WEBPACK_IMPORTED_MODULE_0__.log.error(error);
+    };
+  }
+
+  /**
+   * @param {(...args: any[]) => void} f
+   */
+  _createClass(WebSocketClient, [{
+    key: "onOpen",
+    value: function onOpen(f) {
+      this.client.onopen = f;
+    }
+
+    /**
+     * @param {(...args: any[]) => void} f
+     */
+  }, {
+    key: "onClose",
+    value: function onClose(f) {
+      this.client.onclose = f;
+    }
+
+    // call f with the message string as the first argument
+    /**
+     * @param {(...args: any[]) => void} f
+     */
+  }, {
+    key: "onMessage",
+    value: function onMessage(f) {
+      this.client.onmessage = function (e) {
+        f(e.data);
+      };
+    }
+  }]);
+  return WebSocketClient;
+}();
+
 
 /***/ }),
 
@@ -137,7 +1583,338 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("var __resourceQuery = \"?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=info&overlay=true&reconnect=10&hot=true&live-reload=true\";\n__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! webpack/hot/log.js */ \"./node_modules/webpack/hot/log.js\");\n/* harmony import */ var webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/stripAnsi.js */ \"./node_modules/webpack-dev-server/client/utils/stripAnsi.js\");\n/* harmony import */ var _utils_parseURL_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/parseURL.js */ \"./node_modules/webpack-dev-server/client/utils/parseURL.js\");\n/* harmony import */ var _socket_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./socket.js */ \"./node_modules/webpack-dev-server/client/socket.js\");\n/* harmony import */ var _overlay_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./overlay.js */ \"./node_modules/webpack-dev-server/client/overlay.js\");\n/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils/log.js */ \"./node_modules/webpack-dev-server/client/utils/log.js\");\n/* harmony import */ var _utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./utils/sendMessage.js */ \"./node_modules/webpack-dev-server/client/utils/sendMessage.js\");\n/* harmony import */ var _utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./utils/reloadApp.js */ \"./node_modules/webpack-dev-server/client/utils/reloadApp.js\");\n/* harmony import */ var _utils_createSocketURL_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./utils/createSocketURL.js */ \"./node_modules/webpack-dev-server/client/utils/createSocketURL.js\");\nfunction ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }\nfunction _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }\nfunction _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }\nfunction _toPropertyKey(arg) { var key = _toPrimitive(arg, \"string\"); return typeof key === \"symbol\" ? key : String(key); }\nfunction _toPrimitive(input, hint) { if (typeof input !== \"object\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \"default\"); if (typeof res !== \"object\") return res; throw new TypeError(\"@@toPrimitive must return a primitive value.\"); } return (hint === \"string\" ? String : Number)(input); }\n/* global __resourceQuery, __webpack_hash__ */\n/// <reference types=\"webpack/module\" />\n\n\n\n\n\n\n\n\n\n\n/**\n * @typedef {Object} OverlayOptions\n * @property {boolean | (error: Error) => boolean} [warnings]\n * @property {boolean | (error: Error) => boolean} [errors]\n * @property {boolean | (error: Error) => boolean} [runtimeErrors]\n * @property {string} [trustedTypesPolicyName]\n */\n\n/**\n * @typedef {Object} Options\n * @property {boolean} hot\n * @property {boolean} liveReload\n * @property {boolean} progress\n * @property {boolean | OverlayOptions} overlay\n * @property {string} [logging]\n * @property {number} [reconnect]\n */\n\n/**\n * @typedef {Object} Status\n * @property {boolean} isUnloading\n * @property {string} currentHash\n * @property {string} [previousHash]\n */\n\n/**\n * @param {boolean | { warnings?: boolean | string; errors?: boolean | string; runtimeErrors?: boolean | string; }} overlayOptions\n */\nvar decodeOverlayOptions = function decodeOverlayOptions(overlayOptions) {\n  if (typeof overlayOptions === \"object\") {\n    [\"warnings\", \"errors\", \"runtimeErrors\"].forEach(function (property) {\n      if (typeof overlayOptions[property] === \"string\") {\n        var overlayFilterFunctionString = decodeURIComponent(overlayOptions[property]);\n\n        // eslint-disable-next-line no-new-func\n        var overlayFilterFunction = new Function(\"message\", \"var callback = \".concat(overlayFilterFunctionString, \"\\n        return callback(message)\"));\n        overlayOptions[property] = overlayFilterFunction;\n      }\n    });\n  }\n};\n\n/**\n * @type {Status}\n */\nvar status = {\n  isUnloading: false,\n  // TODO Workaround for webpack v4, `__webpack_hash__` is not replaced without HotModuleReplacement\n  // eslint-disable-next-line camelcase\n  currentHash:  true ? __webpack_require__.h() : 0\n};\n\n/** @type {Options} */\nvar options = {\n  hot: false,\n  liveReload: false,\n  progress: false,\n  overlay: false\n};\nvar parsedResourceQuery = (0,_utils_parseURL_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"])(__resourceQuery);\nvar enabledFeatures = {\n  \"Hot Module Replacement\": false,\n  \"Live Reloading\": false,\n  Progress: false,\n  Overlay: false\n};\nif (parsedResourceQuery.hot === \"true\") {\n  options.hot = true;\n  enabledFeatures[\"Hot Module Replacement\"] = true;\n}\nif (parsedResourceQuery[\"live-reload\"] === \"true\") {\n  options.liveReload = true;\n  enabledFeatures[\"Live Reloading\"] = true;\n}\nif (parsedResourceQuery.progress === \"true\") {\n  options.progress = true;\n  enabledFeatures.Progress = true;\n}\nif (parsedResourceQuery.overlay) {\n  try {\n    options.overlay = JSON.parse(parsedResourceQuery.overlay);\n  } catch (e) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(\"Error parsing overlay options from resource query:\", e);\n  }\n\n  // Fill in default \"true\" params for partially-specified objects.\n  if (typeof options.overlay === \"object\") {\n    options.overlay = _objectSpread({\n      errors: true,\n      warnings: true,\n      runtimeErrors: true\n    }, options.overlay);\n    decodeOverlayOptions(options.overlay);\n  }\n  enabledFeatures.Overlay = true;\n}\nif (parsedResourceQuery.logging) {\n  options.logging = parsedResourceQuery.logging;\n}\nif (typeof parsedResourceQuery.reconnect !== \"undefined\") {\n  options.reconnect = Number(parsedResourceQuery.reconnect);\n}\n\n/**\n * @param {string} level\n */\nfunction setAllLogLevel(level) {\n  // This is needed because the HMR logger operate separately from dev server logger\n  webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0___default().setLogLevel(level === \"verbose\" || level === \"log\" ? \"info\" : level);\n  (0,_utils_log_js__WEBPACK_IMPORTED_MODULE_5__.setLogLevel)(level);\n}\nif (options.logging) {\n  setAllLogLevel(options.logging);\n}\n(0,_utils_log_js__WEBPACK_IMPORTED_MODULE_5__.logEnabledFeatures)(enabledFeatures);\nself.addEventListener(\"beforeunload\", function () {\n  status.isUnloading = true;\n});\nvar overlay = typeof window !== \"undefined\" ? (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.createOverlay)(typeof options.overlay === \"object\" ? {\n  trustedTypesPolicyName: options.overlay.trustedTypesPolicyName,\n  catchRuntimeError: options.overlay.runtimeErrors\n} : {\n  trustedTypesPolicyName: false,\n  catchRuntimeError: options.overlay\n}) : {\n  send: function send() {}\n};\nvar onSocketMessage = {\n  hot: function hot() {\n    if (parsedResourceQuery.hot === \"false\") {\n      return;\n    }\n    options.hot = true;\n  },\n  liveReload: function liveReload() {\n    if (parsedResourceQuery[\"live-reload\"] === \"false\") {\n      return;\n    }\n    options.liveReload = true;\n  },\n  invalid: function invalid() {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"App updated. Recompiling...\");\n\n    // Fixes #1042. overlay doesn't clear if errors are fixed but warnings remain.\n    if (options.overlay) {\n      overlay.send({\n        type: \"DISMISS\"\n      });\n    }\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Invalid\");\n  },\n  /**\n   * @param {string} hash\n   */\n  hash: function hash(_hash) {\n    status.previousHash = status.currentHash;\n    status.currentHash = _hash;\n  },\n  logging: setAllLogLevel,\n  /**\n   * @param {boolean} value\n   */\n  overlay: function overlay(value) {\n    if (typeof document === \"undefined\") {\n      return;\n    }\n    options.overlay = value;\n    decodeOverlayOptions(options.overlay);\n  },\n  /**\n   * @param {number} value\n   */\n  reconnect: function reconnect(value) {\n    if (parsedResourceQuery.reconnect === \"false\") {\n      return;\n    }\n    options.reconnect = value;\n  },\n  /**\n   * @param {boolean} value\n   */\n  progress: function progress(value) {\n    options.progress = value;\n  },\n  /**\n   * @param {{ pluginName?: string, percent: number, msg: string }} data\n   */\n  \"progress-update\": function progressUpdate(data) {\n    if (options.progress) {\n      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"\".concat(data.pluginName ? \"[\".concat(data.pluginName, \"] \") : \"\").concat(data.percent, \"% - \").concat(data.msg, \".\"));\n    }\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Progress\", data);\n  },\n  \"still-ok\": function stillOk() {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"Nothing changed.\");\n    if (options.overlay) {\n      overlay.send({\n        type: \"DISMISS\"\n      });\n    }\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"StillOk\");\n  },\n  ok: function ok() {\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Ok\");\n    if (options.overlay) {\n      overlay.send({\n        type: \"DISMISS\"\n      });\n    }\n    (0,_utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__[\"default\"])(options, status);\n  },\n  // TODO: remove in v5 in favor of 'static-changed'\n  /**\n   * @param {string} file\n   */\n  \"content-changed\": function contentChanged(file) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"\".concat(file ? \"\\\"\".concat(file, \"\\\"\") : \"Content\", \" from static directory was changed. Reloading...\"));\n    self.location.reload();\n  },\n  /**\n   * @param {string} file\n   */\n  \"static-changed\": function staticChanged(file) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"\".concat(file ? \"\\\"\".concat(file, \"\\\"\") : \"Content\", \" from static directory was changed. Reloading...\"));\n    self.location.reload();\n  },\n  /**\n   * @param {Error[]} warnings\n   * @param {any} params\n   */\n  warnings: function warnings(_warnings, params) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.warn(\"Warnings while compiling.\");\n    var printableWarnings = _warnings.map(function (error) {\n      var _formatProblem = (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.formatProblem)(\"warning\", error),\n        header = _formatProblem.header,\n        body = _formatProblem.body;\n      return \"\".concat(header, \"\\n\").concat((0,_utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"])(body));\n    });\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Warnings\", printableWarnings);\n    for (var i = 0; i < printableWarnings.length; i++) {\n      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.warn(printableWarnings[i]);\n    }\n    var overlayWarningsSetting = typeof options.overlay === \"boolean\" ? options.overlay : options.overlay && options.overlay.warnings;\n    if (overlayWarningsSetting) {\n      var warningsToDisplay = typeof overlayWarningsSetting === \"function\" ? _warnings.filter(overlayWarningsSetting) : _warnings;\n      if (warningsToDisplay.length) {\n        overlay.send({\n          type: \"BUILD_ERROR\",\n          level: \"warning\",\n          messages: _warnings\n        });\n      }\n    }\n    if (params && params.preventReloading) {\n      return;\n    }\n    (0,_utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__[\"default\"])(options, status);\n  },\n  /**\n   * @param {Error[]} errors\n   */\n  errors: function errors(_errors) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(\"Errors while compiling. Reload prevented.\");\n    var printableErrors = _errors.map(function (error) {\n      var _formatProblem2 = (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.formatProblem)(\"error\", error),\n        header = _formatProblem2.header,\n        body = _formatProblem2.body;\n      return \"\".concat(header, \"\\n\").concat((0,_utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__[\"default\"])(body));\n    });\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Errors\", printableErrors);\n    for (var i = 0; i < printableErrors.length; i++) {\n      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(printableErrors[i]);\n    }\n    var overlayErrorsSettings = typeof options.overlay === \"boolean\" ? options.overlay : options.overlay && options.overlay.errors;\n    if (overlayErrorsSettings) {\n      var errorsToDisplay = typeof overlayErrorsSettings === \"function\" ? _errors.filter(overlayErrorsSettings) : _errors;\n      if (errorsToDisplay.length) {\n        overlay.send({\n          type: \"BUILD_ERROR\",\n          level: \"error\",\n          messages: _errors\n        });\n      }\n    }\n  },\n  /**\n   * @param {Error} error\n   */\n  error: function error(_error) {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(_error);\n  },\n  close: function close() {\n    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info(\"Disconnected!\");\n    if (options.overlay) {\n      overlay.send({\n        type: \"DISMISS\"\n      });\n    }\n    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__[\"default\"])(\"Close\");\n  }\n};\nvar socketURL = (0,_utils_createSocketURL_js__WEBPACK_IMPORTED_MODULE_8__[\"default\"])(parsedResourceQuery);\n(0,_socket_js__WEBPACK_IMPORTED_MODULE_3__[\"default\"])(socketURL, onSocketMessage, options.reconnect);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/index.js?");
+var __resourceQuery = "?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=info&overlay=true&reconnect=10&hot=true&live-reload=true";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! webpack/hot/log.js */ "./node_modules/webpack/hot/log.js");
+/* harmony import */ var webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/stripAnsi.js */ "./node_modules/webpack-dev-server/client/utils/stripAnsi.js");
+/* harmony import */ var _utils_parseURL_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils/parseURL.js */ "./node_modules/webpack-dev-server/client/utils/parseURL.js");
+/* harmony import */ var _socket_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./socket.js */ "./node_modules/webpack-dev-server/client/socket.js");
+/* harmony import */ var _overlay_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./overlay.js */ "./node_modules/webpack-dev-server/client/overlay.js");
+/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./utils/log.js */ "./node_modules/webpack-dev-server/client/utils/log.js");
+/* harmony import */ var _utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./utils/sendMessage.js */ "./node_modules/webpack-dev-server/client/utils/sendMessage.js");
+/* harmony import */ var _utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./utils/reloadApp.js */ "./node_modules/webpack-dev-server/client/utils/reloadApp.js");
+/* harmony import */ var _utils_createSocketURL_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./utils/createSocketURL.js */ "./node_modules/webpack-dev-server/client/utils/createSocketURL.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+/* global __resourceQuery, __webpack_hash__ */
+/// <reference types="webpack/module" />
+
+
+
+
+
+
+
+
+
+
+/**
+ * @typedef {Object} OverlayOptions
+ * @property {boolean | (error: Error) => boolean} [warnings]
+ * @property {boolean | (error: Error) => boolean} [errors]
+ * @property {boolean | (error: Error) => boolean} [runtimeErrors]
+ * @property {string} [trustedTypesPolicyName]
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {boolean} hot
+ * @property {boolean} liveReload
+ * @property {boolean} progress
+ * @property {boolean | OverlayOptions} overlay
+ * @property {string} [logging]
+ * @property {number} [reconnect]
+ */
+
+/**
+ * @typedef {Object} Status
+ * @property {boolean} isUnloading
+ * @property {string} currentHash
+ * @property {string} [previousHash]
+ */
+
+/**
+ * @param {boolean | { warnings?: boolean | string; errors?: boolean | string; runtimeErrors?: boolean | string; }} overlayOptions
+ */
+var decodeOverlayOptions = function decodeOverlayOptions(overlayOptions) {
+  if (typeof overlayOptions === "object") {
+    ["warnings", "errors", "runtimeErrors"].forEach(function (property) {
+      if (typeof overlayOptions[property] === "string") {
+        var overlayFilterFunctionString = decodeURIComponent(overlayOptions[property]);
+
+        // eslint-disable-next-line no-new-func
+        var overlayFilterFunction = new Function("message", "var callback = ".concat(overlayFilterFunctionString, "\n        return callback(message)"));
+        overlayOptions[property] = overlayFilterFunction;
+      }
+    });
+  }
+};
+
+/**
+ * @type {Status}
+ */
+var status = {
+  isUnloading: false,
+  // TODO Workaround for webpack v4, `__webpack_hash__` is not replaced without HotModuleReplacement
+  // eslint-disable-next-line camelcase
+  currentHash:  true ? __webpack_require__.h() : 0
+};
+
+/** @type {Options} */
+var options = {
+  hot: false,
+  liveReload: false,
+  progress: false,
+  overlay: false
+};
+var parsedResourceQuery = (0,_utils_parseURL_js__WEBPACK_IMPORTED_MODULE_2__["default"])(__resourceQuery);
+var enabledFeatures = {
+  "Hot Module Replacement": false,
+  "Live Reloading": false,
+  Progress: false,
+  Overlay: false
+};
+if (parsedResourceQuery.hot === "true") {
+  options.hot = true;
+  enabledFeatures["Hot Module Replacement"] = true;
+}
+if (parsedResourceQuery["live-reload"] === "true") {
+  options.liveReload = true;
+  enabledFeatures["Live Reloading"] = true;
+}
+if (parsedResourceQuery.progress === "true") {
+  options.progress = true;
+  enabledFeatures.Progress = true;
+}
+if (parsedResourceQuery.overlay) {
+  try {
+    options.overlay = JSON.parse(parsedResourceQuery.overlay);
+  } catch (e) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error("Error parsing overlay options from resource query:", e);
+  }
+
+  // Fill in default "true" params for partially-specified objects.
+  if (typeof options.overlay === "object") {
+    options.overlay = _objectSpread({
+      errors: true,
+      warnings: true,
+      runtimeErrors: true
+    }, options.overlay);
+    decodeOverlayOptions(options.overlay);
+  }
+  enabledFeatures.Overlay = true;
+}
+if (parsedResourceQuery.logging) {
+  options.logging = parsedResourceQuery.logging;
+}
+if (typeof parsedResourceQuery.reconnect !== "undefined") {
+  options.reconnect = Number(parsedResourceQuery.reconnect);
+}
+
+/**
+ * @param {string} level
+ */
+function setAllLogLevel(level) {
+  // This is needed because the HMR logger operate separately from dev server logger
+  webpack_hot_log_js__WEBPACK_IMPORTED_MODULE_0___default().setLogLevel(level === "verbose" || level === "log" ? "info" : level);
+  (0,_utils_log_js__WEBPACK_IMPORTED_MODULE_5__.setLogLevel)(level);
+}
+if (options.logging) {
+  setAllLogLevel(options.logging);
+}
+(0,_utils_log_js__WEBPACK_IMPORTED_MODULE_5__.logEnabledFeatures)(enabledFeatures);
+self.addEventListener("beforeunload", function () {
+  status.isUnloading = true;
+});
+var overlay = typeof window !== "undefined" ? (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.createOverlay)(typeof options.overlay === "object" ? {
+  trustedTypesPolicyName: options.overlay.trustedTypesPolicyName,
+  catchRuntimeError: options.overlay.runtimeErrors
+} : {
+  trustedTypesPolicyName: false,
+  catchRuntimeError: options.overlay
+}) : {
+  send: function send() {}
+};
+var onSocketMessage = {
+  hot: function hot() {
+    if (parsedResourceQuery.hot === "false") {
+      return;
+    }
+    options.hot = true;
+  },
+  liveReload: function liveReload() {
+    if (parsedResourceQuery["live-reload"] === "false") {
+      return;
+    }
+    options.liveReload = true;
+  },
+  invalid: function invalid() {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("App updated. Recompiling...");
+
+    // Fixes #1042. overlay doesn't clear if errors are fixed but warnings remain.
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Invalid");
+  },
+  /**
+   * @param {string} hash
+   */
+  hash: function hash(_hash) {
+    status.previousHash = status.currentHash;
+    status.currentHash = _hash;
+  },
+  logging: setAllLogLevel,
+  /**
+   * @param {boolean} value
+   */
+  overlay: function overlay(value) {
+    if (typeof document === "undefined") {
+      return;
+    }
+    options.overlay = value;
+    decodeOverlayOptions(options.overlay);
+  },
+  /**
+   * @param {number} value
+   */
+  reconnect: function reconnect(value) {
+    if (parsedResourceQuery.reconnect === "false") {
+      return;
+    }
+    options.reconnect = value;
+  },
+  /**
+   * @param {boolean} value
+   */
+  progress: function progress(value) {
+    options.progress = value;
+  },
+  /**
+   * @param {{ pluginName?: string, percent: number, msg: string }} data
+   */
+  "progress-update": function progressUpdate(data) {
+    if (options.progress) {
+      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("".concat(data.pluginName ? "[".concat(data.pluginName, "] ") : "").concat(data.percent, "% - ").concat(data.msg, "."));
+    }
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Progress", data);
+  },
+  "still-ok": function stillOk() {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("Nothing changed.");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("StillOk");
+  },
+  ok: function ok() {
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Ok");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    (0,_utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__["default"])(options, status);
+  },
+  // TODO: remove in v5 in favor of 'static-changed'
+  /**
+   * @param {string} file
+   */
+  "content-changed": function contentChanged(file) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
+    self.location.reload();
+  },
+  /**
+   * @param {string} file
+   */
+  "static-changed": function staticChanged(file) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("".concat(file ? "\"".concat(file, "\"") : "Content", " from static directory was changed. Reloading..."));
+    self.location.reload();
+  },
+  /**
+   * @param {Error[]} warnings
+   * @param {any} params
+   */
+  warnings: function warnings(_warnings, params) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.warn("Warnings while compiling.");
+    var printableWarnings = _warnings.map(function (error) {
+      var _formatProblem = (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.formatProblem)("warning", error),
+        header = _formatProblem.header,
+        body = _formatProblem.body;
+      return "".concat(header, "\n").concat((0,_utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__["default"])(body));
+    });
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Warnings", printableWarnings);
+    for (var i = 0; i < printableWarnings.length; i++) {
+      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.warn(printableWarnings[i]);
+    }
+    var overlayWarningsSetting = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.warnings;
+    if (overlayWarningsSetting) {
+      var warningsToDisplay = typeof overlayWarningsSetting === "function" ? _warnings.filter(overlayWarningsSetting) : _warnings;
+      if (warningsToDisplay.length) {
+        overlay.send({
+          type: "BUILD_ERROR",
+          level: "warning",
+          messages: _warnings
+        });
+      }
+    }
+    if (params && params.preventReloading) {
+      return;
+    }
+    (0,_utils_reloadApp_js__WEBPACK_IMPORTED_MODULE_7__["default"])(options, status);
+  },
+  /**
+   * @param {Error[]} errors
+   */
+  errors: function errors(_errors) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error("Errors while compiling. Reload prevented.");
+    var printableErrors = _errors.map(function (error) {
+      var _formatProblem2 = (0,_overlay_js__WEBPACK_IMPORTED_MODULE_4__.formatProblem)("error", error),
+        header = _formatProblem2.header,
+        body = _formatProblem2.body;
+      return "".concat(header, "\n").concat((0,_utils_stripAnsi_js__WEBPACK_IMPORTED_MODULE_1__["default"])(body));
+    });
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Errors", printableErrors);
+    for (var i = 0; i < printableErrors.length; i++) {
+      _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(printableErrors[i]);
+    }
+    var overlayErrorsSettings = typeof options.overlay === "boolean" ? options.overlay : options.overlay && options.overlay.errors;
+    if (overlayErrorsSettings) {
+      var errorsToDisplay = typeof overlayErrorsSettings === "function" ? _errors.filter(overlayErrorsSettings) : _errors;
+      if (errorsToDisplay.length) {
+        overlay.send({
+          type: "BUILD_ERROR",
+          level: "error",
+          messages: _errors
+        });
+      }
+    }
+  },
+  /**
+   * @param {Error} error
+   */
+  error: function error(_error) {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.error(_error);
+  },
+  close: function close() {
+    _utils_log_js__WEBPACK_IMPORTED_MODULE_5__.log.info("Disconnected!");
+    if (options.overlay) {
+      overlay.send({
+        type: "DISMISS"
+      });
+    }
+    (0,_utils_sendMessage_js__WEBPACK_IMPORTED_MODULE_6__["default"])("Close");
+  }
+};
+var socketURL = (0,_utils_createSocketURL_js__WEBPACK_IMPORTED_MODULE_8__["default"])(parsedResourceQuery);
+(0,_socket_js__WEBPACK_IMPORTED_MODULE_3__["default"])(socketURL, onSocketMessage, options.reconnect);
 
 /***/ }),
 
@@ -147,7 +1924,734 @@ eval("var __resourceQuery = \"?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathnam
   \************************************************************************/
 /***/ ((__unused_webpack_module, exports) => {
 
-eval("/******/ (function() { // webpackBootstrap\n/******/ \t\"use strict\";\n/******/ \tvar __webpack_modules__ = ({\n\n/***/ \"./client-src/modules/logger/SyncBailHookFake.js\":\n/*!*******************************************************!*\\\n  !*** ./client-src/modules/logger/SyncBailHookFake.js ***!\n  \\*******************************************************/\n/***/ (function(module) {\n\n\n\n/**\n * Client stub for tapable SyncBailHook\n */\nmodule.exports = function clientTapableSyncBailHook() {\n  return {\n    call: function call() {}\n  };\n};\n\n/***/ }),\n\n/***/ \"./node_modules/webpack/lib/logging/Logger.js\":\n/*!****************************************************!*\\\n  !*** ./node_modules/webpack/lib/logging/Logger.js ***!\n  \\****************************************************/\n/***/ (function(__unused_webpack_module, exports) {\n\n/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Tobias Koppers @sokra\n*/\n\n\n\nfunction _toConsumableArray(arr) {\n  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();\n}\nfunction _nonIterableSpread() {\n  throw new TypeError(\"Invalid attempt to spread non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\");\n}\nfunction _unsupportedIterableToArray(o, minLen) {\n  if (!o) return;\n  if (typeof o === \"string\") return _arrayLikeToArray(o, minLen);\n  var n = Object.prototype.toString.call(o).slice(8, -1);\n  if (n === \"Object\" && o.constructor) n = o.constructor.name;\n  if (n === \"Map\" || n === \"Set\") return Array.from(o);\n  if (n === \"Arguments\" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);\n}\nfunction _iterableToArray(iter) {\n  if (typeof (typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; }) !== \"undefined\" && iter[(typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; }).iterator] != null || iter[\"@@iterator\"] != null) return Array.from(iter);\n}\nfunction _arrayWithoutHoles(arr) {\n  if (Array.isArray(arr)) return _arrayLikeToArray(arr);\n}\nfunction _arrayLikeToArray(arr, len) {\n  if (len == null || len > arr.length) len = arr.length;\n  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];\n  return arr2;\n}\nfunction _classCallCheck(instance, Constructor) {\n  if (!(instance instanceof Constructor)) {\n    throw new TypeError(\"Cannot call a class as a function\");\n  }\n}\nfunction _defineProperties(target, props) {\n  for (var i = 0; i < props.length; i++) {\n    var descriptor = props[i];\n    descriptor.enumerable = descriptor.enumerable || false;\n    descriptor.configurable = true;\n    if (\"value\" in descriptor) descriptor.writable = true;\n    Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);\n  }\n}\nfunction _createClass(Constructor, protoProps, staticProps) {\n  if (protoProps) _defineProperties(Constructor.prototype, protoProps);\n  if (staticProps) _defineProperties(Constructor, staticProps);\n  Object.defineProperty(Constructor, \"prototype\", {\n    writable: false\n  });\n  return Constructor;\n}\nfunction _toPropertyKey(arg) {\n  var key = _toPrimitive(arg, \"string\");\n  return typeof key === \"symbol\" ? key : String(key);\n}\nfunction _toPrimitive(input, hint) {\n  if (typeof input !== \"object\" || input === null) return input;\n  var prim = input[(typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; }).toPrimitive];\n  if (prim !== undefined) {\n    var res = prim.call(input, hint || \"default\");\n    if (typeof res !== \"object\") return res;\n    throw new TypeError(\"@@toPrimitive must return a primitive value.\");\n  }\n  return (hint === \"string\" ? String : Number)(input);\n}\nvar LogType = Object.freeze({\n  error: /** @type {\"error\"} */\"error\",\n  // message, c style arguments\n  warn: /** @type {\"warn\"} */\"warn\",\n  // message, c style arguments\n  info: /** @type {\"info\"} */\"info\",\n  // message, c style arguments\n  log: /** @type {\"log\"} */\"log\",\n  // message, c style arguments\n  debug: /** @type {\"debug\"} */\"debug\",\n  // message, c style arguments\n\n  trace: /** @type {\"trace\"} */\"trace\",\n  // no arguments\n\n  group: /** @type {\"group\"} */\"group\",\n  // [label]\n  groupCollapsed: /** @type {\"groupCollapsed\"} */\"groupCollapsed\",\n  // [label]\n  groupEnd: /** @type {\"groupEnd\"} */\"groupEnd\",\n  // [label]\n\n  profile: /** @type {\"profile\"} */\"profile\",\n  // [profileName]\n  profileEnd: /** @type {\"profileEnd\"} */\"profileEnd\",\n  // [profileName]\n\n  time: /** @type {\"time\"} */\"time\",\n  // name, time as [seconds, nanoseconds]\n\n  clear: /** @type {\"clear\"} */\"clear\",\n  // no arguments\n  status: /** @type {\"status\"} */\"status\" // message, arguments\n});\n\nexports.LogType = LogType;\n\n/** @typedef {typeof LogType[keyof typeof LogType]} LogTypeEnum */\n\nvar LOG_SYMBOL = (typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; })(\"webpack logger raw log method\");\nvar TIMERS_SYMBOL = (typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; })(\"webpack logger times\");\nvar TIMERS_AGGREGATES_SYMBOL = (typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; })(\"webpack logger aggregated times\");\nvar WebpackLogger = /*#__PURE__*/function () {\n  /**\n   * @param {function(LogTypeEnum, any[]=): void} log log function\n   * @param {function(string | function(): string): WebpackLogger} getChildLogger function to create child logger\n   */\n  function WebpackLogger(log, getChildLogger) {\n    _classCallCheck(this, WebpackLogger);\n    this[LOG_SYMBOL] = log;\n    this.getChildLogger = getChildLogger;\n  }\n  _createClass(WebpackLogger, [{\n    key: \"error\",\n    value: function error() {\n      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {\n        args[_key] = arguments[_key];\n      }\n      this[LOG_SYMBOL](LogType.error, args);\n    }\n  }, {\n    key: \"warn\",\n    value: function warn() {\n      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {\n        args[_key2] = arguments[_key2];\n      }\n      this[LOG_SYMBOL](LogType.warn, args);\n    }\n  }, {\n    key: \"info\",\n    value: function info() {\n      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {\n        args[_key3] = arguments[_key3];\n      }\n      this[LOG_SYMBOL](LogType.info, args);\n    }\n  }, {\n    key: \"log\",\n    value: function log() {\n      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {\n        args[_key4] = arguments[_key4];\n      }\n      this[LOG_SYMBOL](LogType.log, args);\n    }\n  }, {\n    key: \"debug\",\n    value: function debug() {\n      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {\n        args[_key5] = arguments[_key5];\n      }\n      this[LOG_SYMBOL](LogType.debug, args);\n    }\n  }, {\n    key: \"assert\",\n    value: function assert(assertion) {\n      if (!assertion) {\n        for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {\n          args[_key6 - 1] = arguments[_key6];\n        }\n        this[LOG_SYMBOL](LogType.error, args);\n      }\n    }\n  }, {\n    key: \"trace\",\n    value: function trace() {\n      this[LOG_SYMBOL](LogType.trace, [\"Trace\"]);\n    }\n  }, {\n    key: \"clear\",\n    value: function clear() {\n      this[LOG_SYMBOL](LogType.clear);\n    }\n  }, {\n    key: \"status\",\n    value: function status() {\n      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {\n        args[_key7] = arguments[_key7];\n      }\n      this[LOG_SYMBOL](LogType.status, args);\n    }\n  }, {\n    key: \"group\",\n    value: function group() {\n      for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {\n        args[_key8] = arguments[_key8];\n      }\n      this[LOG_SYMBOL](LogType.group, args);\n    }\n  }, {\n    key: \"groupCollapsed\",\n    value: function groupCollapsed() {\n      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {\n        args[_key9] = arguments[_key9];\n      }\n      this[LOG_SYMBOL](LogType.groupCollapsed, args);\n    }\n  }, {\n    key: \"groupEnd\",\n    value: function groupEnd() {\n      for (var _len10 = arguments.length, args = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {\n        args[_key10] = arguments[_key10];\n      }\n      this[LOG_SYMBOL](LogType.groupEnd, args);\n    }\n  }, {\n    key: \"profile\",\n    value: function profile(label) {\n      this[LOG_SYMBOL](LogType.profile, [label]);\n    }\n  }, {\n    key: \"profileEnd\",\n    value: function profileEnd(label) {\n      this[LOG_SYMBOL](LogType.profileEnd, [label]);\n    }\n  }, {\n    key: \"time\",\n    value: function time(label) {\n      this[TIMERS_SYMBOL] = this[TIMERS_SYMBOL] || new Map();\n      this[TIMERS_SYMBOL].set(label, process.hrtime());\n    }\n  }, {\n    key: \"timeLog\",\n    value: function timeLog(label) {\n      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);\n      if (!prev) {\n        throw new Error(\"No such label '\".concat(label, \"' for WebpackLogger.timeLog()\"));\n      }\n      var time = process.hrtime(prev);\n      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));\n    }\n  }, {\n    key: \"timeEnd\",\n    value: function timeEnd(label) {\n      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);\n      if (!prev) {\n        throw new Error(\"No such label '\".concat(label, \"' for WebpackLogger.timeEnd()\"));\n      }\n      var time = process.hrtime(prev);\n      this[TIMERS_SYMBOL].delete(label);\n      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));\n    }\n  }, {\n    key: \"timeAggregate\",\n    value: function timeAggregate(label) {\n      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);\n      if (!prev) {\n        throw new Error(\"No such label '\".concat(label, \"' for WebpackLogger.timeAggregate()\"));\n      }\n      var time = process.hrtime(prev);\n      this[TIMERS_SYMBOL].delete(label);\n      this[TIMERS_AGGREGATES_SYMBOL] = this[TIMERS_AGGREGATES_SYMBOL] || new Map();\n      var current = this[TIMERS_AGGREGATES_SYMBOL].get(label);\n      if (current !== undefined) {\n        if (time[1] + current[1] > 1e9) {\n          time[0] += current[0] + 1;\n          time[1] = time[1] - 1e9 + current[1];\n        } else {\n          time[0] += current[0];\n          time[1] += current[1];\n        }\n      }\n      this[TIMERS_AGGREGATES_SYMBOL].set(label, time);\n    }\n  }, {\n    key: \"timeAggregateEnd\",\n    value: function timeAggregateEnd(label) {\n      if (this[TIMERS_AGGREGATES_SYMBOL] === undefined) return;\n      var time = this[TIMERS_AGGREGATES_SYMBOL].get(label);\n      if (time === undefined) return;\n      this[TIMERS_AGGREGATES_SYMBOL].delete(label);\n      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));\n    }\n  }]);\n  return WebpackLogger;\n}();\nexports.Logger = WebpackLogger;\n\n/***/ }),\n\n/***/ \"./node_modules/webpack/lib/logging/createConsoleLogger.js\":\n/*!*****************************************************************!*\\\n  !*** ./node_modules/webpack/lib/logging/createConsoleLogger.js ***!\n  \\*****************************************************************/\n/***/ (function(module, __unused_webpack_exports, __nested_webpack_require_11285__) {\n\n/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Tobias Koppers @sokra\n*/\n\n\n\nfunction _toConsumableArray(arr) {\n  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();\n}\nfunction _nonIterableSpread() {\n  throw new TypeError(\"Invalid attempt to spread non-iterable instance.\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\");\n}\nfunction _unsupportedIterableToArray(o, minLen) {\n  if (!o) return;\n  if (typeof o === \"string\") return _arrayLikeToArray(o, minLen);\n  var n = Object.prototype.toString.call(o).slice(8, -1);\n  if (n === \"Object\" && o.constructor) n = o.constructor.name;\n  if (n === \"Map\" || n === \"Set\") return Array.from(o);\n  if (n === \"Arguments\" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);\n}\nfunction _iterableToArray(iter) {\n  if (typeof (typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; }) !== \"undefined\" && iter[(typeof Symbol !== \"undefined\" ? Symbol : function (i) { return i; }).iterator] != null || iter[\"@@iterator\"] != null) return Array.from(iter);\n}\nfunction _arrayWithoutHoles(arr) {\n  if (Array.isArray(arr)) return _arrayLikeToArray(arr);\n}\nfunction _arrayLikeToArray(arr, len) {\n  if (len == null || len > arr.length) len = arr.length;\n  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];\n  return arr2;\n}\nvar _require = __nested_webpack_require_11285__(/*! ./Logger */ \"./node_modules/webpack/lib/logging/Logger.js\"),\n  LogType = _require.LogType;\n\n/** @typedef {import(\"../../declarations/WebpackOptions\").FilterItemTypes} FilterItemTypes */\n/** @typedef {import(\"../../declarations/WebpackOptions\").FilterTypes} FilterTypes */\n/** @typedef {import(\"./Logger\").LogTypeEnum} LogTypeEnum */\n\n/** @typedef {function(string): boolean} FilterFunction */\n\n/**\n * @typedef {Object} LoggerConsole\n * @property {function(): void} clear\n * @property {function(): void} trace\n * @property {(...args: any[]) => void} info\n * @property {(...args: any[]) => void} log\n * @property {(...args: any[]) => void} warn\n * @property {(...args: any[]) => void} error\n * @property {(...args: any[]) => void=} debug\n * @property {(...args: any[]) => void=} group\n * @property {(...args: any[]) => void=} groupCollapsed\n * @property {(...args: any[]) => void=} groupEnd\n * @property {(...args: any[]) => void=} status\n * @property {(...args: any[]) => void=} profile\n * @property {(...args: any[]) => void=} profileEnd\n * @property {(...args: any[]) => void=} logTime\n */\n\n/**\n * @typedef {Object} LoggerOptions\n * @property {false|true|\"none\"|\"error\"|\"warn\"|\"info\"|\"log\"|\"verbose\"} level loglevel\n * @property {FilterTypes|boolean} debug filter for debug logging\n * @property {LoggerConsole} console the console to log to\n */\n\n/**\n * @param {FilterItemTypes} item an input item\n * @returns {FilterFunction} filter function\n */\nvar filterToFunction = function filterToFunction(item) {\n  if (typeof item === \"string\") {\n    var regExp = new RegExp(\"[\\\\\\\\/]\".concat(item.replace(\n    // eslint-disable-next-line no-useless-escape\n    /[-[\\]{}()*+?.\\\\^$|]/g, \"\\\\$&\"), \"([\\\\\\\\/]|$|!|\\\\?)\"));\n    return function (ident) {\n      return regExp.test(ident);\n    };\n  }\n  if (item && typeof item === \"object\" && typeof item.test === \"function\") {\n    return function (ident) {\n      return item.test(ident);\n    };\n  }\n  if (typeof item === \"function\") {\n    return item;\n  }\n  if (typeof item === \"boolean\") {\n    return function () {\n      return item;\n    };\n  }\n};\n\n/**\n * @enum {number}\n */\nvar LogLevel = {\n  none: 6,\n  false: 6,\n  error: 5,\n  warn: 4,\n  info: 3,\n  log: 2,\n  true: 2,\n  verbose: 1\n};\n\n/**\n * @param {LoggerOptions} options options object\n * @returns {function(string, LogTypeEnum, any[]): void} logging function\n */\nmodule.exports = function (_ref) {\n  var _ref$level = _ref.level,\n    level = _ref$level === void 0 ? \"info\" : _ref$level,\n    _ref$debug = _ref.debug,\n    debug = _ref$debug === void 0 ? false : _ref$debug,\n    console = _ref.console;\n  var debugFilters = typeof debug === \"boolean\" ? [function () {\n    return debug;\n  }] : /** @type {FilterItemTypes[]} */[].concat(debug).map(filterToFunction);\n  /** @type {number} */\n  var loglevel = LogLevel[\"\".concat(level)] || 0;\n\n  /**\n   * @param {string} name name of the logger\n   * @param {LogTypeEnum} type type of the log entry\n   * @param {any[]} args arguments of the log entry\n   * @returns {void}\n   */\n  var logger = function logger(name, type, args) {\n    var labeledArgs = function labeledArgs() {\n      if (Array.isArray(args)) {\n        if (args.length > 0 && typeof args[0] === \"string\") {\n          return [\"[\".concat(name, \"] \").concat(args[0])].concat(_toConsumableArray(args.slice(1)));\n        } else {\n          return [\"[\".concat(name, \"]\")].concat(_toConsumableArray(args));\n        }\n      } else {\n        return [];\n      }\n    };\n    var debug = debugFilters.some(function (f) {\n      return f(name);\n    });\n    switch (type) {\n      case LogType.debug:\n        if (!debug) return;\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.debug === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.debug.apply(console, _toConsumableArray(labeledArgs()));\n        } else {\n          console.log.apply(console, _toConsumableArray(labeledArgs()));\n        }\n        break;\n      case LogType.log:\n        if (!debug && loglevel > LogLevel.log) return;\n        console.log.apply(console, _toConsumableArray(labeledArgs()));\n        break;\n      case LogType.info:\n        if (!debug && loglevel > LogLevel.info) return;\n        console.info.apply(console, _toConsumableArray(labeledArgs()));\n        break;\n      case LogType.warn:\n        if (!debug && loglevel > LogLevel.warn) return;\n        console.warn.apply(console, _toConsumableArray(labeledArgs()));\n        break;\n      case LogType.error:\n        if (!debug && loglevel > LogLevel.error) return;\n        console.error.apply(console, _toConsumableArray(labeledArgs()));\n        break;\n      case LogType.trace:\n        if (!debug) return;\n        console.trace();\n        break;\n      case LogType.groupCollapsed:\n        if (!debug && loglevel > LogLevel.log) return;\n        if (!debug && loglevel > LogLevel.verbose) {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          if (typeof console.groupCollapsed === \"function\") {\n            // eslint-disable-next-line node/no-unsupported-features/node-builtins\n            console.groupCollapsed.apply(console, _toConsumableArray(labeledArgs()));\n          } else {\n            console.log.apply(console, _toConsumableArray(labeledArgs()));\n          }\n          break;\n        }\n      // falls through\n      case LogType.group:\n        if (!debug && loglevel > LogLevel.log) return;\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.group === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.group.apply(console, _toConsumableArray(labeledArgs()));\n        } else {\n          console.log.apply(console, _toConsumableArray(labeledArgs()));\n        }\n        break;\n      case LogType.groupEnd:\n        if (!debug && loglevel > LogLevel.log) return;\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.groupEnd === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.groupEnd();\n        }\n        break;\n      case LogType.time:\n        {\n          if (!debug && loglevel > LogLevel.log) return;\n          var ms = args[1] * 1000 + args[2] / 1000000;\n          var msg = \"[\".concat(name, \"] \").concat(args[0], \": \").concat(ms, \" ms\");\n          if (typeof console.logTime === \"function\") {\n            console.logTime(msg);\n          } else {\n            console.log(msg);\n          }\n          break;\n        }\n      case LogType.profile:\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.profile === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.profile.apply(console, _toConsumableArray(labeledArgs()));\n        }\n        break;\n      case LogType.profileEnd:\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.profileEnd === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.profileEnd.apply(console, _toConsumableArray(labeledArgs()));\n        }\n        break;\n      case LogType.clear:\n        if (!debug && loglevel > LogLevel.log) return;\n        // eslint-disable-next-line node/no-unsupported-features/node-builtins\n        if (typeof console.clear === \"function\") {\n          // eslint-disable-next-line node/no-unsupported-features/node-builtins\n          console.clear();\n        }\n        break;\n      case LogType.status:\n        if (!debug && loglevel > LogLevel.info) return;\n        if (typeof console.status === \"function\") {\n          if (args.length === 0) {\n            console.status();\n          } else {\n            console.status.apply(console, _toConsumableArray(labeledArgs()));\n          }\n        } else {\n          if (args.length !== 0) {\n            console.info.apply(console, _toConsumableArray(labeledArgs()));\n          }\n        }\n        break;\n      default:\n        throw new Error(\"Unexpected LogType \".concat(type));\n    }\n  };\n  return logger;\n};\n\n/***/ }),\n\n/***/ \"./node_modules/webpack/lib/logging/runtime.js\":\n/*!*****************************************************!*\\\n  !*** ./node_modules/webpack/lib/logging/runtime.js ***!\n  \\*****************************************************/\n/***/ (function(__unused_webpack_module, exports, __nested_webpack_require_21334__) {\n\n/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Tobias Koppers @sokra\n*/\n\n\n\nfunction _extends() {\n  _extends = Object.assign ? Object.assign.bind() : function (target) {\n    for (var i = 1; i < arguments.length; i++) {\n      var source = arguments[i];\n      for (var key in source) {\n        if (Object.prototype.hasOwnProperty.call(source, key)) {\n          target[key] = source[key];\n        }\n      }\n    }\n    return target;\n  };\n  return _extends.apply(this, arguments);\n}\nvar SyncBailHook = __nested_webpack_require_21334__(/*! tapable/lib/SyncBailHook */ \"./client-src/modules/logger/SyncBailHookFake.js\");\nvar _require = __nested_webpack_require_21334__(/*! ./Logger */ \"./node_modules/webpack/lib/logging/Logger.js\"),\n  Logger = _require.Logger;\nvar createConsoleLogger = __nested_webpack_require_21334__(/*! ./createConsoleLogger */ \"./node_modules/webpack/lib/logging/createConsoleLogger.js\");\n\n/** @type {createConsoleLogger.LoggerOptions} */\nvar currentDefaultLoggerOptions = {\n  level: \"info\",\n  debug: false,\n  console: console\n};\nvar currentDefaultLogger = createConsoleLogger(currentDefaultLoggerOptions);\n\n/**\n * @param {string} name name of the logger\n * @returns {Logger} a logger\n */\nexports.getLogger = function (name) {\n  return new Logger(function (type, args) {\n    if (exports.hooks.log.call(name, type, args) === undefined) {\n      currentDefaultLogger(name, type, args);\n    }\n  }, function (childName) {\n    return exports.getLogger(\"\".concat(name, \"/\").concat(childName));\n  });\n};\n\n/**\n * @param {createConsoleLogger.LoggerOptions} options new options, merge with old options\n * @returns {void}\n */\nexports.configureDefaultLogger = function (options) {\n  _extends(currentDefaultLoggerOptions, options);\n  currentDefaultLogger = createConsoleLogger(currentDefaultLoggerOptions);\n};\nexports.hooks = {\n  log: new SyncBailHook([\"origin\", \"type\", \"args\"])\n};\n\n/***/ })\n\n/******/ \t});\n/************************************************************************/\n/******/ \t// The module cache\n/******/ \tvar __webpack_module_cache__ = {};\n/******/ \t\n/******/ \t// The require function\n/******/ \tfunction __nested_webpack_require_23461__(moduleId) {\n/******/ \t\t// Check if module is in cache\n/******/ \t\tvar cachedModule = __webpack_module_cache__[moduleId];\n/******/ \t\tif (cachedModule !== undefined) {\n/******/ \t\t\treturn cachedModule.exports;\n/******/ \t\t}\n/******/ \t\t// Create a new module (and put it into the cache)\n/******/ \t\tvar module = __webpack_module_cache__[moduleId] = {\n/******/ \t\t\t// no module.id needed\n/******/ \t\t\t// no module.loaded needed\n/******/ \t\t\texports: {}\n/******/ \t\t};\n/******/ \t\n/******/ \t\t// Execute the module function\n/******/ \t\t__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_23461__);\n/******/ \t\n/******/ \t\t// Return the exports of the module\n/******/ \t\treturn module.exports;\n/******/ \t}\n/******/ \t\n/************************************************************************/\n/******/ \t/* webpack/runtime/define property getters */\n/******/ \t!function() {\n/******/ \t\t// define getter functions for harmony exports\n/******/ \t\t__nested_webpack_require_23461__.d = function(exports, definition) {\n/******/ \t\t\tfor(var key in definition) {\n/******/ \t\t\t\tif(__nested_webpack_require_23461__.o(definition, key) && !__nested_webpack_require_23461__.o(exports, key)) {\n/******/ \t\t\t\t\tObject.defineProperty(exports, key, { enumerable: true, get: definition[key] });\n/******/ \t\t\t\t}\n/******/ \t\t\t}\n/******/ \t\t};\n/******/ \t}();\n/******/ \t\n/******/ \t/* webpack/runtime/hasOwnProperty shorthand */\n/******/ \t!function() {\n/******/ \t\t__nested_webpack_require_23461__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }\n/******/ \t}();\n/******/ \t\n/******/ \t/* webpack/runtime/make namespace object */\n/******/ \t!function() {\n/******/ \t\t// define __esModule on exports\n/******/ \t\t__nested_webpack_require_23461__.r = function(exports) {\n/******/ \t\t\tif(typeof Symbol !== 'undefined' && Symbol.toStringTag) {\n/******/ \t\t\t\tObject.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });\n/******/ \t\t\t}\n/******/ \t\t\tObject.defineProperty(exports, '__esModule', { value: true });\n/******/ \t\t};\n/******/ \t}();\n/******/ \t\n/************************************************************************/\nvar __nested_webpack_exports__ = {};\n// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.\n!function() {\n/*!********************************************!*\\\n  !*** ./client-src/modules/logger/index.js ***!\n  \\********************************************/\n__nested_webpack_require_23461__.r(__nested_webpack_exports__);\n/* harmony export */ __nested_webpack_require_23461__.d(__nested_webpack_exports__, {\n/* harmony export */   \"default\": function() { return /* reexport default export from named module */ webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__; }\n/* harmony export */ });\n/* harmony import */ var webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_23461__(/*! webpack/lib/logging/runtime.js */ \"./node_modules/webpack/lib/logging/runtime.js\");\n\n}();\nvar __webpack_export_target__ = exports;\nfor(var i in __nested_webpack_exports__) __webpack_export_target__[i] = __nested_webpack_exports__[i];\nif(__nested_webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, \"__esModule\", { value: true });\n/******/ })()\n;\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/modules/logger/index.js?");
+/******/ (function() { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ "./client-src/modules/logger/SyncBailHookFake.js":
+/*!*******************************************************!*\
+  !*** ./client-src/modules/logger/SyncBailHookFake.js ***!
+  \*******************************************************/
+/***/ (function(module) {
+
+
+
+/**
+ * Client stub for tapable SyncBailHook
+ */
+module.exports = function clientTapableSyncBailHook() {
+  return {
+    call: function call() {}
+  };
+};
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/logging/Logger.js":
+/*!****************************************************!*\
+  !*** ./node_modules/webpack/lib/logging/Logger.js ***!
+  \****************************************************/
+/***/ (function(__unused_webpack_module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+function _iterableToArray(iter) {
+  if (typeof (typeof Symbol !== "undefined" ? Symbol : function (i) { return i; }) !== "undefined" && iter[(typeof Symbol !== "undefined" ? Symbol : function (i) { return i; }).iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+  return arr2;
+}
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, _toPropertyKey(descriptor.key), descriptor);
+  }
+}
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  Object.defineProperty(Constructor, "prototype", {
+    writable: false
+  });
+  return Constructor;
+}
+function _toPropertyKey(arg) {
+  var key = _toPrimitive(arg, "string");
+  return typeof key === "symbol" ? key : String(key);
+}
+function _toPrimitive(input, hint) {
+  if (typeof input !== "object" || input === null) return input;
+  var prim = input[(typeof Symbol !== "undefined" ? Symbol : function (i) { return i; }).toPrimitive];
+  if (prim !== undefined) {
+    var res = prim.call(input, hint || "default");
+    if (typeof res !== "object") return res;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return (hint === "string" ? String : Number)(input);
+}
+var LogType = Object.freeze({
+  error: /** @type {"error"} */"error",
+  // message, c style arguments
+  warn: /** @type {"warn"} */"warn",
+  // message, c style arguments
+  info: /** @type {"info"} */"info",
+  // message, c style arguments
+  log: /** @type {"log"} */"log",
+  // message, c style arguments
+  debug: /** @type {"debug"} */"debug",
+  // message, c style arguments
+
+  trace: /** @type {"trace"} */"trace",
+  // no arguments
+
+  group: /** @type {"group"} */"group",
+  // [label]
+  groupCollapsed: /** @type {"groupCollapsed"} */"groupCollapsed",
+  // [label]
+  groupEnd: /** @type {"groupEnd"} */"groupEnd",
+  // [label]
+
+  profile: /** @type {"profile"} */"profile",
+  // [profileName]
+  profileEnd: /** @type {"profileEnd"} */"profileEnd",
+  // [profileName]
+
+  time: /** @type {"time"} */"time",
+  // name, time as [seconds, nanoseconds]
+
+  clear: /** @type {"clear"} */"clear",
+  // no arguments
+  status: /** @type {"status"} */"status" // message, arguments
+});
+
+exports.LogType = LogType;
+
+/** @typedef {typeof LogType[keyof typeof LogType]} LogTypeEnum */
+
+var LOG_SYMBOL = (typeof Symbol !== "undefined" ? Symbol : function (i) { return i; })("webpack logger raw log method");
+var TIMERS_SYMBOL = (typeof Symbol !== "undefined" ? Symbol : function (i) { return i; })("webpack logger times");
+var TIMERS_AGGREGATES_SYMBOL = (typeof Symbol !== "undefined" ? Symbol : function (i) { return i; })("webpack logger aggregated times");
+var WebpackLogger = /*#__PURE__*/function () {
+  /**
+   * @param {function(LogTypeEnum, any[]=): void} log log function
+   * @param {function(string | function(): string): WebpackLogger} getChildLogger function to create child logger
+   */
+  function WebpackLogger(log, getChildLogger) {
+    _classCallCheck(this, WebpackLogger);
+    this[LOG_SYMBOL] = log;
+    this.getChildLogger = getChildLogger;
+  }
+  _createClass(WebpackLogger, [{
+    key: "error",
+    value: function error() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+      this[LOG_SYMBOL](LogType.error, args);
+    }
+  }, {
+    key: "warn",
+    value: function warn() {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+      this[LOG_SYMBOL](LogType.warn, args);
+    }
+  }, {
+    key: "info",
+    value: function info() {
+      for (var _len3 = arguments.length, args = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
+      }
+      this[LOG_SYMBOL](LogType.info, args);
+    }
+  }, {
+    key: "log",
+    value: function log() {
+      for (var _len4 = arguments.length, args = new Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
+        args[_key4] = arguments[_key4];
+      }
+      this[LOG_SYMBOL](LogType.log, args);
+    }
+  }, {
+    key: "debug",
+    value: function debug() {
+      for (var _len5 = arguments.length, args = new Array(_len5), _key5 = 0; _key5 < _len5; _key5++) {
+        args[_key5] = arguments[_key5];
+      }
+      this[LOG_SYMBOL](LogType.debug, args);
+    }
+  }, {
+    key: "assert",
+    value: function assert(assertion) {
+      if (!assertion) {
+        for (var _len6 = arguments.length, args = new Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+          args[_key6 - 1] = arguments[_key6];
+        }
+        this[LOG_SYMBOL](LogType.error, args);
+      }
+    }
+  }, {
+    key: "trace",
+    value: function trace() {
+      this[LOG_SYMBOL](LogType.trace, ["Trace"]);
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      this[LOG_SYMBOL](LogType.clear);
+    }
+  }, {
+    key: "status",
+    value: function status() {
+      for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {
+        args[_key7] = arguments[_key7];
+      }
+      this[LOG_SYMBOL](LogType.status, args);
+    }
+  }, {
+    key: "group",
+    value: function group() {
+      for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {
+        args[_key8] = arguments[_key8];
+      }
+      this[LOG_SYMBOL](LogType.group, args);
+    }
+  }, {
+    key: "groupCollapsed",
+    value: function groupCollapsed() {
+      for (var _len9 = arguments.length, args = new Array(_len9), _key9 = 0; _key9 < _len9; _key9++) {
+        args[_key9] = arguments[_key9];
+      }
+      this[LOG_SYMBOL](LogType.groupCollapsed, args);
+    }
+  }, {
+    key: "groupEnd",
+    value: function groupEnd() {
+      for (var _len10 = arguments.length, args = new Array(_len10), _key10 = 0; _key10 < _len10; _key10++) {
+        args[_key10] = arguments[_key10];
+      }
+      this[LOG_SYMBOL](LogType.groupEnd, args);
+    }
+  }, {
+    key: "profile",
+    value: function profile(label) {
+      this[LOG_SYMBOL](LogType.profile, [label]);
+    }
+  }, {
+    key: "profileEnd",
+    value: function profileEnd(label) {
+      this[LOG_SYMBOL](LogType.profileEnd, [label]);
+    }
+  }, {
+    key: "time",
+    value: function time(label) {
+      this[TIMERS_SYMBOL] = this[TIMERS_SYMBOL] || new Map();
+      this[TIMERS_SYMBOL].set(label, process.hrtime());
+    }
+  }, {
+    key: "timeLog",
+    value: function timeLog(label) {
+      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);
+      if (!prev) {
+        throw new Error("No such label '".concat(label, "' for WebpackLogger.timeLog()"));
+      }
+      var time = process.hrtime(prev);
+      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));
+    }
+  }, {
+    key: "timeEnd",
+    value: function timeEnd(label) {
+      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);
+      if (!prev) {
+        throw new Error("No such label '".concat(label, "' for WebpackLogger.timeEnd()"));
+      }
+      var time = process.hrtime(prev);
+      this[TIMERS_SYMBOL].delete(label);
+      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));
+    }
+  }, {
+    key: "timeAggregate",
+    value: function timeAggregate(label) {
+      var prev = this[TIMERS_SYMBOL] && this[TIMERS_SYMBOL].get(label);
+      if (!prev) {
+        throw new Error("No such label '".concat(label, "' for WebpackLogger.timeAggregate()"));
+      }
+      var time = process.hrtime(prev);
+      this[TIMERS_SYMBOL].delete(label);
+      this[TIMERS_AGGREGATES_SYMBOL] = this[TIMERS_AGGREGATES_SYMBOL] || new Map();
+      var current = this[TIMERS_AGGREGATES_SYMBOL].get(label);
+      if (current !== undefined) {
+        if (time[1] + current[1] > 1e9) {
+          time[0] += current[0] + 1;
+          time[1] = time[1] - 1e9 + current[1];
+        } else {
+          time[0] += current[0];
+          time[1] += current[1];
+        }
+      }
+      this[TIMERS_AGGREGATES_SYMBOL].set(label, time);
+    }
+  }, {
+    key: "timeAggregateEnd",
+    value: function timeAggregateEnd(label) {
+      if (this[TIMERS_AGGREGATES_SYMBOL] === undefined) return;
+      var time = this[TIMERS_AGGREGATES_SYMBOL].get(label);
+      if (time === undefined) return;
+      this[TIMERS_AGGREGATES_SYMBOL].delete(label);
+      this[LOG_SYMBOL](LogType.time, [label].concat(_toConsumableArray(time)));
+    }
+  }]);
+  return WebpackLogger;
+}();
+exports.Logger = WebpackLogger;
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/logging/createConsoleLogger.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/webpack/lib/logging/createConsoleLogger.js ***!
+  \*****************************************************************/
+/***/ (function(module, __unused_webpack_exports, __nested_webpack_require_11285__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+
+function _toConsumableArray(arr) {
+  return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+}
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+}
+function _iterableToArray(iter) {
+  if (typeof (typeof Symbol !== "undefined" ? Symbol : function (i) { return i; }) !== "undefined" && iter[(typeof Symbol !== "undefined" ? Symbol : function (i) { return i; }).iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+}
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+  return arr2;
+}
+var _require = __nested_webpack_require_11285__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
+  LogType = _require.LogType;
+
+/** @typedef {import("../../declarations/WebpackOptions").FilterItemTypes} FilterItemTypes */
+/** @typedef {import("../../declarations/WebpackOptions").FilterTypes} FilterTypes */
+/** @typedef {import("./Logger").LogTypeEnum} LogTypeEnum */
+
+/** @typedef {function(string): boolean} FilterFunction */
+
+/**
+ * @typedef {Object} LoggerConsole
+ * @property {function(): void} clear
+ * @property {function(): void} trace
+ * @property {(...args: any[]) => void} info
+ * @property {(...args: any[]) => void} log
+ * @property {(...args: any[]) => void} warn
+ * @property {(...args: any[]) => void} error
+ * @property {(...args: any[]) => void=} debug
+ * @property {(...args: any[]) => void=} group
+ * @property {(...args: any[]) => void=} groupCollapsed
+ * @property {(...args: any[]) => void=} groupEnd
+ * @property {(...args: any[]) => void=} status
+ * @property {(...args: any[]) => void=} profile
+ * @property {(...args: any[]) => void=} profileEnd
+ * @property {(...args: any[]) => void=} logTime
+ */
+
+/**
+ * @typedef {Object} LoggerOptions
+ * @property {false|true|"none"|"error"|"warn"|"info"|"log"|"verbose"} level loglevel
+ * @property {FilterTypes|boolean} debug filter for debug logging
+ * @property {LoggerConsole} console the console to log to
+ */
+
+/**
+ * @param {FilterItemTypes} item an input item
+ * @returns {FilterFunction} filter function
+ */
+var filterToFunction = function filterToFunction(item) {
+  if (typeof item === "string") {
+    var regExp = new RegExp("[\\\\/]".concat(item.replace(
+    // eslint-disable-next-line no-useless-escape
+    /[-[\]{}()*+?.\\^$|]/g, "\\$&"), "([\\\\/]|$|!|\\?)"));
+    return function (ident) {
+      return regExp.test(ident);
+    };
+  }
+  if (item && typeof item === "object" && typeof item.test === "function") {
+    return function (ident) {
+      return item.test(ident);
+    };
+  }
+  if (typeof item === "function") {
+    return item;
+  }
+  if (typeof item === "boolean") {
+    return function () {
+      return item;
+    };
+  }
+};
+
+/**
+ * @enum {number}
+ */
+var LogLevel = {
+  none: 6,
+  false: 6,
+  error: 5,
+  warn: 4,
+  info: 3,
+  log: 2,
+  true: 2,
+  verbose: 1
+};
+
+/**
+ * @param {LoggerOptions} options options object
+ * @returns {function(string, LogTypeEnum, any[]): void} logging function
+ */
+module.exports = function (_ref) {
+  var _ref$level = _ref.level,
+    level = _ref$level === void 0 ? "info" : _ref$level,
+    _ref$debug = _ref.debug,
+    debug = _ref$debug === void 0 ? false : _ref$debug,
+    console = _ref.console;
+  var debugFilters = typeof debug === "boolean" ? [function () {
+    return debug;
+  }] : /** @type {FilterItemTypes[]} */[].concat(debug).map(filterToFunction);
+  /** @type {number} */
+  var loglevel = LogLevel["".concat(level)] || 0;
+
+  /**
+   * @param {string} name name of the logger
+   * @param {LogTypeEnum} type type of the log entry
+   * @param {any[]} args arguments of the log entry
+   * @returns {void}
+   */
+  var logger = function logger(name, type, args) {
+    var labeledArgs = function labeledArgs() {
+      if (Array.isArray(args)) {
+        if (args.length > 0 && typeof args[0] === "string") {
+          return ["[".concat(name, "] ").concat(args[0])].concat(_toConsumableArray(args.slice(1)));
+        } else {
+          return ["[".concat(name, "]")].concat(_toConsumableArray(args));
+        }
+      } else {
+        return [];
+      }
+    };
+    var debug = debugFilters.some(function (f) {
+      return f(name);
+    });
+    switch (type) {
+      case LogType.debug:
+        if (!debug) return;
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.debug === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.debug.apply(console, _toConsumableArray(labeledArgs()));
+        } else {
+          console.log.apply(console, _toConsumableArray(labeledArgs()));
+        }
+        break;
+      case LogType.log:
+        if (!debug && loglevel > LogLevel.log) return;
+        console.log.apply(console, _toConsumableArray(labeledArgs()));
+        break;
+      case LogType.info:
+        if (!debug && loglevel > LogLevel.info) return;
+        console.info.apply(console, _toConsumableArray(labeledArgs()));
+        break;
+      case LogType.warn:
+        if (!debug && loglevel > LogLevel.warn) return;
+        console.warn.apply(console, _toConsumableArray(labeledArgs()));
+        break;
+      case LogType.error:
+        if (!debug && loglevel > LogLevel.error) return;
+        console.error.apply(console, _toConsumableArray(labeledArgs()));
+        break;
+      case LogType.trace:
+        if (!debug) return;
+        console.trace();
+        break;
+      case LogType.groupCollapsed:
+        if (!debug && loglevel > LogLevel.log) return;
+        if (!debug && loglevel > LogLevel.verbose) {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          if (typeof console.groupCollapsed === "function") {
+            // eslint-disable-next-line node/no-unsupported-features/node-builtins
+            console.groupCollapsed.apply(console, _toConsumableArray(labeledArgs()));
+          } else {
+            console.log.apply(console, _toConsumableArray(labeledArgs()));
+          }
+          break;
+        }
+      // falls through
+      case LogType.group:
+        if (!debug && loglevel > LogLevel.log) return;
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.group === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.group.apply(console, _toConsumableArray(labeledArgs()));
+        } else {
+          console.log.apply(console, _toConsumableArray(labeledArgs()));
+        }
+        break;
+      case LogType.groupEnd:
+        if (!debug && loglevel > LogLevel.log) return;
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.groupEnd === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.groupEnd();
+        }
+        break;
+      case LogType.time:
+        {
+          if (!debug && loglevel > LogLevel.log) return;
+          var ms = args[1] * 1000 + args[2] / 1000000;
+          var msg = "[".concat(name, "] ").concat(args[0], ": ").concat(ms, " ms");
+          if (typeof console.logTime === "function") {
+            console.logTime(msg);
+          } else {
+            console.log(msg);
+          }
+          break;
+        }
+      case LogType.profile:
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.profile === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.profile.apply(console, _toConsumableArray(labeledArgs()));
+        }
+        break;
+      case LogType.profileEnd:
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.profileEnd === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.profileEnd.apply(console, _toConsumableArray(labeledArgs()));
+        }
+        break;
+      case LogType.clear:
+        if (!debug && loglevel > LogLevel.log) return;
+        // eslint-disable-next-line node/no-unsupported-features/node-builtins
+        if (typeof console.clear === "function") {
+          // eslint-disable-next-line node/no-unsupported-features/node-builtins
+          console.clear();
+        }
+        break;
+      case LogType.status:
+        if (!debug && loglevel > LogLevel.info) return;
+        if (typeof console.status === "function") {
+          if (args.length === 0) {
+            console.status();
+          } else {
+            console.status.apply(console, _toConsumableArray(labeledArgs()));
+          }
+        } else {
+          if (args.length !== 0) {
+            console.info.apply(console, _toConsumableArray(labeledArgs()));
+          }
+        }
+        break;
+      default:
+        throw new Error("Unexpected LogType ".concat(type));
+    }
+  };
+  return logger;
+};
+
+/***/ }),
+
+/***/ "./node_modules/webpack/lib/logging/runtime.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/webpack/lib/logging/runtime.js ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __nested_webpack_require_21334__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+
+
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+var SyncBailHook = __nested_webpack_require_21334__(/*! tapable/lib/SyncBailHook */ "./client-src/modules/logger/SyncBailHookFake.js");
+var _require = __nested_webpack_require_21334__(/*! ./Logger */ "./node_modules/webpack/lib/logging/Logger.js"),
+  Logger = _require.Logger;
+var createConsoleLogger = __nested_webpack_require_21334__(/*! ./createConsoleLogger */ "./node_modules/webpack/lib/logging/createConsoleLogger.js");
+
+/** @type {createConsoleLogger.LoggerOptions} */
+var currentDefaultLoggerOptions = {
+  level: "info",
+  debug: false,
+  console: console
+};
+var currentDefaultLogger = createConsoleLogger(currentDefaultLoggerOptions);
+
+/**
+ * @param {string} name name of the logger
+ * @returns {Logger} a logger
+ */
+exports.getLogger = function (name) {
+  return new Logger(function (type, args) {
+    if (exports.hooks.log.call(name, type, args) === undefined) {
+      currentDefaultLogger(name, type, args);
+    }
+  }, function (childName) {
+    return exports.getLogger("".concat(name, "/").concat(childName));
+  });
+};
+
+/**
+ * @param {createConsoleLogger.LoggerOptions} options new options, merge with old options
+ * @returns {void}
+ */
+exports.configureDefaultLogger = function (options) {
+  _extends(currentDefaultLoggerOptions, options);
+  currentDefaultLogger = createConsoleLogger(currentDefaultLoggerOptions);
+};
+exports.hooks = {
+  log: new SyncBailHook(["origin", "type", "args"])
+};
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __nested_webpack_require_23461__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __nested_webpack_require_23461__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	!function() {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nested_webpack_require_23461__.d = function(exports, definition) {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nested_webpack_require_23461__.o(definition, key) && !__nested_webpack_require_23461__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	!function() {
+/******/ 		__nested_webpack_require_23461__.o = function(obj, prop) { return Object.prototype.hasOwnProperty.call(obj, prop); }
+/******/ 	}();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	!function() {
+/******/ 		// define __esModule on exports
+/******/ 		__nested_webpack_require_23461__.r = function(exports) {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	}();
+/******/ 	
+/************************************************************************/
+var __nested_webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+!function() {
+/*!********************************************!*\
+  !*** ./client-src/modules/logger/index.js ***!
+  \********************************************/
+__nested_webpack_require_23461__.r(__nested_webpack_exports__);
+/* harmony export */ __nested_webpack_require_23461__.d(__nested_webpack_exports__, {
+/* harmony export */   "default": function() { return /* reexport default export from named module */ webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__; }
+/* harmony export */ });
+/* harmony import */ var webpack_lib_logging_runtime_js__WEBPACK_IMPORTED_MODULE_0__ = __nested_webpack_require_23461__(/*! webpack/lib/logging/runtime.js */ "./node_modules/webpack/lib/logging/runtime.js");
+
+}();
+var __webpack_export_target__ = exports;
+for(var i in __nested_webpack_exports__) __webpack_export_target__[i] = __nested_webpack_exports__[i];
+if(__nested_webpack_exports__.__esModule) Object.defineProperty(__webpack_export_target__, "__esModule", { value: true });
+/******/ })()
+;
 
 /***/ }),
 
@@ -158,7 +2662,286 @@ eval("/******/ (function() { // webpackBootstrap\n/******/ \t\"use strict\";\n/*
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   createOverlay: () => (/* binding */ createOverlay),\n/* harmony export */   formatProblem: () => (/* binding */ formatProblem)\n/* harmony export */ });\n/* harmony import */ var ansi_html_community__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ansi-html-community */ \"./node_modules/ansi-html-community/index.js\");\n/* harmony import */ var ansi_html_community__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(ansi_html_community__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var html_entities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! html-entities */ \"./node_modules/html-entities/lib/index.js\");\n/* harmony import */ var html_entities__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(html_entities__WEBPACK_IMPORTED_MODULE_4__);\n/* harmony import */ var _overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./overlay/runtime-error.js */ \"./node_modules/webpack-dev-server/client/overlay/runtime-error.js\");\n/* harmony import */ var _overlay_state_machine_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./overlay/state-machine.js */ \"./node_modules/webpack-dev-server/client/overlay/state-machine.js\");\n/* harmony import */ var _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./overlay/styles.js */ \"./node_modules/webpack-dev-server/client/overlay/styles.js\");\nfunction ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }\nfunction _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }\nfunction _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }\nfunction _toPropertyKey(arg) { var key = _toPrimitive(arg, \"string\"); return typeof key === \"symbol\" ? key : String(key); }\nfunction _toPrimitive(input, hint) { if (typeof input !== \"object\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \"default\"); if (typeof res !== \"object\") return res; throw new TypeError(\"@@toPrimitive must return a primitive value.\"); } return (hint === \"string\" ? String : Number)(input); }\n// The error overlay is inspired (and mostly copied) from Create React App (https://github.com/facebookincubator/create-react-app)\n// They, in turn, got inspired by webpack-hot-middleware (https://github.com/glenjamin/webpack-hot-middleware).\n\n\n\n\n\n\nvar colors = {\n  reset: [\"transparent\", \"transparent\"],\n  black: \"181818\",\n  red: \"E36049\",\n  green: \"B3CB74\",\n  yellow: \"FFD080\",\n  blue: \"7CAFC2\",\n  magenta: \"7FACCA\",\n  cyan: \"C3C2EF\",\n  lightgrey: \"EBE7E3\",\n  darkgrey: \"6D7891\"\n};\nansi_html_community__WEBPACK_IMPORTED_MODULE_0___default().setColors(colors);\n\n/**\n * @param {string} type\n * @param {string  | { file?: string, moduleName?: string, loc?: string, message?: string; stack?: string[] }} item\n * @returns {{ header: string, body: string }}\n */\nfunction formatProblem(type, item) {\n  var header = type === \"warning\" ? \"WARNING\" : \"ERROR\";\n  var body = \"\";\n  if (typeof item === \"string\") {\n    body += item;\n  } else {\n    var file = item.file || \"\";\n    // eslint-disable-next-line no-nested-ternary\n    var moduleName = item.moduleName ? item.moduleName.indexOf(\"!\") !== -1 ? \"\".concat(item.moduleName.replace(/^(\\s|\\S)*!/, \"\"), \" (\").concat(item.moduleName, \")\") : \"\".concat(item.moduleName) : \"\";\n    var loc = item.loc;\n    header += \"\".concat(moduleName || file ? \" in \".concat(moduleName ? \"\".concat(moduleName).concat(file ? \" (\".concat(file, \")\") : \"\") : file).concat(loc ? \" \".concat(loc) : \"\") : \"\");\n    body += item.message || \"\";\n  }\n  if (Array.isArray(item.stack)) {\n    item.stack.forEach(function (stack) {\n      if (typeof stack === \"string\") {\n        body += \"\\r\\n\".concat(stack);\n      }\n    });\n  }\n  return {\n    header: header,\n    body: body\n  };\n}\n\n/**\n * @typedef {Object} CreateOverlayOptions\n * @property {string | null} trustedTypesPolicyName\n * @property {boolean | (error: Error) => void} [catchRuntimeError]\n */\n\n/**\n *\n * @param {CreateOverlayOptions} options\n */\nvar createOverlay = function createOverlay(options) {\n  /** @type {HTMLIFrameElement | null | undefined} */\n  var iframeContainerElement;\n  /** @type {HTMLDivElement | null | undefined} */\n  var containerElement;\n  /** @type {HTMLDivElement | null | undefined} */\n  var headerElement;\n  /** @type {Array<(element: HTMLDivElement) => void>} */\n  var onLoadQueue = [];\n  /** @type {TrustedTypePolicy | undefined} */\n  var overlayTrustedTypesPolicy;\n\n  /**\n   *\n   * @param {HTMLElement} element\n   * @param {CSSStyleDeclaration} style\n   */\n  function applyStyle(element, style) {\n    Object.keys(style).forEach(function (prop) {\n      element.style[prop] = style[prop];\n    });\n  }\n\n  /**\n   * @param {string | null} trustedTypesPolicyName\n   */\n  function createContainer(trustedTypesPolicyName) {\n    // Enable Trusted Types if they are available in the current browser.\n    if (window.trustedTypes) {\n      overlayTrustedTypesPolicy = window.trustedTypes.createPolicy(trustedTypesPolicyName || \"webpack-dev-server#overlay\", {\n        createHTML: function createHTML(value) {\n          return value;\n        }\n      });\n    }\n    iframeContainerElement = document.createElement(\"iframe\");\n    iframeContainerElement.id = \"webpack-dev-server-client-overlay\";\n    iframeContainerElement.src = \"about:blank\";\n    applyStyle(iframeContainerElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.iframeStyle);\n    iframeContainerElement.onload = function () {\n      var contentElement = /** @type {Document} */\n      /** @type {HTMLIFrameElement} */\n      iframeContainerElement.contentDocument.createElement(\"div\");\n      containerElement = /** @type {Document} */\n      /** @type {HTMLIFrameElement} */\n      iframeContainerElement.contentDocument.createElement(\"div\");\n      contentElement.id = \"webpack-dev-server-client-overlay-div\";\n      applyStyle(contentElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.containerStyle);\n      headerElement = document.createElement(\"div\");\n      headerElement.innerText = \"Compiled with problems:\";\n      applyStyle(headerElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.headerStyle);\n      var closeButtonElement = document.createElement(\"button\");\n      applyStyle(closeButtonElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.dismissButtonStyle);\n      closeButtonElement.innerText = \"×\";\n      closeButtonElement.ariaLabel = \"Dismiss\";\n      closeButtonElement.addEventListener(\"click\", function () {\n        // eslint-disable-next-line no-use-before-define\n        overlayService.send({\n          type: \"DISMISS\"\n        });\n      });\n      contentElement.appendChild(headerElement);\n      contentElement.appendChild(closeButtonElement);\n      contentElement.appendChild(containerElement);\n\n      /** @type {Document} */\n      /** @type {HTMLIFrameElement} */\n      iframeContainerElement.contentDocument.body.appendChild(contentElement);\n      onLoadQueue.forEach(function (onLoad) {\n        onLoad( /** @type {HTMLDivElement} */contentElement);\n      });\n      onLoadQueue = [];\n\n      /** @type {HTMLIFrameElement} */\n      iframeContainerElement.onload = null;\n    };\n    document.body.appendChild(iframeContainerElement);\n  }\n\n  /**\n   * @param {(element: HTMLDivElement) => void} callback\n   * @param {string | null} trustedTypesPolicyName\n   */\n  function ensureOverlayExists(callback, trustedTypesPolicyName) {\n    if (containerElement) {\n      containerElement.innerHTML = \"\";\n      // Everything is ready, call the callback right away.\n      callback(containerElement);\n      return;\n    }\n    onLoadQueue.push(callback);\n    if (iframeContainerElement) {\n      return;\n    }\n    createContainer(trustedTypesPolicyName);\n  }\n\n  // Successful compilation.\n  function hide() {\n    if (!iframeContainerElement) {\n      return;\n    }\n\n    // Clean up and reset internal state.\n    document.body.removeChild(iframeContainerElement);\n    iframeContainerElement = null;\n    containerElement = null;\n  }\n\n  // Compilation with errors (e.g. syntax error or missing modules).\n  /**\n   * @param {string} type\n   * @param {Array<string  | { moduleIdentifier?: string, moduleName?: string, loc?: string, message?: string }>} messages\n   * @param {string | null} trustedTypesPolicyName\n   * @param {'build' | 'runtime'} messageSource\n   */\n  function show(type, messages, trustedTypesPolicyName, messageSource) {\n    ensureOverlayExists(function () {\n      headerElement.innerText = messageSource === \"runtime\" ? \"Uncaught runtime errors:\" : \"Compiled with problems:\";\n      messages.forEach(function (message) {\n        var entryElement = document.createElement(\"div\");\n        var msgStyle = type === \"warning\" ? _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgStyles.warning : _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgStyles.error;\n        applyStyle(entryElement, _objectSpread(_objectSpread({}, msgStyle), {}, {\n          padding: \"1rem 1rem 1.5rem 1rem\"\n        }));\n        var typeElement = document.createElement(\"div\");\n        var _formatProblem = formatProblem(type, message),\n          header = _formatProblem.header,\n          body = _formatProblem.body;\n        typeElement.innerText = header;\n        applyStyle(typeElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgTypeStyle);\n        if (message.moduleIdentifier) {\n          applyStyle(typeElement, {\n            cursor: \"pointer\"\n          });\n          // element.dataset not supported in IE\n          typeElement.setAttribute(\"data-can-open\", true);\n          typeElement.addEventListener(\"click\", function () {\n            fetch(\"/webpack-dev-server/open-editor?fileName=\".concat(message.moduleIdentifier));\n          });\n        }\n\n        // Make it look similar to our terminal.\n        var text = ansi_html_community__WEBPACK_IMPORTED_MODULE_0___default()((0,html_entities__WEBPACK_IMPORTED_MODULE_4__.encode)(body));\n        var messageTextNode = document.createElement(\"div\");\n        applyStyle(messageTextNode, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgTextStyle);\n        messageTextNode.innerHTML = overlayTrustedTypesPolicy ? overlayTrustedTypesPolicy.createHTML(text) : text;\n        entryElement.appendChild(typeElement);\n        entryElement.appendChild(messageTextNode);\n\n        /** @type {HTMLDivElement} */\n        containerElement.appendChild(entryElement);\n      });\n    }, trustedTypesPolicyName);\n  }\n  var overlayService = (0,_overlay_state_machine_js__WEBPACK_IMPORTED_MODULE_2__[\"default\"])({\n    showOverlay: function showOverlay(_ref) {\n      var _ref$level = _ref.level,\n        level = _ref$level === void 0 ? \"error\" : _ref$level,\n        messages = _ref.messages,\n        messageSource = _ref.messageSource;\n      return show(level, messages, options.trustedTypesPolicyName, messageSource);\n    },\n    hideOverlay: hide\n  });\n  if (options.catchRuntimeError) {\n    /**\n     * @param {Error | undefined} error\n     * @param {string} fallbackMessage\n     */\n    var handleError = function handleError(error, fallbackMessage) {\n      var errorObject = error instanceof Error ? error : new Error(error || fallbackMessage);\n      var shouldDisplay = typeof options.catchRuntimeError === \"function\" ? options.catchRuntimeError(errorObject) : true;\n      if (shouldDisplay) {\n        overlayService.send({\n          type: \"RUNTIME_ERROR\",\n          messages: [{\n            message: errorObject.message,\n            stack: (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.parseErrorToStacks)(errorObject)\n          }]\n        });\n      }\n    };\n    (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.listenToRuntimeError)(function (errorEvent) {\n      // error property may be empty in older browser like IE\n      var error = errorEvent.error,\n        message = errorEvent.message;\n      if (!error && !message) {\n        return;\n      }\n      handleError(error, message);\n    });\n    (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.listenToUnhandledRejection)(function (promiseRejectionEvent) {\n      var reason = promiseRejectionEvent.reason;\n      handleError(reason, \"Unknown promise rejection reason\");\n    });\n  }\n  return overlayService;\n};\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/overlay.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   createOverlay: () => (/* binding */ createOverlay),
+/* harmony export */   formatProblem: () => (/* binding */ formatProblem)
+/* harmony export */ });
+/* harmony import */ var ansi_html_community__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ansi-html-community */ "./node_modules/ansi-html-community/index.js");
+/* harmony import */ var ansi_html_community__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(ansi_html_community__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var html_entities__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! html-entities */ "./node_modules/html-entities/lib/index.js");
+/* harmony import */ var html_entities__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(html_entities__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./overlay/runtime-error.js */ "./node_modules/webpack-dev-server/client/overlay/runtime-error.js");
+/* harmony import */ var _overlay_state_machine_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./overlay/state-machine.js */ "./node_modules/webpack-dev-server/client/overlay/state-machine.js");
+/* harmony import */ var _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./overlay/styles.js */ "./node_modules/webpack-dev-server/client/overlay/styles.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+// The error overlay is inspired (and mostly copied) from Create React App (https://github.com/facebookincubator/create-react-app)
+// They, in turn, got inspired by webpack-hot-middleware (https://github.com/glenjamin/webpack-hot-middleware).
+
+
+
+
+
+
+var colors = {
+  reset: ["transparent", "transparent"],
+  black: "181818",
+  red: "E36049",
+  green: "B3CB74",
+  yellow: "FFD080",
+  blue: "7CAFC2",
+  magenta: "7FACCA",
+  cyan: "C3C2EF",
+  lightgrey: "EBE7E3",
+  darkgrey: "6D7891"
+};
+ansi_html_community__WEBPACK_IMPORTED_MODULE_0___default().setColors(colors);
+
+/**
+ * @param {string} type
+ * @param {string  | { file?: string, moduleName?: string, loc?: string, message?: string; stack?: string[] }} item
+ * @returns {{ header: string, body: string }}
+ */
+function formatProblem(type, item) {
+  var header = type === "warning" ? "WARNING" : "ERROR";
+  var body = "";
+  if (typeof item === "string") {
+    body += item;
+  } else {
+    var file = item.file || "";
+    // eslint-disable-next-line no-nested-ternary
+    var moduleName = item.moduleName ? item.moduleName.indexOf("!") !== -1 ? "".concat(item.moduleName.replace(/^(\s|\S)*!/, ""), " (").concat(item.moduleName, ")") : "".concat(item.moduleName) : "";
+    var loc = item.loc;
+    header += "".concat(moduleName || file ? " in ".concat(moduleName ? "".concat(moduleName).concat(file ? " (".concat(file, ")") : "") : file).concat(loc ? " ".concat(loc) : "") : "");
+    body += item.message || "";
+  }
+  if (Array.isArray(item.stack)) {
+    item.stack.forEach(function (stack) {
+      if (typeof stack === "string") {
+        body += "\r\n".concat(stack);
+      }
+    });
+  }
+  return {
+    header: header,
+    body: body
+  };
+}
+
+/**
+ * @typedef {Object} CreateOverlayOptions
+ * @property {string | null} trustedTypesPolicyName
+ * @property {boolean | (error: Error) => void} [catchRuntimeError]
+ */
+
+/**
+ *
+ * @param {CreateOverlayOptions} options
+ */
+var createOverlay = function createOverlay(options) {
+  /** @type {HTMLIFrameElement | null | undefined} */
+  var iframeContainerElement;
+  /** @type {HTMLDivElement | null | undefined} */
+  var containerElement;
+  /** @type {HTMLDivElement | null | undefined} */
+  var headerElement;
+  /** @type {Array<(element: HTMLDivElement) => void>} */
+  var onLoadQueue = [];
+  /** @type {TrustedTypePolicy | undefined} */
+  var overlayTrustedTypesPolicy;
+
+  /**
+   *
+   * @param {HTMLElement} element
+   * @param {CSSStyleDeclaration} style
+   */
+  function applyStyle(element, style) {
+    Object.keys(style).forEach(function (prop) {
+      element.style[prop] = style[prop];
+    });
+  }
+
+  /**
+   * @param {string | null} trustedTypesPolicyName
+   */
+  function createContainer(trustedTypesPolicyName) {
+    // Enable Trusted Types if they are available in the current browser.
+    if (window.trustedTypes) {
+      overlayTrustedTypesPolicy = window.trustedTypes.createPolicy(trustedTypesPolicyName || "webpack-dev-server#overlay", {
+        createHTML: function createHTML(value) {
+          return value;
+        }
+      });
+    }
+    iframeContainerElement = document.createElement("iframe");
+    iframeContainerElement.id = "webpack-dev-server-client-overlay";
+    iframeContainerElement.src = "about:blank";
+    applyStyle(iframeContainerElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.iframeStyle);
+    iframeContainerElement.onload = function () {
+      var contentElement = /** @type {Document} */
+      /** @type {HTMLIFrameElement} */
+      iframeContainerElement.contentDocument.createElement("div");
+      containerElement = /** @type {Document} */
+      /** @type {HTMLIFrameElement} */
+      iframeContainerElement.contentDocument.createElement("div");
+      contentElement.id = "webpack-dev-server-client-overlay-div";
+      applyStyle(contentElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.containerStyle);
+      headerElement = document.createElement("div");
+      headerElement.innerText = "Compiled with problems:";
+      applyStyle(headerElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.headerStyle);
+      var closeButtonElement = document.createElement("button");
+      applyStyle(closeButtonElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.dismissButtonStyle);
+      closeButtonElement.innerText = "×";
+      closeButtonElement.ariaLabel = "Dismiss";
+      closeButtonElement.addEventListener("click", function () {
+        // eslint-disable-next-line no-use-before-define
+        overlayService.send({
+          type: "DISMISS"
+        });
+      });
+      contentElement.appendChild(headerElement);
+      contentElement.appendChild(closeButtonElement);
+      contentElement.appendChild(containerElement);
+
+      /** @type {Document} */
+      /** @type {HTMLIFrameElement} */
+      iframeContainerElement.contentDocument.body.appendChild(contentElement);
+      onLoadQueue.forEach(function (onLoad) {
+        onLoad( /** @type {HTMLDivElement} */contentElement);
+      });
+      onLoadQueue = [];
+
+      /** @type {HTMLIFrameElement} */
+      iframeContainerElement.onload = null;
+    };
+    document.body.appendChild(iframeContainerElement);
+  }
+
+  /**
+   * @param {(element: HTMLDivElement) => void} callback
+   * @param {string | null} trustedTypesPolicyName
+   */
+  function ensureOverlayExists(callback, trustedTypesPolicyName) {
+    if (containerElement) {
+      containerElement.innerHTML = "";
+      // Everything is ready, call the callback right away.
+      callback(containerElement);
+      return;
+    }
+    onLoadQueue.push(callback);
+    if (iframeContainerElement) {
+      return;
+    }
+    createContainer(trustedTypesPolicyName);
+  }
+
+  // Successful compilation.
+  function hide() {
+    if (!iframeContainerElement) {
+      return;
+    }
+
+    // Clean up and reset internal state.
+    document.body.removeChild(iframeContainerElement);
+    iframeContainerElement = null;
+    containerElement = null;
+  }
+
+  // Compilation with errors (e.g. syntax error or missing modules).
+  /**
+   * @param {string} type
+   * @param {Array<string  | { moduleIdentifier?: string, moduleName?: string, loc?: string, message?: string }>} messages
+   * @param {string | null} trustedTypesPolicyName
+   * @param {'build' | 'runtime'} messageSource
+   */
+  function show(type, messages, trustedTypesPolicyName, messageSource) {
+    ensureOverlayExists(function () {
+      headerElement.innerText = messageSource === "runtime" ? "Uncaught runtime errors:" : "Compiled with problems:";
+      messages.forEach(function (message) {
+        var entryElement = document.createElement("div");
+        var msgStyle = type === "warning" ? _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgStyles.warning : _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgStyles.error;
+        applyStyle(entryElement, _objectSpread(_objectSpread({}, msgStyle), {}, {
+          padding: "1rem 1rem 1.5rem 1rem"
+        }));
+        var typeElement = document.createElement("div");
+        var _formatProblem = formatProblem(type, message),
+          header = _formatProblem.header,
+          body = _formatProblem.body;
+        typeElement.innerText = header;
+        applyStyle(typeElement, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgTypeStyle);
+        if (message.moduleIdentifier) {
+          applyStyle(typeElement, {
+            cursor: "pointer"
+          });
+          // element.dataset not supported in IE
+          typeElement.setAttribute("data-can-open", true);
+          typeElement.addEventListener("click", function () {
+            fetch("/webpack-dev-server/open-editor?fileName=".concat(message.moduleIdentifier));
+          });
+        }
+
+        // Make it look similar to our terminal.
+        var text = ansi_html_community__WEBPACK_IMPORTED_MODULE_0___default()((0,html_entities__WEBPACK_IMPORTED_MODULE_4__.encode)(body));
+        var messageTextNode = document.createElement("div");
+        applyStyle(messageTextNode, _overlay_styles_js__WEBPACK_IMPORTED_MODULE_3__.msgTextStyle);
+        messageTextNode.innerHTML = overlayTrustedTypesPolicy ? overlayTrustedTypesPolicy.createHTML(text) : text;
+        entryElement.appendChild(typeElement);
+        entryElement.appendChild(messageTextNode);
+
+        /** @type {HTMLDivElement} */
+        containerElement.appendChild(entryElement);
+      });
+    }, trustedTypesPolicyName);
+  }
+  var overlayService = (0,_overlay_state_machine_js__WEBPACK_IMPORTED_MODULE_2__["default"])({
+    showOverlay: function showOverlay(_ref) {
+      var _ref$level = _ref.level,
+        level = _ref$level === void 0 ? "error" : _ref$level,
+        messages = _ref.messages,
+        messageSource = _ref.messageSource;
+      return show(level, messages, options.trustedTypesPolicyName, messageSource);
+    },
+    hideOverlay: hide
+  });
+  if (options.catchRuntimeError) {
+    /**
+     * @param {Error | undefined} error
+     * @param {string} fallbackMessage
+     */
+    var handleError = function handleError(error, fallbackMessage) {
+      var errorObject = error instanceof Error ? error : new Error(error || fallbackMessage);
+      var shouldDisplay = typeof options.catchRuntimeError === "function" ? options.catchRuntimeError(errorObject) : true;
+      if (shouldDisplay) {
+        overlayService.send({
+          type: "RUNTIME_ERROR",
+          messages: [{
+            message: errorObject.message,
+            stack: (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.parseErrorToStacks)(errorObject)
+          }]
+        });
+      }
+    };
+    (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.listenToRuntimeError)(function (errorEvent) {
+      // error property may be empty in older browser like IE
+      var error = errorEvent.error,
+        message = errorEvent.message;
+      if (!error && !message) {
+        return;
+      }
+      handleError(error, message);
+    });
+    (0,_overlay_runtime_error_js__WEBPACK_IMPORTED_MODULE_1__.listenToUnhandledRejection)(function (promiseRejectionEvent) {
+      var reason = promiseRejectionEvent.reason;
+      handleError(reason, "Unknown promise rejection reason");
+    });
+  }
+  return overlayService;
+};
+
 
 /***/ }),
 
@@ -169,7 +2952,74 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\nfunction ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }\nfunction _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }\nfunction _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }\nfunction _toPropertyKey(arg) { var key = _toPrimitive(arg, \"string\"); return typeof key === \"symbol\" ? key : String(key); }\nfunction _toPrimitive(input, hint) { if (typeof input !== \"object\" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || \"default\"); if (typeof res !== \"object\") return res; throw new TypeError(\"@@toPrimitive must return a primitive value.\"); } return (hint === \"string\" ? String : Number)(input); }\n/**\n * @typedef {Object} StateDefinitions\n * @property {{[event: string]: { target: string; actions?: Array<string> }}} [on]\n */\n\n/**\n * @typedef {Object} Options\n * @property {{[state: string]: StateDefinitions}} states\n * @property {object} context;\n * @property {string} initial\n */\n\n/**\n * @typedef {Object} Implementation\n * @property {{[actionName: string]: (ctx: object, event: any) => object}} actions\n */\n\n/**\n * A simplified `createMachine` from `@xstate/fsm` with the following differences:\n *\n *  - the returned machine is technically a \"service\". No `interpret(machine).start()` is needed.\n *  - the state definition only support `on` and target must be declared with { target: 'nextState', actions: [] } explicitly.\n *  - event passed to `send` must be an object with `type` property.\n *  - actions implementation will be [assign action](https://xstate.js.org/docs/guides/context.html#assign-action) if you return any value.\n *  Do not return anything if you just want to invoke side effect.\n *\n * The goal of this custom function is to avoid installing the entire `'xstate/fsm'` package, while enabling modeling using\n * state machine. You can copy the first parameter into the editor at https://stately.ai/viz to visualize the state machine.\n *\n * @param {Options} options\n * @param {Implementation} implementation\n */\nfunction createMachine(_ref, _ref2) {\n  var states = _ref.states,\n    context = _ref.context,\n    initial = _ref.initial;\n  var actions = _ref2.actions;\n  var currentState = initial;\n  var currentContext = context;\n  return {\n    send: function send(event) {\n      var currentStateOn = states[currentState].on;\n      var transitionConfig = currentStateOn && currentStateOn[event.type];\n      if (transitionConfig) {\n        currentState = transitionConfig.target;\n        if (transitionConfig.actions) {\n          transitionConfig.actions.forEach(function (actName) {\n            var actionImpl = actions[actName];\n            var nextContextValue = actionImpl && actionImpl(currentContext, event);\n            if (nextContextValue) {\n              currentContext = _objectSpread(_objectSpread({}, currentContext), nextContextValue);\n            }\n          });\n        }\n      }\n    }\n  };\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createMachine);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/overlay/fsm.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return typeof key === "symbol" ? key : String(key); }
+function _toPrimitive(input, hint) { if (typeof input !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (typeof res !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+/**
+ * @typedef {Object} StateDefinitions
+ * @property {{[event: string]: { target: string; actions?: Array<string> }}} [on]
+ */
+
+/**
+ * @typedef {Object} Options
+ * @property {{[state: string]: StateDefinitions}} states
+ * @property {object} context;
+ * @property {string} initial
+ */
+
+/**
+ * @typedef {Object} Implementation
+ * @property {{[actionName: string]: (ctx: object, event: any) => object}} actions
+ */
+
+/**
+ * A simplified `createMachine` from `@xstate/fsm` with the following differences:
+ *
+ *  - the returned machine is technically a "service". No `interpret(machine).start()` is needed.
+ *  - the state definition only support `on` and target must be declared with { target: 'nextState', actions: [] } explicitly.
+ *  - event passed to `send` must be an object with `type` property.
+ *  - actions implementation will be [assign action](https://xstate.js.org/docs/guides/context.html#assign-action) if you return any value.
+ *  Do not return anything if you just want to invoke side effect.
+ *
+ * The goal of this custom function is to avoid installing the entire `'xstate/fsm'` package, while enabling modeling using
+ * state machine. You can copy the first parameter into the editor at https://stately.ai/viz to visualize the state machine.
+ *
+ * @param {Options} options
+ * @param {Implementation} implementation
+ */
+function createMachine(_ref, _ref2) {
+  var states = _ref.states,
+    context = _ref.context,
+    initial = _ref.initial;
+  var actions = _ref2.actions;
+  var currentState = initial;
+  var currentContext = context;
+  return {
+    send: function send(event) {
+      var currentStateOn = states[currentState].on;
+      var transitionConfig = currentStateOn && currentStateOn[event.type];
+      if (transitionConfig) {
+        currentState = transitionConfig.target;
+        if (transitionConfig.actions) {
+          transitionConfig.actions.forEach(function (actName) {
+            var actionImpl = actions[actName];
+            var nextContextValue = actionImpl && actionImpl(currentContext, event);
+            if (nextContextValue) {
+              currentContext = _objectSpread(_objectSpread({}, currentContext), nextContextValue);
+            }
+          });
+        }
+      }
+    }
+  };
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createMachine);
 
 /***/ }),
 
@@ -180,7 +3030,59 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   listenToRuntimeError: () => (/* binding */ listenToRuntimeError),\n/* harmony export */   listenToUnhandledRejection: () => (/* binding */ listenToUnhandledRejection),\n/* harmony export */   parseErrorToStacks: () => (/* binding */ parseErrorToStacks)\n/* harmony export */ });\n/**\n *\n * @param {Error} error\n */\nfunction parseErrorToStacks(error) {\n  if (!error || !(error instanceof Error)) {\n    throw new Error(\"parseErrorToStacks expects Error object\");\n  }\n  if (typeof error.stack === \"string\") {\n    return error.stack.split(\"\\n\").filter(function (stack) {\n      return stack !== \"Error: \".concat(error.message);\n    });\n  }\n}\n\n/**\n * @callback ErrorCallback\n * @param {ErrorEvent} error\n * @returns {void}\n */\n\n/**\n * @param {ErrorCallback} callback\n */\nfunction listenToRuntimeError(callback) {\n  window.addEventListener(\"error\", callback);\n  return function cleanup() {\n    window.removeEventListener(\"error\", callback);\n  };\n}\n\n/**\n * @callback UnhandledRejectionCallback\n * @param {PromiseRejectionEvent} rejectionEvent\n * @returns {void}\n */\n\n/**\n * @param {UnhandledRejectionCallback} callback\n */\nfunction listenToUnhandledRejection(callback) {\n  window.addEventListener(\"unhandledrejection\", callback);\n  return function cleanup() {\n    window.removeEventListener(\"unhandledrejection\", callback);\n  };\n}\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/overlay/runtime-error.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   listenToRuntimeError: () => (/* binding */ listenToRuntimeError),
+/* harmony export */   listenToUnhandledRejection: () => (/* binding */ listenToUnhandledRejection),
+/* harmony export */   parseErrorToStacks: () => (/* binding */ parseErrorToStacks)
+/* harmony export */ });
+/**
+ *
+ * @param {Error} error
+ */
+function parseErrorToStacks(error) {
+  if (!error || !(error instanceof Error)) {
+    throw new Error("parseErrorToStacks expects Error object");
+  }
+  if (typeof error.stack === "string") {
+    return error.stack.split("\n").filter(function (stack) {
+      return stack !== "Error: ".concat(error.message);
+    });
+  }
+}
+
+/**
+ * @callback ErrorCallback
+ * @param {ErrorEvent} error
+ * @returns {void}
+ */
+
+/**
+ * @param {ErrorCallback} callback
+ */
+function listenToRuntimeError(callback) {
+  window.addEventListener("error", callback);
+  return function cleanup() {
+    window.removeEventListener("error", callback);
+  };
+}
+
+/**
+ * @callback UnhandledRejectionCallback
+ * @param {PromiseRejectionEvent} rejectionEvent
+ * @returns {void}
+ */
+
+/**
+ * @param {UnhandledRejectionCallback} callback
+ */
+function listenToUnhandledRejection(callback) {
+  window.addEventListener("unhandledrejection", callback);
+  return function cleanup() {
+    window.removeEventListener("unhandledrejection", callback);
+  };
+}
+
 
 /***/ }),
 
@@ -191,7 +3093,111 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _fsm_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./fsm.js */ \"./node_modules/webpack-dev-server/client/overlay/fsm.js\");\n\n\n/**\n * @typedef {Object} ShowOverlayData\n * @property {'warning' | 'error'} level\n * @property {Array<string  | { moduleIdentifier?: string, moduleName?: string, loc?: string, message?: string }>} messages\n * @property {'build' | 'runtime'} messageSource\n */\n\n/**\n * @typedef {Object} CreateOverlayMachineOptions\n * @property {(data: ShowOverlayData) => void} showOverlay\n * @property {() => void} hideOverlay\n */\n\n/**\n * @param {CreateOverlayMachineOptions} options\n */\nvar createOverlayMachine = function createOverlayMachine(options) {\n  var hideOverlay = options.hideOverlay,\n    showOverlay = options.showOverlay;\n  var overlayMachine = (0,_fsm_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"])({\n    initial: \"hidden\",\n    context: {\n      level: \"error\",\n      messages: [],\n      messageSource: \"build\"\n    },\n    states: {\n      hidden: {\n        on: {\n          BUILD_ERROR: {\n            target: \"displayBuildError\",\n            actions: [\"setMessages\", \"showOverlay\"]\n          },\n          RUNTIME_ERROR: {\n            target: \"displayRuntimeError\",\n            actions: [\"setMessages\", \"showOverlay\"]\n          }\n        }\n      },\n      displayBuildError: {\n        on: {\n          DISMISS: {\n            target: \"hidden\",\n            actions: [\"dismissMessages\", \"hideOverlay\"]\n          },\n          BUILD_ERROR: {\n            target: \"displayBuildError\",\n            actions: [\"appendMessages\", \"showOverlay\"]\n          }\n        }\n      },\n      displayRuntimeError: {\n        on: {\n          DISMISS: {\n            target: \"hidden\",\n            actions: [\"dismissMessages\", \"hideOverlay\"]\n          },\n          RUNTIME_ERROR: {\n            target: \"displayRuntimeError\",\n            actions: [\"appendMessages\", \"showOverlay\"]\n          },\n          BUILD_ERROR: {\n            target: \"displayBuildError\",\n            actions: [\"setMessages\", \"showOverlay\"]\n          }\n        }\n      }\n    }\n  }, {\n    actions: {\n      dismissMessages: function dismissMessages() {\n        return {\n          messages: [],\n          level: \"error\",\n          messageSource: \"build\"\n        };\n      },\n      appendMessages: function appendMessages(context, event) {\n        return {\n          messages: context.messages.concat(event.messages),\n          level: event.level || context.level,\n          messageSource: event.type === \"RUNTIME_ERROR\" ? \"runtime\" : \"build\"\n        };\n      },\n      setMessages: function setMessages(context, event) {\n        return {\n          messages: event.messages,\n          level: event.level || context.level,\n          messageSource: event.type === \"RUNTIME_ERROR\" ? \"runtime\" : \"build\"\n        };\n      },\n      hideOverlay: hideOverlay,\n      showOverlay: showOverlay\n    }\n  });\n  return overlayMachine;\n};\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createOverlayMachine);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/overlay/state-machine.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _fsm_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./fsm.js */ "./node_modules/webpack-dev-server/client/overlay/fsm.js");
+
+
+/**
+ * @typedef {Object} ShowOverlayData
+ * @property {'warning' | 'error'} level
+ * @property {Array<string  | { moduleIdentifier?: string, moduleName?: string, loc?: string, message?: string }>} messages
+ * @property {'build' | 'runtime'} messageSource
+ */
+
+/**
+ * @typedef {Object} CreateOverlayMachineOptions
+ * @property {(data: ShowOverlayData) => void} showOverlay
+ * @property {() => void} hideOverlay
+ */
+
+/**
+ * @param {CreateOverlayMachineOptions} options
+ */
+var createOverlayMachine = function createOverlayMachine(options) {
+  var hideOverlay = options.hideOverlay,
+    showOverlay = options.showOverlay;
+  var overlayMachine = (0,_fsm_js__WEBPACK_IMPORTED_MODULE_0__["default"])({
+    initial: "hidden",
+    context: {
+      level: "error",
+      messages: [],
+      messageSource: "build"
+    },
+    states: {
+      hidden: {
+        on: {
+          BUILD_ERROR: {
+            target: "displayBuildError",
+            actions: ["setMessages", "showOverlay"]
+          },
+          RUNTIME_ERROR: {
+            target: "displayRuntimeError",
+            actions: ["setMessages", "showOverlay"]
+          }
+        }
+      },
+      displayBuildError: {
+        on: {
+          DISMISS: {
+            target: "hidden",
+            actions: ["dismissMessages", "hideOverlay"]
+          },
+          BUILD_ERROR: {
+            target: "displayBuildError",
+            actions: ["appendMessages", "showOverlay"]
+          }
+        }
+      },
+      displayRuntimeError: {
+        on: {
+          DISMISS: {
+            target: "hidden",
+            actions: ["dismissMessages", "hideOverlay"]
+          },
+          RUNTIME_ERROR: {
+            target: "displayRuntimeError",
+            actions: ["appendMessages", "showOverlay"]
+          },
+          BUILD_ERROR: {
+            target: "displayBuildError",
+            actions: ["setMessages", "showOverlay"]
+          }
+        }
+      }
+    }
+  }, {
+    actions: {
+      dismissMessages: function dismissMessages() {
+        return {
+          messages: [],
+          level: "error",
+          messageSource: "build"
+        };
+      },
+      appendMessages: function appendMessages(context, event) {
+        return {
+          messages: context.messages.concat(event.messages),
+          level: event.level || context.level,
+          messageSource: event.type === "RUNTIME_ERROR" ? "runtime" : "build"
+        };
+      },
+      setMessages: function setMessages(context, event) {
+        return {
+          messages: event.messages,
+          level: event.level || context.level,
+          messageSource: event.type === "RUNTIME_ERROR" ? "runtime" : "build"
+        };
+      },
+      hideOverlay: hideOverlay,
+      showOverlay: showOverlay
+    }
+  });
+  return overlayMachine;
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createOverlayMachine);
 
 /***/ }),
 
@@ -202,7 +3208,90 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   containerStyle: () => (/* binding */ containerStyle),\n/* harmony export */   dismissButtonStyle: () => (/* binding */ dismissButtonStyle),\n/* harmony export */   headerStyle: () => (/* binding */ headerStyle),\n/* harmony export */   iframeStyle: () => (/* binding */ iframeStyle),\n/* harmony export */   msgStyles: () => (/* binding */ msgStyles),\n/* harmony export */   msgTextStyle: () => (/* binding */ msgTextStyle),\n/* harmony export */   msgTypeStyle: () => (/* binding */ msgTypeStyle)\n/* harmony export */ });\n// styles are inspired by `react-error-overlay`\n\nvar msgStyles = {\n  error: {\n    backgroundColor: \"rgba(206, 17, 38, 0.1)\",\n    color: \"#fccfcf\"\n  },\n  warning: {\n    backgroundColor: \"rgba(251, 245, 180, 0.1)\",\n    color: \"#fbf5b4\"\n  }\n};\nvar iframeStyle = {\n  position: \"fixed\",\n  top: 0,\n  left: 0,\n  right: 0,\n  bottom: 0,\n  width: \"100vw\",\n  height: \"100vh\",\n  border: \"none\",\n  \"z-index\": 9999999999\n};\nvar containerStyle = {\n  position: \"fixed\",\n  boxSizing: \"border-box\",\n  left: 0,\n  top: 0,\n  right: 0,\n  bottom: 0,\n  width: \"100vw\",\n  height: \"100vh\",\n  fontSize: \"large\",\n  padding: \"2rem 2rem 4rem 2rem\",\n  lineHeight: \"1.2\",\n  whiteSpace: \"pre-wrap\",\n  overflow: \"auto\",\n  backgroundColor: \"rgba(0, 0, 0, 0.9)\",\n  color: \"white\"\n};\nvar headerStyle = {\n  color: \"#e83b46\",\n  fontSize: \"2em\",\n  whiteSpace: \"pre-wrap\",\n  fontFamily: \"sans-serif\",\n  margin: \"0 2rem 2rem 0\",\n  flex: \"0 0 auto\",\n  maxHeight: \"50%\",\n  overflow: \"auto\"\n};\nvar dismissButtonStyle = {\n  color: \"#ffffff\",\n  lineHeight: \"1rem\",\n  fontSize: \"1.5rem\",\n  padding: \"1rem\",\n  cursor: \"pointer\",\n  position: \"absolute\",\n  right: 0,\n  top: 0,\n  backgroundColor: \"transparent\",\n  border: \"none\"\n};\nvar msgTypeStyle = {\n  color: \"#e83b46\",\n  fontSize: \"1.2em\",\n  marginBottom: \"1rem\",\n  fontFamily: \"sans-serif\"\n};\nvar msgTextStyle = {\n  lineHeight: \"1.5\",\n  fontSize: \"1rem\",\n  fontFamily: \"Menlo, Consolas, monospace\"\n};\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/overlay/styles.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   containerStyle: () => (/* binding */ containerStyle),
+/* harmony export */   dismissButtonStyle: () => (/* binding */ dismissButtonStyle),
+/* harmony export */   headerStyle: () => (/* binding */ headerStyle),
+/* harmony export */   iframeStyle: () => (/* binding */ iframeStyle),
+/* harmony export */   msgStyles: () => (/* binding */ msgStyles),
+/* harmony export */   msgTextStyle: () => (/* binding */ msgTextStyle),
+/* harmony export */   msgTypeStyle: () => (/* binding */ msgTypeStyle)
+/* harmony export */ });
+// styles are inspired by `react-error-overlay`
+
+var msgStyles = {
+  error: {
+    backgroundColor: "rgba(206, 17, 38, 0.1)",
+    color: "#fccfcf"
+  },
+  warning: {
+    backgroundColor: "rgba(251, 245, 180, 0.1)",
+    color: "#fbf5b4"
+  }
+};
+var iframeStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  width: "100vw",
+  height: "100vh",
+  border: "none",
+  "z-index": 9999999999
+};
+var containerStyle = {
+  position: "fixed",
+  boxSizing: "border-box",
+  left: 0,
+  top: 0,
+  right: 0,
+  bottom: 0,
+  width: "100vw",
+  height: "100vh",
+  fontSize: "large",
+  padding: "2rem 2rem 4rem 2rem",
+  lineHeight: "1.2",
+  whiteSpace: "pre-wrap",
+  overflow: "auto",
+  backgroundColor: "rgba(0, 0, 0, 0.9)",
+  color: "white"
+};
+var headerStyle = {
+  color: "#e83b46",
+  fontSize: "2em",
+  whiteSpace: "pre-wrap",
+  fontFamily: "sans-serif",
+  margin: "0 2rem 2rem 0",
+  flex: "0 0 auto",
+  maxHeight: "50%",
+  overflow: "auto"
+};
+var dismissButtonStyle = {
+  color: "#ffffff",
+  lineHeight: "1rem",
+  fontSize: "1.5rem",
+  padding: "1rem",
+  cursor: "pointer",
+  position: "absolute",
+  right: 0,
+  top: 0,
+  backgroundColor: "transparent",
+  border: "none"
+};
+var msgTypeStyle = {
+  color: "#e83b46",
+  fontSize: "1.2em",
+  marginBottom: "1rem",
+  fontFamily: "sans-serif"
+};
+var msgTextStyle = {
+  lineHeight: "1.5",
+  fontSize: "1rem",
+  fontFamily: "Menlo, Consolas, monospace"
+};
+
 
 /***/ }),
 
@@ -213,7 +3302,80 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   client: () => (/* binding */ client),\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _clients_WebSocketClient_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clients/WebSocketClient.js */ \"./node_modules/webpack-dev-server/client/clients/WebSocketClient.js\");\n/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/log.js */ \"./node_modules/webpack-dev-server/client/utils/log.js\");\n/* provided dependency */ var __webpack_dev_server_client__ = __webpack_require__(/*! ./node_modules/webpack-dev-server/client/clients/WebSocketClient.js */ \"./node_modules/webpack-dev-server/client/clients/WebSocketClient.js\");\n/* global __webpack_dev_server_client__ */\n\n\n\n\n// this WebsocketClient is here as a default fallback, in case the client is not injected\n/* eslint-disable camelcase */\nvar Client =\n// eslint-disable-next-line no-nested-ternary\ntypeof __webpack_dev_server_client__ !== \"undefined\" ? typeof __webpack_dev_server_client__.default !== \"undefined\" ? __webpack_dev_server_client__.default : __webpack_dev_server_client__ : _clients_WebSocketClient_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"];\n/* eslint-enable camelcase */\n\nvar retries = 0;\nvar maxRetries = 10;\n\n// Initialized client is exported so external consumers can utilize the same instance\n// It is mutable to enforce singleton\n// eslint-disable-next-line import/no-mutable-exports\nvar client = null;\n\n/**\n * @param {string} url\n * @param {{ [handler: string]: (data?: any, params?: any) => any }} handlers\n * @param {number} [reconnect]\n */\nvar socket = function initSocket(url, handlers, reconnect) {\n  client = new Client(url);\n  client.onOpen(function () {\n    retries = 0;\n    if (typeof reconnect !== \"undefined\") {\n      maxRetries = reconnect;\n    }\n  });\n  client.onClose(function () {\n    if (retries === 0) {\n      handlers.close();\n    }\n\n    // Try to reconnect.\n    client = null;\n\n    // After 10 retries stop trying, to prevent logspam.\n    if (retries < maxRetries) {\n      // Exponentially increase timeout to reconnect.\n      // Respectfully copied from the package `got`.\n      // eslint-disable-next-line no-restricted-properties\n      var retryInMs = 1000 * Math.pow(2, retries) + Math.random() * 100;\n      retries += 1;\n      _utils_log_js__WEBPACK_IMPORTED_MODULE_1__.log.info(\"Trying to reconnect...\");\n      setTimeout(function () {\n        socket(url, handlers, reconnect);\n      }, retryInMs);\n    }\n  });\n  client.onMessage(\n  /**\n   * @param {any} data\n   */\n  function (data) {\n    var message = JSON.parse(data);\n    if (handlers[message.type]) {\n      handlers[message.type](message.data, message.params);\n    }\n  });\n};\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (socket);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/socket.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   client: () => (/* binding */ client),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _clients_WebSocketClient_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./clients/WebSocketClient.js */ "./node_modules/webpack-dev-server/client/clients/WebSocketClient.js");
+/* harmony import */ var _utils_log_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/log.js */ "./node_modules/webpack-dev-server/client/utils/log.js");
+/* provided dependency */ var __webpack_dev_server_client__ = __webpack_require__(/*! ./node_modules/webpack-dev-server/client/clients/WebSocketClient.js */ "./node_modules/webpack-dev-server/client/clients/WebSocketClient.js");
+/* global __webpack_dev_server_client__ */
+
+
+
+
+// this WebsocketClient is here as a default fallback, in case the client is not injected
+/* eslint-disable camelcase */
+var Client =
+// eslint-disable-next-line no-nested-ternary
+typeof __webpack_dev_server_client__ !== "undefined" ? typeof __webpack_dev_server_client__.default !== "undefined" ? __webpack_dev_server_client__.default : __webpack_dev_server_client__ : _clients_WebSocketClient_js__WEBPACK_IMPORTED_MODULE_0__["default"];
+/* eslint-enable camelcase */
+
+var retries = 0;
+var maxRetries = 10;
+
+// Initialized client is exported so external consumers can utilize the same instance
+// It is mutable to enforce singleton
+// eslint-disable-next-line import/no-mutable-exports
+var client = null;
+
+/**
+ * @param {string} url
+ * @param {{ [handler: string]: (data?: any, params?: any) => any }} handlers
+ * @param {number} [reconnect]
+ */
+var socket = function initSocket(url, handlers, reconnect) {
+  client = new Client(url);
+  client.onOpen(function () {
+    retries = 0;
+    if (typeof reconnect !== "undefined") {
+      maxRetries = reconnect;
+    }
+  });
+  client.onClose(function () {
+    if (retries === 0) {
+      handlers.close();
+    }
+
+    // Try to reconnect.
+    client = null;
+
+    // After 10 retries stop trying, to prevent logspam.
+    if (retries < maxRetries) {
+      // Exponentially increase timeout to reconnect.
+      // Respectfully copied from the package `got`.
+      // eslint-disable-next-line no-restricted-properties
+      var retryInMs = 1000 * Math.pow(2, retries) + Math.random() * 100;
+      retries += 1;
+      _utils_log_js__WEBPACK_IMPORTED_MODULE_1__.log.info("Trying to reconnect...");
+      setTimeout(function () {
+        socket(url, handlers, reconnect);
+      }, retryInMs);
+    }
+  });
+  client.onMessage(
+  /**
+   * @param {any} data
+   */
+  function (data) {
+    var message = JSON.parse(data);
+    if (handlers[message.type]) {
+      handlers[message.type](message.data, message.params);
+    }
+  });
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (socket);
 
 /***/ }),
 
@@ -224,7 +3386,131 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/**\n * @param {{ protocol?: string, auth?: string, hostname?: string, port?: string, pathname?: string, search?: string, hash?: string, slashes?: boolean }} objURL\n * @returns {string}\n */\nfunction format(objURL) {\n  var protocol = objURL.protocol || \"\";\n  if (protocol && protocol.substr(-1) !== \":\") {\n    protocol += \":\";\n  }\n  var auth = objURL.auth || \"\";\n  if (auth) {\n    auth = encodeURIComponent(auth);\n    auth = auth.replace(/%3A/i, \":\");\n    auth += \"@\";\n  }\n  var host = \"\";\n  if (objURL.hostname) {\n    host = auth + (objURL.hostname.indexOf(\":\") === -1 ? objURL.hostname : \"[\".concat(objURL.hostname, \"]\"));\n    if (objURL.port) {\n      host += \":\".concat(objURL.port);\n    }\n  }\n  var pathname = objURL.pathname || \"\";\n  if (objURL.slashes) {\n    host = \"//\".concat(host || \"\");\n    if (pathname && pathname.charAt(0) !== \"/\") {\n      pathname = \"/\".concat(pathname);\n    }\n  } else if (!host) {\n    host = \"\";\n  }\n  var search = objURL.search || \"\";\n  if (search && search.charAt(0) !== \"?\") {\n    search = \"?\".concat(search);\n  }\n  var hash = objURL.hash || \"\";\n  if (hash && hash.charAt(0) !== \"#\") {\n    hash = \"#\".concat(hash);\n  }\n  pathname = pathname.replace(/[?#]/g,\n  /**\n   * @param {string} match\n   * @returns {string}\n   */\n  function (match) {\n    return encodeURIComponent(match);\n  });\n  search = search.replace(\"#\", \"%23\");\n  return \"\".concat(protocol).concat(host).concat(pathname).concat(search).concat(hash);\n}\n\n/**\n * @param {URL & { fromCurrentScript?: boolean }} parsedURL\n * @returns {string}\n */\nfunction createSocketURL(parsedURL) {\n  var hostname = parsedURL.hostname;\n\n  // Node.js module parses it as `::`\n  // `new URL(urlString, [baseURLString])` parses it as '[::]'\n  var isInAddrAny = hostname === \"0.0.0.0\" || hostname === \"::\" || hostname === \"[::]\";\n\n  // why do we need this check?\n  // hostname n/a for file protocol (example, when using electron, ionic)\n  // see: https://github.com/webpack/webpack-dev-server/pull/384\n  if (isInAddrAny && self.location.hostname && self.location.protocol.indexOf(\"http\") === 0) {\n    hostname = self.location.hostname;\n  }\n  var socketURLProtocol = parsedURL.protocol || self.location.protocol;\n\n  // When https is used in the app, secure web sockets are always necessary because the browser doesn't accept non-secure web sockets.\n  if (socketURLProtocol === \"auto:\" || hostname && isInAddrAny && self.location.protocol === \"https:\") {\n    socketURLProtocol = self.location.protocol;\n  }\n  socketURLProtocol = socketURLProtocol.replace(/^(?:http|.+-extension|file)/i, \"ws\");\n  var socketURLAuth = \"\";\n\n  // `new URL(urlString, [baseURLstring])` doesn't have `auth` property\n  // Parse authentication credentials in case we need them\n  if (parsedURL.username) {\n    socketURLAuth = parsedURL.username;\n\n    // Since HTTP basic authentication does not allow empty username,\n    // we only include password if the username is not empty.\n    if (parsedURL.password) {\n      // Result: <username>:<password>\n      socketURLAuth = socketURLAuth.concat(\":\", parsedURL.password);\n    }\n  }\n\n  // In case the host is a raw IPv6 address, it can be enclosed in\n  // the brackets as the brackets are needed in the final URL string.\n  // Need to remove those as url.format blindly adds its own set of brackets\n  // if the host string contains colons. That would lead to non-working\n  // double brackets (e.g. [[::]]) host\n  //\n  // All of these web socket url params are optionally passed in through resourceQuery,\n  // so we need to fall back to the default if they are not provided\n  var socketURLHostname = (hostname || self.location.hostname || \"localhost\").replace(/^\\[(.*)\\]$/, \"$1\");\n  var socketURLPort = parsedURL.port;\n  if (!socketURLPort || socketURLPort === \"0\") {\n    socketURLPort = self.location.port;\n  }\n\n  // If path is provided it'll be passed in via the resourceQuery as a\n  // query param so it has to be parsed out of the querystring in order for the\n  // client to open the socket to the correct location.\n  var socketURLPathname = \"/ws\";\n  if (parsedURL.pathname && !parsedURL.fromCurrentScript) {\n    socketURLPathname = parsedURL.pathname;\n  }\n  return format({\n    protocol: socketURLProtocol,\n    auth: socketURLAuth,\n    hostname: socketURLHostname,\n    port: socketURLPort,\n    pathname: socketURLPathname,\n    slashes: true\n  });\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createSocketURL);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/createSocketURL.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/**
+ * @param {{ protocol?: string, auth?: string, hostname?: string, port?: string, pathname?: string, search?: string, hash?: string, slashes?: boolean }} objURL
+ * @returns {string}
+ */
+function format(objURL) {
+  var protocol = objURL.protocol || "";
+  if (protocol && protocol.substr(-1) !== ":") {
+    protocol += ":";
+  }
+  var auth = objURL.auth || "";
+  if (auth) {
+    auth = encodeURIComponent(auth);
+    auth = auth.replace(/%3A/i, ":");
+    auth += "@";
+  }
+  var host = "";
+  if (objURL.hostname) {
+    host = auth + (objURL.hostname.indexOf(":") === -1 ? objURL.hostname : "[".concat(objURL.hostname, "]"));
+    if (objURL.port) {
+      host += ":".concat(objURL.port);
+    }
+  }
+  var pathname = objURL.pathname || "";
+  if (objURL.slashes) {
+    host = "//".concat(host || "");
+    if (pathname && pathname.charAt(0) !== "/") {
+      pathname = "/".concat(pathname);
+    }
+  } else if (!host) {
+    host = "";
+  }
+  var search = objURL.search || "";
+  if (search && search.charAt(0) !== "?") {
+    search = "?".concat(search);
+  }
+  var hash = objURL.hash || "";
+  if (hash && hash.charAt(0) !== "#") {
+    hash = "#".concat(hash);
+  }
+  pathname = pathname.replace(/[?#]/g,
+  /**
+   * @param {string} match
+   * @returns {string}
+   */
+  function (match) {
+    return encodeURIComponent(match);
+  });
+  search = search.replace("#", "%23");
+  return "".concat(protocol).concat(host).concat(pathname).concat(search).concat(hash);
+}
+
+/**
+ * @param {URL & { fromCurrentScript?: boolean }} parsedURL
+ * @returns {string}
+ */
+function createSocketURL(parsedURL) {
+  var hostname = parsedURL.hostname;
+
+  // Node.js module parses it as `::`
+  // `new URL(urlString, [baseURLString])` parses it as '[::]'
+  var isInAddrAny = hostname === "0.0.0.0" || hostname === "::" || hostname === "[::]";
+
+  // why do we need this check?
+  // hostname n/a for file protocol (example, when using electron, ionic)
+  // see: https://github.com/webpack/webpack-dev-server/pull/384
+  if (isInAddrAny && self.location.hostname && self.location.protocol.indexOf("http") === 0) {
+    hostname = self.location.hostname;
+  }
+  var socketURLProtocol = parsedURL.protocol || self.location.protocol;
+
+  // When https is used in the app, secure web sockets are always necessary because the browser doesn't accept non-secure web sockets.
+  if (socketURLProtocol === "auto:" || hostname && isInAddrAny && self.location.protocol === "https:") {
+    socketURLProtocol = self.location.protocol;
+  }
+  socketURLProtocol = socketURLProtocol.replace(/^(?:http|.+-extension|file)/i, "ws");
+  var socketURLAuth = "";
+
+  // `new URL(urlString, [baseURLstring])` doesn't have `auth` property
+  // Parse authentication credentials in case we need them
+  if (parsedURL.username) {
+    socketURLAuth = parsedURL.username;
+
+    // Since HTTP basic authentication does not allow empty username,
+    // we only include password if the username is not empty.
+    if (parsedURL.password) {
+      // Result: <username>:<password>
+      socketURLAuth = socketURLAuth.concat(":", parsedURL.password);
+    }
+  }
+
+  // In case the host is a raw IPv6 address, it can be enclosed in
+  // the brackets as the brackets are needed in the final URL string.
+  // Need to remove those as url.format blindly adds its own set of brackets
+  // if the host string contains colons. That would lead to non-working
+  // double brackets (e.g. [[::]]) host
+  //
+  // All of these web socket url params are optionally passed in through resourceQuery,
+  // so we need to fall back to the default if they are not provided
+  var socketURLHostname = (hostname || self.location.hostname || "localhost").replace(/^\[(.*)\]$/, "$1");
+  var socketURLPort = parsedURL.port;
+  if (!socketURLPort || socketURLPort === "0") {
+    socketURLPort = self.location.port;
+  }
+
+  // If path is provided it'll be passed in via the resourceQuery as a
+  // query param so it has to be parsed out of the querystring in order for the
+  // client to open the socket to the correct location.
+  var socketURLPathname = "/ws";
+  if (parsedURL.pathname && !parsedURL.fromCurrentScript) {
+    socketURLPathname = parsedURL.pathname;
+  }
+  return format({
+    protocol: socketURLProtocol,
+    auth: socketURLAuth,
+    hostname: socketURLHostname,
+    port: socketURLPort,
+    pathname: socketURLPathname,
+    slashes: true
+  });
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (createSocketURL);
 
 /***/ }),
 
@@ -235,7 +3521,34 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/**\n * @returns {string}\n */\nfunction getCurrentScriptSource() {\n  // `document.currentScript` is the most accurate way to find the current script,\n  // but is not supported in all browsers.\n  if (document.currentScript) {\n    return document.currentScript.getAttribute(\"src\");\n  }\n\n  // Fallback to getting all scripts running in the document.\n  var scriptElements = document.scripts || [];\n  var scriptElementsWithSrc = Array.prototype.filter.call(scriptElements, function (element) {\n    return element.getAttribute(\"src\");\n  });\n  if (scriptElementsWithSrc.length > 0) {\n    var currentScript = scriptElementsWithSrc[scriptElementsWithSrc.length - 1];\n    return currentScript.getAttribute(\"src\");\n  }\n\n  // Fail as there was no script to use.\n  throw new Error(\"[webpack-dev-server] Failed to get current script source.\");\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getCurrentScriptSource);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/getCurrentScriptSource.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/**
+ * @returns {string}
+ */
+function getCurrentScriptSource() {
+  // `document.currentScript` is the most accurate way to find the current script,
+  // but is not supported in all browsers.
+  if (document.currentScript) {
+    return document.currentScript.getAttribute("src");
+  }
+
+  // Fallback to getting all scripts running in the document.
+  var scriptElements = document.scripts || [];
+  var scriptElementsWithSrc = Array.prototype.filter.call(scriptElements, function (element) {
+    return element.getAttribute("src");
+  });
+  if (scriptElementsWithSrc.length > 0) {
+    var currentScript = scriptElementsWithSrc[scriptElementsWithSrc.length - 1];
+    return currentScript.getAttribute("src");
+  }
+
+  // Fail as there was no script to use.
+  throw new Error("[webpack-dev-server] Failed to get current script source.");
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (getCurrentScriptSource);
 
 /***/ }),
 
@@ -246,7 +3559,49 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   log: () => (/* binding */ log),\n/* harmony export */   logEnabledFeatures: () => (/* binding */ logEnabledFeatures),\n/* harmony export */   setLogLevel: () => (/* binding */ setLogLevel)\n/* harmony export */ });\n/* harmony import */ var _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/logger/index.js */ \"./node_modules/webpack-dev-server/client/modules/logger/index.js\");\n/* harmony import */ var _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0__);\n\nvar name = \"webpack-dev-server\";\n// default level is set on the client side, so it does not need\n// to be set by the CLI or API\nvar defaultLevel = \"info\";\n\n// options new options, merge with old options\n/**\n * @param {false | true | \"none\" | \"error\" | \"warn\" | \"info\" | \"log\" | \"verbose\"} level\n * @returns {void}\n */\nfunction setLogLevel(level) {\n  _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default().configureDefaultLogger({\n    level: level\n  });\n}\nsetLogLevel(defaultLevel);\nvar log = _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default().getLogger(name);\nvar logEnabledFeatures = function logEnabledFeatures(features) {\n  var enabledFeatures = Object.keys(features);\n  if (!features || enabledFeatures.length === 0) {\n    return;\n  }\n  var logString = \"Server started:\";\n\n  // Server started: Hot Module Replacement enabled, Live Reloading enabled, Overlay disabled.\n  for (var i = 0; i < enabledFeatures.length; i++) {\n    var key = enabledFeatures[i];\n    logString += \" \".concat(key, \" \").concat(features[key] ? \"enabled\" : \"disabled\", \",\");\n  }\n  // replace last comma with a period\n  logString = logString.slice(0, -1).concat(\".\");\n  log.info(logString);\n};\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/log.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   log: () => (/* binding */ log),
+/* harmony export */   logEnabledFeatures: () => (/* binding */ logEnabledFeatures),
+/* harmony export */   setLogLevel: () => (/* binding */ setLogLevel)
+/* harmony export */ });
+/* harmony import */ var _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../modules/logger/index.js */ "./node_modules/webpack-dev-server/client/modules/logger/index.js");
+/* harmony import */ var _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0__);
+
+var name = "webpack-dev-server";
+// default level is set on the client side, so it does not need
+// to be set by the CLI or API
+var defaultLevel = "info";
+
+// options new options, merge with old options
+/**
+ * @param {false | true | "none" | "error" | "warn" | "info" | "log" | "verbose"} level
+ * @returns {void}
+ */
+function setLogLevel(level) {
+  _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default().configureDefaultLogger({
+    level: level
+  });
+}
+setLogLevel(defaultLevel);
+var log = _modules_logger_index_js__WEBPACK_IMPORTED_MODULE_0___default().getLogger(name);
+var logEnabledFeatures = function logEnabledFeatures(features) {
+  var enabledFeatures = Object.keys(features);
+  if (!features || enabledFeatures.length === 0) {
+    return;
+  }
+  var logString = "Server started:";
+
+  // Server started: Hot Module Replacement enabled, Live Reloading enabled, Overlay disabled.
+  for (var i = 0; i < enabledFeatures.length; i++) {
+    var key = enabledFeatures[i];
+    logString += " ".concat(key, " ").concat(features[key] ? "enabled" : "disabled", ",");
+  }
+  // replace last comma with a period
+  logString = logString.slice(0, -1).concat(".");
+  log.info(logString);
+};
+
 
 /***/ }),
 
@@ -257,7 +3612,47 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var _getCurrentScriptSource_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./getCurrentScriptSource.js */ \"./node_modules/webpack-dev-server/client/utils/getCurrentScriptSource.js\");\n\n\n/**\n * @param {string} resourceQuery\n * @returns {{ [key: string]: string | boolean }}\n */\nfunction parseURL(resourceQuery) {\n  /** @type {{ [key: string]: string }} */\n  var options = {};\n  if (typeof resourceQuery === \"string\" && resourceQuery !== \"\") {\n    var searchParams = resourceQuery.slice(1).split(\"&\");\n    for (var i = 0; i < searchParams.length; i++) {\n      var pair = searchParams[i].split(\"=\");\n      options[pair[0]] = decodeURIComponent(pair[1]);\n    }\n  } else {\n    // Else, get the url from the <script> this file was called with.\n    var scriptSource = (0,_getCurrentScriptSource_js__WEBPACK_IMPORTED_MODULE_0__[\"default\"])();\n    var scriptSourceURL;\n    try {\n      // The placeholder `baseURL` with `window.location.href`,\n      // is to allow parsing of path-relative or protocol-relative URLs,\n      // and will have no effect if `scriptSource` is a fully valid URL.\n      scriptSourceURL = new URL(scriptSource, self.location.href);\n    } catch (error) {\n      // URL parsing failed, do nothing.\n      // We will still proceed to see if we can recover using `resourceQuery`\n    }\n    if (scriptSourceURL) {\n      options = scriptSourceURL;\n      options.fromCurrentScript = true;\n    }\n  }\n  return options;\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (parseURL);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/parseURL.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _getCurrentScriptSource_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./getCurrentScriptSource.js */ "./node_modules/webpack-dev-server/client/utils/getCurrentScriptSource.js");
+
+
+/**
+ * @param {string} resourceQuery
+ * @returns {{ [key: string]: string | boolean }}
+ */
+function parseURL(resourceQuery) {
+  /** @type {{ [key: string]: string }} */
+  var options = {};
+  if (typeof resourceQuery === "string" && resourceQuery !== "") {
+    var searchParams = resourceQuery.slice(1).split("&");
+    for (var i = 0; i < searchParams.length; i++) {
+      var pair = searchParams[i].split("=");
+      options[pair[0]] = decodeURIComponent(pair[1]);
+    }
+  } else {
+    // Else, get the url from the <script> this file was called with.
+    var scriptSource = (0,_getCurrentScriptSource_js__WEBPACK_IMPORTED_MODULE_0__["default"])();
+    var scriptSourceURL;
+    try {
+      // The placeholder `baseURL` with `window.location.href`,
+      // is to allow parsing of path-relative or protocol-relative URLs,
+      // and will have no effect if `scriptSource` is a fully valid URL.
+      scriptSourceURL = new URL(scriptSource, self.location.href);
+    } catch (error) {
+      // URL parsing failed, do nothing.
+      // We will still proceed to see if we can recover using `resourceQuery`
+    }
+    if (scriptSourceURL) {
+      options = scriptSourceURL;
+      options.fromCurrentScript = true;
+    }
+  }
+  return options;
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (parseURL);
 
 /***/ }),
 
@@ -268,7 +3663,76 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* harmony import */ var webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! webpack/hot/emitter.js */ \"./node_modules/webpack/hot/emitter.js\");\n/* harmony import */ var webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _log_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./log.js */ \"./node_modules/webpack-dev-server/client/utils/log.js\");\n\n\n\n/** @typedef {import(\"../index\").Options} Options\n/** @typedef {import(\"../index\").Status} Status\n\n/**\n * @param {Options} options\n * @param {Status} status\n */\nfunction reloadApp(_ref, status) {\n  var hot = _ref.hot,\n    liveReload = _ref.liveReload;\n  if (status.isUnloading) {\n    return;\n  }\n  var currentHash = status.currentHash,\n    previousHash = status.previousHash;\n  var isInitial = currentHash.indexOf( /** @type {string} */previousHash) >= 0;\n  if (isInitial) {\n    return;\n  }\n\n  /**\n   * @param {Window} rootWindow\n   * @param {number} intervalId\n   */\n  function applyReload(rootWindow, intervalId) {\n    clearInterval(intervalId);\n    _log_js__WEBPACK_IMPORTED_MODULE_1__.log.info(\"App updated. Reloading...\");\n    rootWindow.location.reload();\n  }\n  var search = self.location.search.toLowerCase();\n  var allowToHot = search.indexOf(\"webpack-dev-server-hot=false\") === -1;\n  var allowToLiveReload = search.indexOf(\"webpack-dev-server-live-reload=false\") === -1;\n  if (hot && allowToHot) {\n    _log_js__WEBPACK_IMPORTED_MODULE_1__.log.info(\"App hot update...\");\n    webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0___default().emit(\"webpackHotUpdate\", status.currentHash);\n    if (typeof self !== \"undefined\" && self.window) {\n      // broadcast update to window\n      self.postMessage(\"webpackHotUpdate\".concat(status.currentHash), \"*\");\n    }\n  }\n  // allow refreshing the page only if liveReload isn't disabled\n  else if (liveReload && allowToLiveReload) {\n    var rootWindow = self;\n\n    // use parent window for reload (in case we're in an iframe with no valid src)\n    var intervalId = self.setInterval(function () {\n      if (rootWindow.location.protocol !== \"about:\") {\n        // reload immediately if protocol is valid\n        applyReload(rootWindow, intervalId);\n      } else {\n        rootWindow = rootWindow.parent;\n        if (rootWindow.parent === rootWindow) {\n          // if parent equals current window we've reached the root which would continue forever, so trigger a reload anyways\n          applyReload(rootWindow, intervalId);\n        }\n      }\n    });\n  }\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (reloadApp);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/reloadApp.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! webpack/hot/emitter.js */ "./node_modules/webpack/hot/emitter.js");
+/* harmony import */ var webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _log_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./log.js */ "./node_modules/webpack-dev-server/client/utils/log.js");
+
+
+
+/** @typedef {import("../index").Options} Options
+/** @typedef {import("../index").Status} Status
+
+/**
+ * @param {Options} options
+ * @param {Status} status
+ */
+function reloadApp(_ref, status) {
+  var hot = _ref.hot,
+    liveReload = _ref.liveReload;
+  if (status.isUnloading) {
+    return;
+  }
+  var currentHash = status.currentHash,
+    previousHash = status.previousHash;
+  var isInitial = currentHash.indexOf( /** @type {string} */previousHash) >= 0;
+  if (isInitial) {
+    return;
+  }
+
+  /**
+   * @param {Window} rootWindow
+   * @param {number} intervalId
+   */
+  function applyReload(rootWindow, intervalId) {
+    clearInterval(intervalId);
+    _log_js__WEBPACK_IMPORTED_MODULE_1__.log.info("App updated. Reloading...");
+    rootWindow.location.reload();
+  }
+  var search = self.location.search.toLowerCase();
+  var allowToHot = search.indexOf("webpack-dev-server-hot=false") === -1;
+  var allowToLiveReload = search.indexOf("webpack-dev-server-live-reload=false") === -1;
+  if (hot && allowToHot) {
+    _log_js__WEBPACK_IMPORTED_MODULE_1__.log.info("App hot update...");
+    webpack_hot_emitter_js__WEBPACK_IMPORTED_MODULE_0___default().emit("webpackHotUpdate", status.currentHash);
+    if (typeof self !== "undefined" && self.window) {
+      // broadcast update to window
+      self.postMessage("webpackHotUpdate".concat(status.currentHash), "*");
+    }
+  }
+  // allow refreshing the page only if liveReload isn't disabled
+  else if (liveReload && allowToLiveReload) {
+    var rootWindow = self;
+
+    // use parent window for reload (in case we're in an iframe with no valid src)
+    var intervalId = self.setInterval(function () {
+      if (rootWindow.location.protocol !== "about:") {
+        // reload immediately if protocol is valid
+        applyReload(rootWindow, intervalId);
+      } else {
+        rootWindow = rootWindow.parent;
+        if (rootWindow.parent === rootWindow) {
+          // if parent equals current window we've reached the root which would continue forever, so trigger a reload anyways
+          applyReload(rootWindow, intervalId);
+        }
+      }
+    });
+  }
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (reloadApp);
 
 /***/ }),
 
@@ -279,7 +3743,26 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n/* global __resourceQuery WorkerGlobalScope */\n\n// Send messages to the outside, so plugins can consume it.\n/**\n * @param {string} type\n * @param {any} [data]\n */\nfunction sendMsg(type, data) {\n  if (typeof self !== \"undefined\" && (typeof WorkerGlobalScope === \"undefined\" || !(self instanceof WorkerGlobalScope))) {\n    self.postMessage({\n      type: \"webpack\".concat(type),\n      data: data\n    }, \"*\");\n  }\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (sendMsg);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/sendMessage.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* global __resourceQuery WorkerGlobalScope */
+
+// Send messages to the outside, so plugins can consume it.
+/**
+ * @param {string} type
+ * @param {any} [data]
+ */
+function sendMsg(type, data) {
+  if (typeof self !== "undefined" && (typeof WorkerGlobalScope === "undefined" || !(self instanceof WorkerGlobalScope))) {
+    self.postMessage({
+      type: "webpack".concat(type),
+      data: data
+    }, "*");
+  }
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (sendMsg);
 
 /***/ }),
 
@@ -290,7 +3773,28 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\nvar ansiRegex = new RegExp([\"[\\\\u001B\\\\u009B][[\\\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\\\d\\\\/#&.:=?%@~_]+)*|[a-zA-Z\\\\d]+(?:;[-a-zA-Z\\\\d\\\\/#&.:=?%@~_]*)*)?\\\\u0007)\", \"(?:(?:\\\\d{1,4}(?:;\\\\d{0,4})*)?[\\\\dA-PR-TZcf-nq-uy=><~]))\"].join(\"|\"), \"g\");\n\n/**\n *\n * Strip [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) from a string.\n * Adapted from code originally released by Sindre Sorhus\n * Licensed the MIT License\n *\n * @param {string} string\n * @return {string}\n */\nfunction stripAnsi(string) {\n  if (typeof string !== \"string\") {\n    throw new TypeError(\"Expected a `string`, got `\".concat(typeof string, \"`\"));\n  }\n  return string.replace(ansiRegex, \"\");\n}\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (stripAnsi);\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack-dev-server/client/utils/stripAnsi.js?");
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var ansiRegex = new RegExp(["[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)", "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))"].join("|"), "g");
+
+/**
+ *
+ * Strip [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code) from a string.
+ * Adapted from code originally released by Sindre Sorhus
+ * Licensed the MIT License
+ *
+ * @param {string} string
+ * @return {string}
+ */
+function stripAnsi(string) {
+  if (typeof string !== "string") {
+    throw new TypeError("Expected a `string`, got `".concat(typeof string, "`"));
+  }
+  return string.replace(ansiRegex, "");
+}
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (stripAnsi);
 
 /***/ }),
 
@@ -300,7 +3804,80 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \************************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Tobias Koppers @sokra\n*/\n/* globals __webpack_hash__ */\nif (true) {\n\t/** @type {undefined|string} */\n\tvar lastHash;\n\tvar upToDate = function upToDate() {\n\t\treturn /** @type {string} */ (lastHash).indexOf(__webpack_require__.h()) >= 0;\n\t};\n\tvar log = __webpack_require__(/*! ./log */ \"./node_modules/webpack/hot/log.js\");\n\tvar check = function check() {\n\t\tmodule.hot\n\t\t\t.check(true)\n\t\t\t.then(function (updatedModules) {\n\t\t\t\tif (!updatedModules) {\n\t\t\t\t\tlog(\n\t\t\t\t\t\t\"warning\",\n\t\t\t\t\t\t\"[HMR] Cannot find update. \" +\n\t\t\t\t\t\t\t(typeof window !== \"undefined\"\n\t\t\t\t\t\t\t\t? \"Need to do a full reload!\"\n\t\t\t\t\t\t\t\t: \"Please reload manually!\")\n\t\t\t\t\t);\n\t\t\t\t\tlog(\n\t\t\t\t\t\t\"warning\",\n\t\t\t\t\t\t\"[HMR] (Probably because of restarting the webpack-dev-server)\"\n\t\t\t\t\t);\n\t\t\t\t\tif (typeof window !== \"undefined\") {\n\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t}\n\t\t\t\t\treturn;\n\t\t\t\t}\n\n\t\t\t\tif (!upToDate()) {\n\t\t\t\t\tcheck();\n\t\t\t\t}\n\n\t\t\t\t__webpack_require__(/*! ./log-apply-result */ \"./node_modules/webpack/hot/log-apply-result.js\")(updatedModules, updatedModules);\n\n\t\t\t\tif (upToDate()) {\n\t\t\t\t\tlog(\"info\", \"[HMR] App is up to date.\");\n\t\t\t\t}\n\t\t\t})\n\t\t\t.catch(function (err) {\n\t\t\t\tvar status = module.hot.status();\n\t\t\t\tif ([\"abort\", \"fail\"].indexOf(status) >= 0) {\n\t\t\t\t\tlog(\n\t\t\t\t\t\t\"warning\",\n\t\t\t\t\t\t\"[HMR] Cannot apply update. \" +\n\t\t\t\t\t\t\t(typeof window !== \"undefined\"\n\t\t\t\t\t\t\t\t? \"Need to do a full reload!\"\n\t\t\t\t\t\t\t\t: \"Please reload manually!\")\n\t\t\t\t\t);\n\t\t\t\t\tlog(\"warning\", \"[HMR] \" + log.formatError(err));\n\t\t\t\t\tif (typeof window !== \"undefined\") {\n\t\t\t\t\t\twindow.location.reload();\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\tlog(\"warning\", \"[HMR] Update failed: \" + log.formatError(err));\n\t\t\t\t}\n\t\t\t});\n\t};\n\tvar hotEmitter = __webpack_require__(/*! ./emitter */ \"./node_modules/webpack/hot/emitter.js\");\n\thotEmitter.on(\"webpackHotUpdate\", function (currentHash) {\n\t\tlastHash = currentHash;\n\t\tif (!upToDate() && module.hot.status() === \"idle\") {\n\t\t\tlog(\"info\", \"[HMR] Checking for updates on the server...\");\n\t\t\tcheck();\n\t\t}\n\t});\n\tlog(\"info\", \"[HMR] Waiting for update signal from WDS...\");\n} else {}\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack/hot/dev-server.js?");
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+/* globals __webpack_hash__ */
+if (true) {
+	/** @type {undefined|string} */
+	var lastHash;
+	var upToDate = function upToDate() {
+		return /** @type {string} */ (lastHash).indexOf(__webpack_require__.h()) >= 0;
+	};
+	var log = __webpack_require__(/*! ./log */ "./node_modules/webpack/hot/log.js");
+	var check = function check() {
+		module.hot
+			.check(true)
+			.then(function (updatedModules) {
+				if (!updatedModules) {
+					log(
+						"warning",
+						"[HMR] Cannot find update. " +
+							(typeof window !== "undefined"
+								? "Need to do a full reload!"
+								: "Please reload manually!")
+					);
+					log(
+						"warning",
+						"[HMR] (Probably because of restarting the webpack-dev-server)"
+					);
+					if (typeof window !== "undefined") {
+						window.location.reload();
+					}
+					return;
+				}
+
+				if (!upToDate()) {
+					check();
+				}
+
+				__webpack_require__(/*! ./log-apply-result */ "./node_modules/webpack/hot/log-apply-result.js")(updatedModules, updatedModules);
+
+				if (upToDate()) {
+					log("info", "[HMR] App is up to date.");
+				}
+			})
+			.catch(function (err) {
+				var status = module.hot.status();
+				if (["abort", "fail"].indexOf(status) >= 0) {
+					log(
+						"warning",
+						"[HMR] Cannot apply update. " +
+							(typeof window !== "undefined"
+								? "Need to do a full reload!"
+								: "Please reload manually!")
+					);
+					log("warning", "[HMR] " + log.formatError(err));
+					if (typeof window !== "undefined") {
+						window.location.reload();
+					}
+				} else {
+					log("warning", "[HMR] Update failed: " + log.formatError(err));
+				}
+			});
+	};
+	var hotEmitter = __webpack_require__(/*! ./emitter */ "./node_modules/webpack/hot/emitter.js");
+	hotEmitter.on("webpackHotUpdate", function (currentHash) {
+		lastHash = currentHash;
+		if (!upToDate() && module.hot.status() === "idle") {
+			log("info", "[HMR] Checking for updates on the server...");
+			check();
+		}
+	});
+	log("info", "[HMR] Waiting for update signal from WDS...");
+} else {}
+
 
 /***/ }),
 
@@ -310,7 +3887,9 @@ eval("/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAu
   \*********************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("var EventEmitter = __webpack_require__(/*! events */ \"./node_modules/events/events.js\");\nmodule.exports = new EventEmitter();\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack/hot/emitter.js?");
+var EventEmitter = __webpack_require__(/*! events */ "./node_modules/events/events.js");
+module.exports = new EventEmitter();
+
 
 /***/ }),
 
@@ -320,7 +3899,56 @@ eval("var EventEmitter = __webpack_require__(/*! events */ \"./node_modules/even
   \******************************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAuthor Tobias Koppers @sokra\n*/\n\n/**\n * @param {(string | number)[]} updatedModules updated modules\n * @param {(string | number)[] | null} renewedModules renewed modules\n */\nmodule.exports = function (updatedModules, renewedModules) {\n\tvar unacceptedModules = updatedModules.filter(function (moduleId) {\n\t\treturn renewedModules && renewedModules.indexOf(moduleId) < 0;\n\t});\n\tvar log = __webpack_require__(/*! ./log */ \"./node_modules/webpack/hot/log.js\");\n\n\tif (unacceptedModules.length > 0) {\n\t\tlog(\n\t\t\t\"warning\",\n\t\t\t\"[HMR] The following modules couldn't be hot updated: (They would need a full reload!)\"\n\t\t);\n\t\tunacceptedModules.forEach(function (moduleId) {\n\t\t\tlog(\"warning\", \"[HMR]  - \" + moduleId);\n\t\t});\n\t}\n\n\tif (!renewedModules || renewedModules.length === 0) {\n\t\tlog(\"info\", \"[HMR] Nothing hot updated.\");\n\t} else {\n\t\tlog(\"info\", \"[HMR] Updated modules:\");\n\t\trenewedModules.forEach(function (moduleId) {\n\t\t\tif (typeof moduleId === \"string\" && moduleId.indexOf(\"!\") !== -1) {\n\t\t\t\tvar parts = moduleId.split(\"!\");\n\t\t\t\tlog.groupCollapsed(\"info\", \"[HMR]  - \" + parts.pop());\n\t\t\t\tlog(\"info\", \"[HMR]  - \" + moduleId);\n\t\t\t\tlog.groupEnd(\"info\");\n\t\t\t} else {\n\t\t\t\tlog(\"info\", \"[HMR]  - \" + moduleId);\n\t\t\t}\n\t\t});\n\t\tvar numberIds = renewedModules.every(function (moduleId) {\n\t\t\treturn typeof moduleId === \"number\";\n\t\t});\n\t\tif (numberIds)\n\t\t\tlog(\n\t\t\t\t\"info\",\n\t\t\t\t'[HMR] Consider using the optimization.moduleIds: \"named\" for module names.'\n\t\t\t);\n\t}\n};\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack/hot/log-apply-result.js?");
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+/**
+ * @param {(string | number)[]} updatedModules updated modules
+ * @param {(string | number)[] | null} renewedModules renewed modules
+ */
+module.exports = function (updatedModules, renewedModules) {
+	var unacceptedModules = updatedModules.filter(function (moduleId) {
+		return renewedModules && renewedModules.indexOf(moduleId) < 0;
+	});
+	var log = __webpack_require__(/*! ./log */ "./node_modules/webpack/hot/log.js");
+
+	if (unacceptedModules.length > 0) {
+		log(
+			"warning",
+			"[HMR] The following modules couldn't be hot updated: (They would need a full reload!)"
+		);
+		unacceptedModules.forEach(function (moduleId) {
+			log("warning", "[HMR]  - " + moduleId);
+		});
+	}
+
+	if (!renewedModules || renewedModules.length === 0) {
+		log("info", "[HMR] Nothing hot updated.");
+	} else {
+		log("info", "[HMR] Updated modules:");
+		renewedModules.forEach(function (moduleId) {
+			if (typeof moduleId === "string" && moduleId.indexOf("!") !== -1) {
+				var parts = moduleId.split("!");
+				log.groupCollapsed("info", "[HMR]  - " + parts.pop());
+				log("info", "[HMR]  - " + moduleId);
+				log.groupEnd("info");
+			} else {
+				log("info", "[HMR]  - " + moduleId);
+			}
+		});
+		var numberIds = renewedModules.every(function (moduleId) {
+			return typeof moduleId === "number";
+		});
+		if (numberIds)
+			log(
+				"info",
+				'[HMR] Consider using the optimization.moduleIds: "named" for module names.'
+			);
+	}
+};
+
 
 /***/ }),
 
@@ -330,7 +3958,88 @@ eval("/*\n\tMIT License http://www.opensource.org/licenses/mit-license.php\n\tAu
   \*****************************************/
 /***/ ((module) => {
 
-eval("/** @typedef {\"info\" | \"warning\" | \"error\"} LogLevel */\n\n/** @type {LogLevel} */\nvar logLevel = \"info\";\n\nfunction dummy() {}\n\n/**\n * @param {LogLevel} level log level\n * @returns {boolean} true, if should log\n */\nfunction shouldLog(level) {\n\tvar shouldLog =\n\t\t(logLevel === \"info\" && level === \"info\") ||\n\t\t([\"info\", \"warning\"].indexOf(logLevel) >= 0 && level === \"warning\") ||\n\t\t([\"info\", \"warning\", \"error\"].indexOf(logLevel) >= 0 && level === \"error\");\n\treturn shouldLog;\n}\n\n/**\n * @param {(msg?: string) => void} logFn log function\n * @returns {(level: LogLevel, msg?: string) => void} function that logs when log level is sufficient\n */\nfunction logGroup(logFn) {\n\treturn function (level, msg) {\n\t\tif (shouldLog(level)) {\n\t\t\tlogFn(msg);\n\t\t}\n\t};\n}\n\n/**\n * @param {LogLevel} level log level\n * @param {string|Error} msg message\n */\nmodule.exports = function (level, msg) {\n\tif (shouldLog(level)) {\n\t\tif (level === \"info\") {\n\t\t\tconsole.log(msg);\n\t\t} else if (level === \"warning\") {\n\t\t\tconsole.warn(msg);\n\t\t} else if (level === \"error\") {\n\t\t\tconsole.error(msg);\n\t\t}\n\t}\n};\n\n/* eslint-disable node/no-unsupported-features/node-builtins */\nvar group = console.group || dummy;\nvar groupCollapsed = console.groupCollapsed || dummy;\nvar groupEnd = console.groupEnd || dummy;\n/* eslint-enable node/no-unsupported-features/node-builtins */\n\nmodule.exports.group = logGroup(group);\n\nmodule.exports.groupCollapsed = logGroup(groupCollapsed);\n\nmodule.exports.groupEnd = logGroup(groupEnd);\n\n/**\n * @param {LogLevel} level log level\n */\nmodule.exports.setLogLevel = function (level) {\n\tlogLevel = level;\n};\n\n/**\n * @param {Error} err error\n * @returns {string} formatted error\n */\nmodule.exports.formatError = function (err) {\n\tvar message = err.message;\n\tvar stack = err.stack;\n\tif (!stack) {\n\t\treturn message;\n\t} else if (stack.indexOf(message) < 0) {\n\t\treturn message + \"\\n\" + stack;\n\t} else {\n\t\treturn stack;\n\t}\n};\n\n\n//# sourceURL=webpack://loan-12-su-quan/./node_modules/webpack/hot/log.js?");
+/** @typedef {"info" | "warning" | "error"} LogLevel */
+
+/** @type {LogLevel} */
+var logLevel = "info";
+
+function dummy() {}
+
+/**
+ * @param {LogLevel} level log level
+ * @returns {boolean} true, if should log
+ */
+function shouldLog(level) {
+	var shouldLog =
+		(logLevel === "info" && level === "info") ||
+		(["info", "warning"].indexOf(logLevel) >= 0 && level === "warning") ||
+		(["info", "warning", "error"].indexOf(logLevel) >= 0 && level === "error");
+	return shouldLog;
+}
+
+/**
+ * @param {(msg?: string) => void} logFn log function
+ * @returns {(level: LogLevel, msg?: string) => void} function that logs when log level is sufficient
+ */
+function logGroup(logFn) {
+	return function (level, msg) {
+		if (shouldLog(level)) {
+			logFn(msg);
+		}
+	};
+}
+
+/**
+ * @param {LogLevel} level log level
+ * @param {string|Error} msg message
+ */
+module.exports = function (level, msg) {
+	if (shouldLog(level)) {
+		if (level === "info") {
+			console.log(msg);
+		} else if (level === "warning") {
+			console.warn(msg);
+		} else if (level === "error") {
+			console.error(msg);
+		}
+	}
+};
+
+/* eslint-disable node/no-unsupported-features/node-builtins */
+var group = console.group || dummy;
+var groupCollapsed = console.groupCollapsed || dummy;
+var groupEnd = console.groupEnd || dummy;
+/* eslint-enable node/no-unsupported-features/node-builtins */
+
+module.exports.group = logGroup(group);
+
+module.exports.groupCollapsed = logGroup(groupCollapsed);
+
+module.exports.groupEnd = logGroup(groupEnd);
+
+/**
+ * @param {LogLevel} level log level
+ */
+module.exports.setLogLevel = function (level) {
+	logLevel = level;
+};
+
+/**
+ * @param {Error} err error
+ * @returns {string} formatted error
+ */
+module.exports.formatError = function (err) {
+	var message = err.message;
+	var stack = err.stack;
+	if (!stack) {
+		return message;
+	} else if (stack.indexOf(message) < 0) {
+		return message + "\n" + stack;
+	} else {
+		return stack;
+	}
+};
+
 
 /***/ })
 
@@ -419,7 +4128,7 @@ eval("/** @typedef {\"info\" | \"warning\" | \"error\"} LogLevel */\n\n/** @type
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("c5e3bfb5907620d6efbb")
+/******/ 		__webpack_require__.h = () => ("5b947304bf3644db88b6")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
@@ -1438,3 +5147,4 @@ eval("/** @typedef {\"info\" | \"warning\" | \"error\"} LogLevel */\n\n/** @type
 /******/ 	
 /******/ })()
 ;
+//# sourceMappingURL=index.js.map
