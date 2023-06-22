@@ -15,145 +15,220 @@ import {
 import { AllMatchedPositions, GameState, Point, TileInfo } from "@/types";
 import { check, combine, findBelow, generateMap, getKeys, randomTile } from "@/utils/common";
 
-const mapUpdate: {
-  [key in GameState]: (self: Game) => void;
+const mapFunction: {
+  [key in GameState]: {
+    render: (self: Game) => void;
+    update: (self: Game) => void;
+  };
 } = {
-  IDLE: () => {},
-  SELECT: (self) => {
-    const offset = self.tSwap * SWAP_OFFSET;
+  IDLE: { render: () => {}, update: () => {} },
+  SELECT: {
+    render: (self) => {
+      const offset = self.tSwap * SWAP_OFFSET;
 
-    const { x: x0, y: y0, value: v0 } = self.selected;
-    const { x: x1, y: y1, value: v1 } = self.swapped || self.selected;
+      const { x: x0, y: y0, value: v0 } = self.selected;
+      const { x: x1, y: y1, value: v1 } = self.swapped || self.selected;
 
-    base.context.drawImage(
-      mapTileInfo[v0].texture,
-      x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
-      y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
-    );
+      if (!self.swapped) {
+        base.context.lineWidth = 4;
+        base.context.strokeStyle = "cyan";
+        base.context.strokeRect(
+          self.selected.x * CELL_SIZE + 2,
+          self.selected.y * CELL_SIZE + 2,
+          CELL_SIZE - 4,
+          CELL_SIZE - 4
+        );
+      } else
+        base.context.drawImage(
+          mapTileInfo[v1].texture,
+          x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
+          y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset
+        );
 
-    if (!self.swapped) {
-      base.context.lineWidth = 4;
-      base.context.strokeStyle = "cyan";
-      base.context.strokeRect(
-        self.selected.x * CELL_SIZE + 2,
-        self.selected.y * CELL_SIZE + 2,
-        CELL_SIZE - 4,
-        CELL_SIZE - 4
+      base.context.drawImage(
+        mapTileInfo[v0].texture,
+        x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
+        y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
       );
-      return;
-    }
+    },
+    update: (self) => {
+      if (!self.swapped) return;
 
-    base.context.drawImage(
-      mapTileInfo[v1].texture,
-      x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
-      y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset
-    );
-  },
-  EXPLODE: (self) => {
-    self.tExplode2 += 1;
-    if (self.tExplode2 % 2 !== 0) return;
+      self.tSwap += 1;
+      if (self.tSwap <= SWAP_DURATION) return;
 
-    self.tExplode += 1;
-    if (self.tExplode !== 4) return;
+      self.tSwap = SWAP_DURATION;
 
-    self.tExplode = 0;
-    self.state = "FALL";
+      const { x: x0, y: y0, value: v0 } = self.selected;
+      const { x: x1, y: y1, value: v1 } = self.swapped;
 
-    self.fall = {};
+      base.map[y0][x0] = v0;
+      base.map[y1][x1] = v1;
 
-    self.explodedTiles.forEach(({ x, y }) => {
-      base.map[y][x] = -1;
-      if (self.fall[x]) {
-        !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-          self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-      } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
-    });
+      self.swap(x0, y0, x1, y1);
 
-    getKeys(self.fall).forEach((key) => {
-      self.fall[key].below = findBelow(self.fall[key].list);
-      const needAdd = self.fall[key].list.length;
-      self.fall[key].list = [];
-      key = Number(key);
-      for (let i = self.fall[key].below; i >= 0; i -= 1) {
-        if (base.map[i][key] !== -1) {
-          self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-          base.map[i][key] = -1;
-        }
-      }
-      for (let i = 0; i < needAdd; i += 1) {
-        self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
-      }
-    });
-  },
-  FALL: (self) => {
-    let newFalling = false;
-    getKeys(self.fall).forEach((col) => {
-      const colData = self.fall[col];
-      col = Number(col);
-
-      let shift = false;
-
-      colData.list.forEach((i, index) => {
-        i.v += GRAVITY;
-        i.offset += i.v;
-        const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
-
-        if (index === 0) {
-          if (newY >= colData.below) {
-            shift = true;
-            base.map[colData.below][col] = i.value;
-            colData.below -= 1;
-          }
+      if (self.reswap) {
+        self.reswap = false;
+        self.selected = self.swapped = null;
+        self.state = "IDLE";
+      } else {
+        const { matched: m0, tiles: t0 } = self.matchPosition(x0, y0);
+        const { matched: m1, tiles: t1 } = self.matchPosition(x1, y1);
+        if (m0 || m1) {
+          self.selected = self.swapped = null;
+          self.explodedTiles = combine([t0, t1]);
+          self.explosions = [];
+          self.explodedTiles.forEach(({ x, y }) => {
+            self.explosions.push({ x, y, value: base.map[y][x] });
+            base.map[y][x] = -1;
+          });
+          self.state = "EXPLODE";
         } else {
-          if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-            i.v = VELOCITY_BASE;
-            i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
-          }
+          base.map[y0][x0] = -1;
+          base.map[y1][x1] = -1;
+          const tmpX = self.selected.x;
+          const tmpY = self.selected.y;
+          self.selected.x = self.swapped.x;
+          self.selected.y = self.swapped.y;
+          self.swapped.x = tmpX;
+          self.swapped.y = tmpY;
+          self.reswap = true;
+          self.tSwap = 0;
         }
+      }
+    },
+  },
+  EXPLODE: {
+    render: (self) => {
+      self.explosions.forEach(({ x, y, value }) => {
+        const texture = mapTileInfo[value].explosions[self.tExplode];
+        base.context.drawImage(
+          texture,
+          x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
+          y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
+        );
+      });
+    },
+    update: (self) => {
+      self.tExplode2 += 1;
+      if (self.tExplode2 % 2 !== 0) return;
+
+      self.tExplode += 1;
+      if (self.tExplode !== 4) return;
+
+      self.tExplode = 0;
+      self.state = "FALL";
+
+      self.fall = {};
+
+      self.explodedTiles.forEach(({ x, y }) => {
+        base.map[y][x] = -1;
+        if (self.fall[x]) {
+          !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+            self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+        } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
       });
 
-      if (shift) colData.list.shift();
-      if (colData.list.length) newFalling = true;
-    });
-
-    if (!newFalling) {
-      const t: any[] = [];
-      for (let i = 0; i < MAP_WIDTH; i += 1) {
-        for (let j = 0; j < MAP_WIDTH; j += 1) {
-          const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
-          if (m0) t.push(...t0);
+      getKeys(self.fall).forEach((key) => {
+        self.fall[key].below = findBelow(self.fall[key].list);
+        const needAdd = self.fall[key].list.length;
+        self.fall[key].list = [];
+        key = Number(key);
+        for (let i = self.fall[key].below; i >= 0; i -= 1) {
+          if (base.map[i][key] !== -1) {
+            self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+            base.map[i][key] = -1;
+          }
         }
-      }
-
-      if (t.length) {
-        self.fall = {};
-        t.forEach(({ x, y }) => {
-          base.map[y][x] = -1;
-          if (self.fall[x]) {
-            !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-              self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-          } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+        for (let i = 0; i < needAdd; i += 1) {
+          self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+        }
+      });
+    },
+  },
+  FALL: {
+    render: (self) => {
+      getKeys(self.fall).forEach((col) => {
+        self.fall[col].list.forEach(({ x, y, value, offset }) => {
+          base.context.drawImage(
+            mapTileInfo[value].texture,
+            x * CELL_SIZE + TILE_OFFSET,
+            y * CELL_SIZE + TILE_OFFSET + offset
+          );
         });
-        const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
-          list.reduce((a, b) => (a < b.y ? b.y : a), -1);
-        getKeys(self.fall).forEach((key) => {
-          self.fall[key].below = findBelow(self.fall[key].list);
-          const needAdd = self.fall[key].list.length;
-          self.fall[key].list = [];
-          key = Number(key);
-          for (let i = self.fall[key].below; i >= 0; i -= 1) {
-            if (base.map[i][key] !== -1) {
-              self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-              base.map[i][key] = -1;
+      });
+    },
+    update: (self) => {
+      let newFalling = false;
+      getKeys(self.fall).forEach((col) => {
+        const colData = self.fall[col];
+        col = Number(col);
+
+        let shift = false;
+
+        colData.list.forEach((i, index) => {
+          i.v += GRAVITY;
+          i.offset += i.v;
+          const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
+
+          if (index === 0) {
+            if (newY >= colData.below) {
+              shift = true;
+              base.map[colData.below][col] = i.value;
+              colData.below -= 1;
+            }
+          } else {
+            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
+              i.v = VELOCITY_BASE;
+              i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
             }
           }
-          for (let i = 0; i < needAdd; i += 1) {
-            self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
-          }
         });
-        // falling = true;
+
+        if (shift) colData.list.shift();
+        if (colData.list.length) newFalling = true;
+      });
+
+      if (!newFalling) {
+        const t: TileInfo[] = [];
+        for (let i = 0; i < MAP_WIDTH; i += 1) {
+          for (let j = 0; j < MAP_WIDTH; j += 1) {
+            const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
+            if (m0) t.push(...t0);
+          }
+        }
+
+        if (t.length) {
+          self.fall = {};
+          t.forEach(({ x, y }) => {
+            base.map[y][x] = -1;
+            if (self.fall[x]) {
+              !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+            } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+          });
+          const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
+            list.reduce((a, b) => (a < b.y ? b.y : a), -1);
+          getKeys(self.fall).forEach((key) => {
+            self.fall[key].below = findBelow(self.fall[key].list);
+            const needAdd = self.fall[key].list.length;
+            self.fall[key].list = [];
+            key = Number(key);
+            for (let i = self.fall[key].below; i >= 0; i -= 1) {
+              if (base.map[i][key] !== -1) {
+                self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+                base.map[i][key] = -1;
+              }
+            }
+            for (let i = 0; i < needAdd; i += 1) {
+              self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+            }
+          });
+          newFalling = true;
+        }
       }
-    }
+      if (!newFalling) self.state = "IDLE";
+    },
   },
 };
 
@@ -294,6 +369,8 @@ export class Game {
     const y = Math.floor(e.offsetY / CELL_SIZE);
     if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
 
+    this.tSwap = 0;
+
     if (!this.selected) {
       this.selected = { x, y, value: base.map[y][x] };
       base.map[y][x] = -1;
@@ -302,6 +379,8 @@ export class Game {
     }
 
     if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
+      const { x, y, value } = this.selected;
+      base.map[y][x] = value;
       this.selected = null;
       this.state = "IDLE";
       return;
@@ -309,7 +388,6 @@ export class Game {
 
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
-    this.tSwap = 0;
   }
 
   render() {
@@ -325,62 +403,10 @@ export class Game {
       }
     }
 
-    switch (this.state) {
-      case "SELECT":
-        const offset = this.tSwap * SWAP_OFFSET;
-
-        const { x: x0, y: y0, value: v0 } = this.selected;
-        const { x: x1, y: y1, value: v1 } = this.swapped || this.selected;
-
-        base.context.drawImage(
-          mapTileInfo[v0].texture,
-          x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
-          y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
-        );
-
-        if (!this.swapped) {
-          base.context.lineWidth = 4;
-          base.context.strokeStyle = "cyan";
-          base.context.strokeRect(
-            this.selected.x * CELL_SIZE + 2,
-            this.selected.y * CELL_SIZE + 2,
-            CELL_SIZE - 4,
-            CELL_SIZE - 4
-          );
-        } else
-          base.context.drawImage(
-            mapTileInfo[v1].texture,
-            x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
-            y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset
-          );
-        break;
-
-      case "EXPLODE":
-        this.explosions.forEach(({ x, y, value }) => {
-          const texture = mapTileInfo[value].explosions[this.tExplode];
-          base.context.drawImage(
-            texture,
-            x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
-            y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
-          );
-        });
-        break;
-
-      case "FALL":
-        getKeys(this.fall).forEach((col) => {
-          this.fall[col].list.forEach(({ x, y, value, offset }) => {
-            base.context.drawImage(
-              mapTileInfo[value].texture,
-              x * CELL_SIZE + TILE_OFFSET,
-              y * CELL_SIZE + TILE_OFFSET + offset
-            );
-          });
-        });
-        break;
-    }
+    mapFunction[this.state].render(this);
   }
 
   update() {
-    mapUpdate[this.state](this);
+    mapFunction[this.state].update(this);
   }
 }
