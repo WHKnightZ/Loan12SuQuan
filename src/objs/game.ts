@@ -200,28 +200,29 @@ const mapFunction: {
 
         if (t.length) {
           self.fall = {};
+          const fall = self.fall;
           t.forEach(({ x, y }) => {
             base.map[y][x] = -1;
-            if (self.fall[x]) {
-              !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-                self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-            } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+            if (fall[x]) {
+              !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
+                fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
+            } else fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
           });
           const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
             list.reduce((a, b) => (a < b.y ? b.y : a), -1);
-          getKeys(self.fall).forEach((key) => {
-            self.fall[key].below = findBelow(self.fall[key].list);
-            const needAdd = self.fall[key].list.length;
-            self.fall[key].list = [];
+          getKeys(fall).forEach((key) => {
+            fall[key].below = findBelow(fall[key].list);
+            const needAdd = fall[key].list.length;
+            fall[key].list = [];
             key = Number(key);
-            for (let i = self.fall[key].below; i >= 0; i -= 1) {
+            for (let i = fall[key].below; i >= 0; i -= 1) {
               if (base.map[i][key] !== -1) {
-                self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+                fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
                 base.map[i][key] = -1;
               }
             }
             for (let i = 0; i < needAdd; i += 1) {
-              self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+              fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
             }
           });
           newFalling = true;
