@@ -348,8 +348,8 @@ export class Game {
 
     const canvas = base.canvas;
 
-    const x = Math.floor((e.offsetX * canvas.width) / (canvas.clientWidth | 0) / CELL_SIZE);
-    const y = Math.floor((e.offsetY * canvas.height) / (canvas.clientHeight | 0) / CELL_SIZE);
+    const x = Math.floor((e.offsetX * canvas.width) / canvas.clientWidth / CELL_SIZE);
+    const y = Math.floor((e.offsetY * canvas.height) / canvas.clientHeight / CELL_SIZE);
     if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
 
     this.tSwap = 0;
