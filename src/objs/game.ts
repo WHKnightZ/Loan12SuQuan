@@ -346,8 +346,10 @@ export class Game {
   onClick(e: MouseEvent) {
     if (this.state !== "IDLE" && this.state !== "SELECT") return;
 
-    const x = Math.floor(e.offsetX / CELL_SIZE);
-    const y = Math.floor(e.offsetY / CELL_SIZE);
+    const canvas = base.canvas;
+
+    const x = Math.floor((e.offsetX * canvas.width) / (canvas.clientWidth | 0) / CELL_SIZE);
+    const y = Math.floor((e.offsetY * canvas.height) / (canvas.clientHeight | 0) / CELL_SIZE);
     if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
 
     this.tSwap = 0;

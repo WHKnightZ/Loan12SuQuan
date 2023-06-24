@@ -15,14 +15,14 @@ const init = () => {
 };
 
 // Timer
-let then = 0;
+// let then = 0;
 
 const update = (now = 0) => {
   requestAnimationFrame(update);
 
-  const elapsed = (now - then) / 1000;
-  if (elapsed < 0) return;
-  then = now;
+  // const elapsed = (now - then) / 1000;
+  // if (elapsed < 0) return;
+  // then = now;
 
   game.update();
   game.render();
