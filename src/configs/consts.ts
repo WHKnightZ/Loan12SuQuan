@@ -2,6 +2,7 @@ import { TileType } from "@/types";
 
 export const APP_NAME = "Loạn 12 Sứ Quân";
 
+export const BOARD_COLORS = ["#3e3226", "#554933"];
 export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
 export const CELL_SIZE = 60;
@@ -16,7 +17,15 @@ export const VELOCITY_BASE = 2;
 export const GRAVITY = 0.4;
 export const SCALE_RATIO = TILE_SIZE / 22;
 
-export const TILES: { [key in TileType]: number } = { SWORD: 0, HEART: 1, GOLD: 2, ENERGY: 3, MANA: 4, EXP: 5, SWORDRED: 6 };
+export const TILES: { [key in TileType]: number } = {
+  SWORD: 0,
+  HEART: 1,
+  GOLD: 2,
+  ENERGY: 3,
+  MANA: 4,
+  EXP: 5,
+  SWORDRED: 6,
+};
 
 export const COUNT_TILES = Object.keys(TILES).length;
 

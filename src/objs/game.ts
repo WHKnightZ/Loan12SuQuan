@@ -1,5 +1,6 @@
 import {
   base,
+  BOARD_COLORS,
   CELL_SIZE,
   GAIN_TURN,
   GRAVITY,
@@ -189,46 +190,25 @@ const mapFunction: {
         if (colData.list.length) newFalling = true;
       });
 
-      if (!newFalling) {
-        const t: TileInfo[] = [];
-        for (let i = 0; i < MAP_WIDTH; i += 1) {
-          for (let j = 0; j < MAP_WIDTH; j += 1) {
-            const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
-            if (m0) t.push(...t0);
-          }
-        }
+      if (newFalling) return;
 
-        if (t.length) {
-          self.fall = {};
-          const fall = self.fall;
-          t.forEach(({ x, y }) => {
-            base.map[y][x] = -1;
-            if (fall[x]) {
-              !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-                fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-            } else fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
-          });
-          const findBelow = (list: { x: number; y: number; offset: number; v: number }[]) =>
-            list.reduce((a, b) => (a < b.y ? b.y : a), -1);
-          getKeys(fall).forEach((key) => {
-            fall[key].below = findBelow(fall[key].list);
-            const needAdd = fall[key].list.length;
-            fall[key].list = [];
-            key = Number(key);
-            for (let i = fall[key].below; i >= 0; i -= 1) {
-              if (base.map[i][key] !== -1) {
-                fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-                base.map[i][key] = -1;
-              }
-            }
-            for (let i = 0; i < needAdd; i += 1) {
-              fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
-            }
-          });
-          newFalling = true;
+      const tt: TileInfo[][] = [];
+      for (let i = 0; i < MAP_WIDTH; i += 1) {
+        for (let j = 0; j < MAP_WIDTH; j += 1) {
+          const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
+          if (m0) tt.push(t0);
         }
       }
-      if (!newFalling) self.state = "IDLE";
+
+      if (tt.length) {
+        self.explodedTiles = combine(tt);
+        self.explosions = [];
+        self.explodedTiles.forEach(({ x, y }) => {
+          self.explosions.push({ x, y, value: base.map[y][x] });
+          base.map[y][x] = -1;
+        });
+        self.state = "EXPLODE";
+      } else self.state = "IDLE";
     },
   },
 };
@@ -394,7 +374,7 @@ export class Game {
   render() {
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
-        base.context.fillStyle = (i + j) % 2 ? "#554933" : "#3e3226";
+        base.context.fillStyle = BOARD_COLORS[(i + j) % 2];
         const x = j * CELL_SIZE;
         const y = i * CELL_SIZE;
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
