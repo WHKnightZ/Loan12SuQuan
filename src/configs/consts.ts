@@ -16,6 +16,7 @@ export const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 export const VELOCITY_BASE = 2;
 export const GRAVITY = 0.4;
 export const SCALE_RATIO = TILE_SIZE / 22;
+export const CORNER_SELECTION_CYCLE = 30;
 
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
@@ -54,3 +55,7 @@ export const base: {
   context: CanvasRenderingContext2D;
   map: number[][];
 } = {} as any;
+
+export const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, index) =>
+  Math.floor(3 * Math.sin((2 * Math.PI * index) / CORNER_SELECTION_CYCLE))
+);

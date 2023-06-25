@@ -1,7 +1,10 @@
+import { cornerSelections } from "@/common/textures";
 import {
   base,
   BOARD_COLORS,
   CELL_SIZE,
+  cornerSelectionOffsets,
+  CORNER_SELECTION_CYCLE,
   GAIN_TURN,
   GRAVITY,
   mapTileInfo,
@@ -30,16 +33,7 @@ const mapFunction: {
       const { x: x0, y: y0, value: v0 } = self.selected;
       const { x: x1, y: y1, value: v1 } = self.swapped || self.selected;
 
-      if (!self.swapped) {
-        base.context.lineWidth = 4;
-        base.context.strokeStyle = "cyan";
-        base.context.strokeRect(
-          self.selected.x * CELL_SIZE + 2,
-          self.selected.y * CELL_SIZE + 2,
-          CELL_SIZE - 4,
-          CELL_SIZE - 4
-        );
-      } else
+      if (self.swapped)
         base.context.drawImage(
           mapTileInfo[v1].texture,
           x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
@@ -51,9 +45,24 @@ const mapFunction: {
         x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
         y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
       );
+
+      if (!self.swapped) {
+        const offset = cornerSelectionOffsets[self.tSelect % CORNER_SELECTION_CYCLE];
+
+        cornerSelections.forEach(({ texture, offset: o, position }) =>
+          base.context.drawImage(
+            texture,
+            self.selected.x * CELL_SIZE + position.x + o.x * offset,
+            self.selected.y * CELL_SIZE + position.y + o.y * offset
+          )
+        );
+      }
     },
     update: (self) => {
-      if (!self.swapped) return;
+      if (!self.swapped) {
+        self.tSelect += 1;
+        return;
+      }
 
       self.tSwap += 1;
       if (self.tSwap <= SWAP_DURATION) return;
@@ -231,6 +240,7 @@ export class Game {
   explosions: Point[];
   explodedTiles: TileInfo[];
 
+  tSelect: number;
   tSwap: number;
   tExplode: number;
   tExplode2: number;
@@ -245,6 +255,7 @@ export class Game {
     this.reswap = false;
     this.fall = {};
     this.explosions = [];
+    this.tSelect = 0;
     this.tSwap = 0;
     this.tExplode = 0;
     this.tExplode2 = 0;
@@ -261,28 +272,28 @@ export class Game {
     while (newX >= 0) {
       const value = base.map[y][newX];
       if (!check(value, posValue, compatible)) break;
-      h.push({ x: newX, y, point: mapTileInfo[value].point });
+      h.push({ x: newX, y, point: mapTileInfo[value].point, value });
       newX -= 1;
     }
     newX = x + 1;
     while (newX < MAP_WIDTH) {
       const value = base.map[y][newX];
       if (!check(value, posValue, compatible)) break;
-      h.push({ x: newX, y, point: mapTileInfo[value].point });
+      h.push({ x: newX, y, point: mapTileInfo[value].point, value });
       newX += 1;
     }
     newY = y - 1;
     while (newY >= 0) {
       const value = base.map[newY][x];
       if (!check(value, posValue, compatible)) break;
-      v.push({ x, y: newY, point: mapTileInfo[value].point });
+      v.push({ x, y: newY, point: mapTileInfo[value].point, value });
       newY -= 1;
     }
     newY = y + 1;
     while (newY < MAP_WIDTH) {
       const value = base.map[newY][x];
       if (!check(value, posValue, compatible)) break;
-      v.push({ x, y: newY, point: mapTileInfo[value].point });
+      v.push({ x, y: newY, point: mapTileInfo[value].point, value });
       newY += 1;
     }
 
@@ -299,7 +310,8 @@ export class Game {
     }
 
     const matched = hasH || hasV;
-    const tiles = matched ? [...h, ...v, { x, y, point: mapTileInfo[base.map[y][x]].point }] : [];
+    const value = base.map[y][x];
+    const tiles = matched ? [...h, ...v, { x, y, point: mapTileInfo[value].point, value }] : [];
 
     return {
       matched,
