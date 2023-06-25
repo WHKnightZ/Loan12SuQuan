@@ -1,14 +1,4 @@
-import {
-  APP_NAME,
-  base,
-  COUNT_TILES,
-  EXPLOSION_KEYS,
-  mapTileInfo,
-  MAP_WIDTH,
-  SCALE_RATIO,
-  TILES,
-  TILE_SIZE,
-} from "@/configs/consts";
+import { APP_NAME, base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
 import { TileInfo } from "@/types";
 
 export const getAppName = () => APP_NAME;
@@ -89,94 +79,44 @@ export const generateMap = () => {
 export const check = (value: number, posValue: number, compatible: number[]) =>
   value === posValue || compatible.includes(value);
 
-export const initImages = async () => {
-  base.context.imageSmoothingEnabled = false;
-
-  const loadTile = (key: number, src: string) => {
-    const image = new Image();
-    image.src = getImageSrc(`tiles/${src}`);
-    return new Promise(
-      (res) =>
-        (image.onload = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = TILE_SIZE;
-          canvas.height = TILE_SIZE;
-          const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-          context.imageSmoothingEnabled = false;
-
-          context.drawImage(image, 0, 0, TILE_SIZE, TILE_SIZE);
-
-          const image2 = new Image();
-          image2.src = canvas.toDataURL("image/png");
-          image2.onload = () => {
-            mapTileInfo[key].texture = image2;
-            res(null);
-          };
-        })
-    );
-  };
-
-  await Promise.all(getKeys(TILES).map((tile) => loadTile(TILES[tile], tile.toLowerCase())));
-
-  const loadExplosion = (key: number, src: string) => {
-    const image = new Image();
-    image.src = getImageSrc(`explosions/${src}`);
-    return new Promise(
-      (res) =>
-        (image.onload = () => {
-          mapTileInfo[key].explosions = [];
-          for (let i = 0; i < 4; i += 1) {
-            const width = Math.floor((image.width / 4) * SCALE_RATIO);
-            const height = Math.floor(image.height * SCALE_RATIO);
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-            context.imageSmoothingEnabled = false;
-
-            context.drawImage(
-              image,
-              (image.width / 4) * i,
-              0,
-              Math.floor(image.width / 4),
-              image.height,
-              0,
-              0,
-              width,
-              height
-            );
-
-            const image2 = new Image();
-            image2.src = canvas.toDataURL("image/png");
-            image2.onload = () => {
-              mapTileInfo[key].explosions[i] = image2;
-              res(null);
-            };
-          }
-        })
-    );
-  };
-
-  await Promise.all(EXPLOSION_KEYS.map((tile) => loadExplosion(TILES[tile], tile.toLowerCase())));
-
-  mapTileInfo[TILES.SWORDRED].explosions = mapTileInfo[TILES.SWORD].explosions;
-};
-
 export const findBelow = (list: { x: number; y: number }[]) => list.reduce((a, b) => (a < b.y ? b.y : a), -1);
 
 export const getKey = (x: number, y: number) => y * MAP_WIDTH + x;
+
+const aroundTiles = [
+  { x: 0, y: -1, condition: (_: number, y: number) => y >= 1 },
+  { x: 1, y: -1, condition: (x: number, y: number) => x < MAP_WIDTH_1 && y >= 1 },
+  { x: 1, y: 0, condition: (x: number, _: number) => x < MAP_WIDTH_1 },
+  { x: 1, y: 1, condition: (x: number, y: number) => x < MAP_WIDTH_1 && y < MAP_WIDTH_1 },
+  { x: 0, y: 1, condition: (_: number, y: number) => y < MAP_WIDTH_1 },
+  { x: -1, y: 1, condition: (x: number, y: number) => x >= 1 && y < MAP_WIDTH_1 },
+  { x: -1, y: 0, condition: (x: number, _: number) => x >= 1 },
+  { x: -1, y: -1, condition: (x: number, y: number) => x >= 1 && y >= 1 },
+];
 
 export const combine = (arr: TileInfo[][]) => {
   const lst: TileInfo[] = [];
   const has: { [key: number]: boolean } = {};
   arr.forEach((tiles) => {
     tiles.forEach((tile) => {
-      const { x, y } = tile;
+      const { x, y, value } = tile;
       const key = getKey(x, y);
       if (has[key]) return;
 
       has[key] = true;
       lst.push(tile);
+
+      // if (value === TILES.SWORDRED)
+      //   aroundTiles.forEach(({ x: _x, y: _y, condition }) => {
+      //     if (condition(x, y)) {
+      //       const newX = x + _x;
+      //       const newY = y + _y;
+      //       const newKey = getKey(newX, newY);
+      //       if (has[newKey]) return;
+      //       has[newKey] = true;
+      //       lst.push({ x: newX, y: newY, point: 0, value: base.map[newY][newX] });
+      //     }
+      //   });
     });
   });
   return lst;

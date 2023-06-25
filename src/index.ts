@@ -1,6 +1,6 @@
+import { loadTextures } from "./common/textures";
 import { base, SCREEN_SIZE } from "./configs/consts";
 import { Game } from "./objs/game";
-import { initImages } from "./utils/common";
 
 const game = new Game();
 
@@ -9,6 +9,7 @@ const init = () => {
   const context = canvas.getContext("2d")!;
 
   canvas.width = canvas.height = SCREEN_SIZE;
+  context.imageSmoothingEnabled = false;
 
   base.canvas = canvas;
   base.context = context;
@@ -31,7 +32,7 @@ const update = (now = 0) => {
 const main = async () => {
   init();
 
-  await initImages();
+  await loadTextures();
 
   game.init();
 
