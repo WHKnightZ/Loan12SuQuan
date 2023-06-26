@@ -99,25 +99,34 @@ export const combine = (arr: TileInfo[][]) => {
   const has: { [key: number]: boolean } = {};
   arr.forEach((tiles) => {
     tiles.forEach((tile) => {
-      const { x, y, value } = tile;
+      const { x, y } = tile;
       const key = getKey(x, y);
       if (has[key]) return;
 
       has[key] = true;
       lst.push(tile);
-
-      // if (value === TILES.SWORDRED)
-      //   aroundTiles.forEach(({ x: _x, y: _y, condition }) => {
-      //     if (condition(x, y)) {
-      //       const newX = x + _x;
-      //       const newY = y + _y;
-      //       const newKey = getKey(newX, newY);
-      //       if (has[newKey]) return;
-      //       has[newKey] = true;
-      //       lst.push({ x: newX, y: newY, point: 0, value: base.map[newY][newX] });
-      //     }
-      //   });
     });
   });
+
+  // Xử lý kiếm đỏ: Nổ 1 vùng xung quanh
+  const explodeList: TileInfo[] = [];
+
+  lst.forEach(({ x, y, value }) => {
+    if (value !== TILES.SWORDRED) return;
+
+    aroundTiles.forEach(({ x: _x, y: _y, condition }) => {
+      if (!condition(x, y)) return;
+
+      const newX = x + _x;
+      const newY = y + _y;
+      const key = getKey(newX, newY);
+      if (has[key]) return;
+      has[key] = true;
+      explodeList.push({ x: newX, y: newY, point: 0, value: base.map[newY][newX] });
+    });
+  });
+
+  lst.push(...explodeList);
+
   return lst;
 };
