@@ -22,7 +22,7 @@ const update = (now = 0) => {
   requestAnimationFrame(update);
 
   // const elapsed = (now - then) / 1000;
-  // if (elapsed < 0) return;
+  // if (elapsed < 0.3) return;
   // then = now;
 
   game.update();
