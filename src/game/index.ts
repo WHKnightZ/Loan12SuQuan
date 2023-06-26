@@ -14,16 +14,15 @@ import {
   SWAP_DURATION,
   SWAP_OFFSET,
   TILE_OFFSET,
+  TILE_SIZE,
   VELOCITY_BASE,
 } from "@/configs/consts";
-import { AllMatchedPositions, GameState, Point, TileInfo } from "@/types";
+import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction } from "@/types";
 import { check, combine, findBelow, generateMap, getKeys, randomTile } from "@/utils/common";
+import { clamp } from "@/utils/math";
 
 const mapFunction: {
-  [key in GameState]: {
-    render: (self: Game) => void;
-    update: (self: Game) => void;
-  };
+  [key in GameState]: GameStateFunction;
 } = {
   IDLE: { render: () => {}, update: () => {} },
   SELECT: {
@@ -221,17 +220,32 @@ const mapFunction: {
     },
   },
   FADE: {
-    render: () => {},
-    update: () => {},
+    render: (self) => {
+      for (let i = 0; i < MAP_WIDTH; i += 1) {
+        for (let j = 0; j < MAP_WIDTH; j += 1) {
+          const x = j * CELL_SIZE;
+          const y = i * CELL_SIZE;
+
+          const scale = clamp((i + j + 1) * 3 + 7 - self.tFade, 0, 10) / 10;
+          const size = Math.floor(TILE_SIZE * scale);
+          const offset = Math.floor((CELL_SIZE - size) / 2);
+
+          if (size === 0) continue;
+
+          base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + offset, y + offset, size, size);
+        }
+      }
+    },
+    update: (self) => {
+      self.tFade += 1;
+    },
   },
 };
 
-export class Game {
+export class Game implements IGame {
   state: GameState;
-
   selected: Point | null;
   swapped: Point | null;
-
   reswap: boolean;
 
   fall: {
@@ -248,6 +262,7 @@ export class Game {
   tSwap: number;
   tExplode: number;
   tExplode2: number;
+  tFade: number;
 
   constructor() {}
 
@@ -263,6 +278,7 @@ export class Game {
     this.tSwap = 0;
     this.tExplode = 0;
     this.tExplode2 = 0;
+    this.tFade = 0;
   }
 
   matchPosition(x: number, y: number) {
@@ -404,7 +420,7 @@ export class Game {
         const x = j * CELL_SIZE;
         const y = i * CELL_SIZE;
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-        if (base.map[i][j] === -1) continue;
+        if (base.map[i][j] === -1 || this.state === "FADE") continue;
 
         base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }
