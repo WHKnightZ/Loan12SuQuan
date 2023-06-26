@@ -6,4 +6,4 @@ export type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: numb
 
 export type TileInfo = { x: number; y: number; point: number; value: number };
 
-export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL";
+export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";

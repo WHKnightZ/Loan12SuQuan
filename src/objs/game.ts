@@ -220,6 +220,10 @@ const mapFunction: {
       } else self.state = "IDLE";
     },
   },
+  FADE: {
+    render: () => {},
+    update: () => {},
+  },
 };
 
 export class Game {
@@ -383,6 +387,14 @@ export class Game {
 
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
+  }
+
+  onKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case "Escape":
+        this.state = "FADE";
+        break;
+    }
   }
 
   render() {

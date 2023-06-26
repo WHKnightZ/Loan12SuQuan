@@ -40,6 +40,10 @@ const main = async () => {
     game.onClick(e);
   });
 
+  document.addEventListener("keydown", (e) => {
+    game.onKeyDown(e);
+  });
+
   update();
 };
 
