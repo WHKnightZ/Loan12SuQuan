@@ -1,4 +1,4 @@
-import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_SIZE } from "@/configs/consts";
+import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_LENGTH } from "@/configs/consts";
 import { flipHorizontal, flipVertical } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
@@ -9,7 +9,6 @@ const loadTilesAndExplosions = async () => {
     return new Promise(
       (res) =>
         (image.onload = async () => {
-          const TILE_LENGTH = 7;
           const getCropImage = (pos: number) => {
             const width = Math.floor((image.width / TILE_LENGTH) * SCALE_RATIO);
             const height = Math.floor(image.height * SCALE_RATIO);
