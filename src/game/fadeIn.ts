@@ -32,8 +32,11 @@ const fadeInStateFunction: GameStateFunction = {
     const fall = self.fall;
 
     for (let i = 0; i < MAP_WIDTH; i += 1) {
-      if (self.tFade % (6 + i) === 0 && fall[i].pushCount! < MAP_WIDTH) {
-        fall[i].list.push({ x: i, y: -1, v: VELOCITY_BASE + 5, offset: 0, value: randomTile() });
+      let newTFade = self.tFade - i * 5;
+      if (newTFade < 1) newTFade = 1;
+
+      if (newTFade % (6 + i) === 0 && fall[i].pushCount! < MAP_WIDTH) {
+        fall[i].list.push({ x: i, y: -1, v: VELOCITY_BASE + 6, offset: 0, value: randomTile() });
         fall[i].pushCount += 1;
       }
     }

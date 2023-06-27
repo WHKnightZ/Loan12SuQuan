@@ -6,6 +6,8 @@ export type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: numb
 
 export type TileInfo = { x: number; y: number; point: number; value: number };
 
+export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
+
 export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE_IN" | "FADE_OUT";
 
 export interface IGame {
@@ -31,6 +33,9 @@ export interface IGame {
   tExplode2: number;
   tFade: number;
 
+  matchedPositions: AllMatchedPositions;
+  hintIndex: number;
+
   init(): void;
   matchPosition(
     x: number,
@@ -43,7 +48,7 @@ export interface IGame {
   };
   swap(x0: number, y0: number, x1: number, y1: number): void;
   addMatchedPosition(allMatchedPositions: AllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
-  findAllMatchedPositions(): AllMatchedPositions;
+  findAllMatchedPositions(): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
   render(): void;

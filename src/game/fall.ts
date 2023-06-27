@@ -65,7 +65,10 @@ const fallStateFunction: GameStateFunction = {
         base.map[y][x] = -1;
       });
       self.state = "EXPLODE";
-    } else self.state = "IDLE";
+    } else {
+      self.findAllMatchedPositions();
+      self.state = "IDLE";
+    }
   },
 };
 

@@ -51,10 +51,14 @@ export class Game implements IGame {
   tExplode2: number;
   tFade: number;
 
+  matchedPositions: AllMatchedPositions;
+  hintIndex: number;
+
   constructor() {}
 
   init() {
     base.map = generateMap();
+    this.findAllMatchedPositions();
     this.state = "IDLE";
     this.selected = null;
     this.swapped = null;
@@ -66,6 +70,8 @@ export class Game implements IGame {
     this.tExplode = 0;
     this.tExplode2 = 0;
     this.tFade = 0;
+    this.matchedPositions = [];
+    this.hintIndex = 0;
   }
 
   matchPosition(x: number, y: number) {
@@ -159,7 +165,7 @@ export class Game implements IGame {
       this.addMatchedPosition(allMatchedPositions, j, MAP_WIDTH_1, j + 1, MAP_WIDTH_1);
 
     allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
-    return allMatchedPositions;
+    this.matchedPositions = allMatchedPositions;
   }
 
   onClick(e: MouseEvent) {
@@ -195,7 +201,7 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        this.state = "FADE_OUT";
+        // this.state = "FADE_OUT";
         break;
     }
   }

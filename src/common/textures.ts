@@ -1,5 +1,6 @@
 import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_LENGTH } from "@/configs/consts";
-import { flipHorizontal, flipVertical } from "@/utils/canvas";
+import { Direction } from "@/types";
+import { flipHorizontal, flipVertical, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
 const loadTilesAndExplosions = async () => {
@@ -74,11 +75,26 @@ const loadCornerSelections = () => {
   });
 };
 
+export let hintArrows: {
+  [key in Direction]: HTMLImageElement;
+} = {} as any;
+
+const loadCommonTextures = async () => {
+  const hintArrowUp = new Image();
+  hintArrowUp.src = getImageSrc("common/hint-arrow");
+  await new Promise((res) => (hintArrowUp.onload = () => res(null)));
+  hintArrows.UP = hintArrowUp;
+  hintArrows.RIGHT = await rotateCW90(hintArrowUp);
+  hintArrows.DOWN = await flipVertical(hintArrowUp);
+  hintArrows.LEFT = await flipHorizontal(hintArrows.RIGHT);
+};
+
 // All
 export const loadTextures = () => {
   return Promise.all([
     loadTilesAndExplosions(),
     loadCornerSelections(),
+    loadCommonTextures(),
     //
   ]);
 };
