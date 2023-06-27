@@ -1,245 +1,32 @@
-import { cornerSelections } from "@/common/textures";
 import {
   base,
   BOARD_COLORS,
   CELL_SIZE,
-  cornerSelectionOffsets,
-  CORNER_SELECTION_CYCLE,
   GAIN_TURN,
-  GRAVITY,
   mapTileInfo,
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_POINT,
-  SWAP_DURATION,
-  SWAP_OFFSET,
   TILE_OFFSET,
-  TILE_SIZE,
-  VELOCITY_BASE,
 } from "@/configs/consts";
 import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction } from "@/types";
-import { check, combine, findBelow, generateMap, getKeys, randomTile } from "@/utils/common";
-import { clamp } from "@/utils/math";
+import { check, generateMap } from "@/utils/common";
+import explodeStateFunction from "./explode";
+import fadeInStateFunction from "./fadeIn";
+import fadeOutStateFunction from "./fadeOut";
+import fallStateFunction from "./fall";
+import idleStateFunction from "./idle";
+import selectStateFunction from "./select";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;
 } = {
-  IDLE: { render: () => {}, update: () => {} },
-  SELECT: {
-    render: (self) => {
-      const offset = self.tSwap * SWAP_OFFSET;
-
-      const { x: x0, y: y0, value: v0 } = self.selected;
-      const { x: x1, y: y1, value: v1 } = self.swapped || self.selected;
-
-      if (self.swapped)
-        base.context.drawImage(
-          mapTileInfo[v1].texture,
-          x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
-          y1 * CELL_SIZE + TILE_OFFSET + (y0 - y1) * offset
-        );
-
-      base.context.drawImage(
-        mapTileInfo[v0].texture,
-        x0 * CELL_SIZE + TILE_OFFSET + (x1 - x0) * offset,
-        y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
-      );
-
-      if (!self.swapped) {
-        const offset = cornerSelectionOffsets[self.tSelect % CORNER_SELECTION_CYCLE];
-
-        cornerSelections.forEach(({ texture, offset: o, position }) =>
-          base.context.drawImage(
-            texture,
-            self.selected.x * CELL_SIZE + position.x + o.x * offset,
-            self.selected.y * CELL_SIZE + position.y + o.y * offset
-          )
-        );
-      }
-    },
-    update: (self) => {
-      if (!self.swapped) {
-        self.tSelect += 1;
-        return;
-      }
-
-      self.tSwap += 1;
-      if (self.tSwap <= SWAP_DURATION) return;
-
-      self.tSwap = SWAP_DURATION;
-
-      const { x: x0, y: y0, value: v0 } = self.selected;
-      const { x: x1, y: y1, value: v1 } = self.swapped;
-
-      base.map[y0][x0] = v0;
-      base.map[y1][x1] = v1;
-
-      self.swap(x0, y0, x1, y1);
-
-      if (self.reswap) {
-        self.reswap = false;
-        self.selected = self.swapped = null;
-        self.state = "IDLE";
-      } else {
-        const { matched: m0, tiles: t0 } = self.matchPosition(x0, y0);
-        const { matched: m1, tiles: t1 } = self.matchPosition(x1, y1);
-        if (m0 || m1) {
-          self.selected = self.swapped = null;
-          self.explodedTiles = combine([t0, t1]);
-          self.explosions = [];
-          self.explodedTiles.forEach(({ x, y }) => {
-            self.explosions.push({ x, y, value: base.map[y][x] });
-            base.map[y][x] = -1;
-          });
-          self.state = "EXPLODE";
-        } else {
-          base.map[y0][x0] = -1;
-          base.map[y1][x1] = -1;
-          const tmpX = self.selected.x;
-          const tmpY = self.selected.y;
-          self.selected.x = self.swapped.x;
-          self.selected.y = self.swapped.y;
-          self.swapped.x = tmpX;
-          self.swapped.y = tmpY;
-          self.reswap = true;
-          self.tSwap = 0;
-        }
-      }
-    },
-  },
-  EXPLODE: {
-    render: (self) => {
-      self.explosions.forEach(({ x, y, value }) => {
-        const texture = mapTileInfo[value].explosions[self.tExplode];
-        base.context.drawImage(
-          texture,
-          x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
-          y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
-        );
-      });
-    },
-    update: (self) => {
-      self.tExplode2 += 1;
-      if (self.tExplode2 % 2 !== 0) return;
-
-      self.tExplode += 1;
-      if (self.tExplode !== 4) return;
-
-      self.tExplode = 0;
-      self.state = "FALL";
-
-      self.fall = {};
-
-      self.explodedTiles.forEach(({ x, y }) => {
-        base.map[y][x] = -1;
-        if (self.fall[x]) {
-          !self.fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-            self.fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-        } else self.fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
-      });
-
-      getKeys(self.fall).forEach((key) => {
-        self.fall[key].below = findBelow(self.fall[key].list);
-        const needAdd = self.fall[key].list.length;
-        self.fall[key].list = [];
-        key = Number(key);
-        for (let i = self.fall[key].below; i >= 0; i -= 1) {
-          if (base.map[i][key] !== -1) {
-            self.fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
-            base.map[i][key] = -1;
-          }
-        }
-        for (let i = 0; i < needAdd; i += 1) {
-          self.fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
-        }
-      });
-    },
-  },
-  FALL: {
-    render: (self) => {
-      getKeys(self.fall).forEach((col) => {
-        self.fall[col].list.forEach(({ x, y, value, offset }) => {
-          base.context.drawImage(
-            mapTileInfo[value].texture,
-            x * CELL_SIZE + TILE_OFFSET,
-            y * CELL_SIZE + TILE_OFFSET + offset
-          );
-        });
-      });
-    },
-    update: (self) => {
-      let newFalling = false;
-      getKeys(self.fall).forEach((col) => {
-        const colData = self.fall[col];
-        col = Number(col);
-
-        let shift = false;
-
-        colData.list.forEach((i, index) => {
-          i.v += GRAVITY;
-          i.offset += i.v;
-          const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
-
-          if (index === 0) {
-            if (newY >= colData.below) {
-              shift = true;
-              base.map[colData.below][col] = i.value;
-              colData.below -= 1;
-            }
-          } else {
-            if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-              i.v = VELOCITY_BASE;
-              i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
-            }
-          }
-        });
-
-        if (shift) colData.list.shift();
-        if (colData.list.length) newFalling = true;
-      });
-
-      if (newFalling) return;
-
-      const tt: TileInfo[][] = [];
-      for (let i = 0; i < MAP_WIDTH; i += 1) {
-        for (let j = 0; j < MAP_WIDTH; j += 1) {
-          const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
-          if (m0) tt.push(t0);
-        }
-      }
-
-      if (tt.length) {
-        self.explodedTiles = combine(tt);
-        self.explosions = [];
-        self.explodedTiles.forEach(({ x, y }) => {
-          self.explosions.push({ x, y, value: base.map[y][x] });
-          base.map[y][x] = -1;
-        });
-        self.state = "EXPLODE";
-      } else self.state = "IDLE";
-    },
-  },
-  FADE: {
-    render: (self) => {
-      for (let i = 0; i < MAP_WIDTH; i += 1) {
-        for (let j = 0; j < MAP_WIDTH; j += 1) {
-          const x = j * CELL_SIZE;
-          const y = i * CELL_SIZE;
-
-          const scale = clamp((i + j + 1) * 3 + 7 - self.tFade, 0, 10) / 10;
-          const size = Math.floor(TILE_SIZE * scale);
-          const offset = Math.floor((CELL_SIZE - size) / 2);
-
-          if (size === 0) continue;
-
-          base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + offset, y + offset, size, size);
-        }
-      }
-    },
-    update: (self) => {
-      self.tFade += 1;
-    },
-  },
+  IDLE: idleStateFunction,
+  SELECT: selectStateFunction,
+  EXPLODE: explodeStateFunction,
+  FALL: fallStateFunction,
+  FADE_IN: fadeInStateFunction,
+  FADE_OUT: fadeOutStateFunction,
 };
 
 export class Game implements IGame {
@@ -408,7 +195,7 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        this.state = "FADE";
+        this.state = "FADE_OUT";
         break;
     }
   }
@@ -420,7 +207,7 @@ export class Game implements IGame {
         const x = j * CELL_SIZE;
         const y = i * CELL_SIZE;
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-        if (base.map[i][j] === -1 || this.state === "FADE") continue;
+        if (base.map[i][j] === -1 || this.state === "FADE_IN" || this.state === "FADE_OUT") continue;
 
         base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }

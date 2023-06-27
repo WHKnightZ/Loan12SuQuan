@@ -46,7 +46,7 @@ export const mapTileInfo: {
     explosions: HTMLImageElement[];
   };
 } = {
-  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 100, point: 10, texture: null as any, explosions: [] },
+  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, point: 10, texture: null as any, explosions: [] },
   [TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null as any, explosions: [] },
   [TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null as any, explosions: [] },
   [TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null as any, explosions: [] },

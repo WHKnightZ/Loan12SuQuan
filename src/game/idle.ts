@@ -1,8 +1,8 @@
 import { GameStateFunction } from "@/types";
 
-const stateFunction: GameStateFunction = {
+const idleStateFunction: GameStateFunction = {
   render: () => {},
   update: () => {},
 };
 
-export default stateFunction;
+export default idleStateFunction;

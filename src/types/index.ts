@@ -6,7 +6,7 @@ export type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: numb
 
 export type TileInfo = { x: number; y: number; point: number; value: number };
 
-export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";
+export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE_IN" | "FADE_OUT";
 
 export interface IGame {
   state: GameState;
@@ -18,6 +18,7 @@ export interface IGame {
     [key: number]: {
       list: { x: number; y: number; offset: number; v: number; value: number }[];
       below: number;
+      pushCount?: number;
     };
   };
 
