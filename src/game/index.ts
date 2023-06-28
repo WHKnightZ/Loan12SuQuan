@@ -72,7 +72,6 @@ export class Game implements IGame {
     this.tExplode = 0;
     this.tExplode2 = 0;
     this.tFade = 0;
-    this.matchedPositions = [];
     this.hintIndex = 0;
   }
 
@@ -149,7 +148,9 @@ export class Game implements IGame {
     this.swap(x0, y0, x1, y1);
     const { matched: m0, point: p0 } = this.matchPosition(x0, y0);
     const { matched: m1, point: p1 } = this.matchPosition(x1, y1);
-    if (m0 || m1) allMatchedPositions.push({ x0, y0, x1, y1, point: p0 + p1 });
+    const swapDirection = Math.random() < 0.5;
+    const pos = swapDirection ? { x0: x1, y0: y1, x1: x0, y1: y0 } : { x0, y0, x1, y1 };
+    if (m0 || m1) allMatchedPositions.push({ ...pos, point: p0 + p1 });
     this.swap(x0, y0, x1, y1);
   }
 
@@ -203,7 +204,7 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        // this.state = "FADE_OUT";
+        this.state = "FADE_OUT";
         break;
     }
   }

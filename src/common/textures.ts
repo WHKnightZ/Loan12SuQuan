@@ -79,8 +79,6 @@ export let hintArrows: {
   [key in Direction]: HintArrow;
 } = {} as any;
 
-export const hintArrowOffsets = Array.from({ length: 20 }).map((_, i) => Math.sin((i / 20) * 2 * Math.PI) * 3);
-
 const loadCommonTextures = async () => {
   let image = new Image();
   image.src = getImageSrc("common/hint-arrow");
@@ -88,30 +86,30 @@ const loadCommonTextures = async () => {
   await new Promise(
     (res) =>
       (image.onload = async () => {
-        image = await resize(image, SCALE_RATIO);
+        image = await resize(image, 2);
         res(null);
       })
   );
   hintArrows.UP = {
-    offset: { x: (CELL_SIZE - image.width) / 2, y: 0 },
+    offset: { x: (CELL_SIZE - image.width) / 2, y: -6 },
     texture: image,
     drt: { x: 0, y: -1 },
   };
   image = await rotateCW90(image);
   hintArrows.RIGHT = {
-    offset: { x: CELL_SIZE - image.width, y: (CELL_SIZE - image.height) / 2 },
+    offset: { x: CELL_SIZE - image.width + 6, y: (CELL_SIZE - image.height) / 2 },
     texture: image,
     drt: { x: 1, y: 0 },
   };
   image = await rotateCW90(image);
   hintArrows.DOWN = {
-    offset: { x: (CELL_SIZE - image.width) / 2, y: CELL_SIZE - image.height },
+    offset: { x: (CELL_SIZE - image.width) / 2, y: CELL_SIZE - image.height + 6 },
     texture: image,
     drt: { x: 0, y: 1 },
   };
   image = await rotateCW90(image);
   hintArrows.LEFT = {
-    offset: { x: 0, y: (CELL_SIZE - image.height) / 2 },
+    offset: { x: -6, y: (CELL_SIZE - image.height) / 2 },
     texture: image,
     drt: { x: -1, y: 0 },
   };

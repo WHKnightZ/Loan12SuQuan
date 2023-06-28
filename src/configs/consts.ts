@@ -24,6 +24,7 @@ export const VELOCITY_BASE = 2;
 export const GRAVITY = 0.4;
 export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
 export const CORNER_SELECTION_CYCLE = 30;
+export const HINT_ARROW_CYCLE = 30;
 
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
@@ -61,6 +62,10 @@ export const base: {
   map: number[][];
 } = {} as any;
 
-export const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, index) =>
-  Math.floor(3 * Math.sin((2 * Math.PI * index) / CORNER_SELECTION_CYCLE))
+export const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, i) =>
+  Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
+);
+
+export const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
+  Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
 );
