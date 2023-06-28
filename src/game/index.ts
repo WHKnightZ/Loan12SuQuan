@@ -45,6 +45,7 @@ export class Game implements IGame {
   explosions: Point[];
   explodedTiles: TileInfo[];
 
+  tIdle: number;
   tSelect: number;
   tSwap: number;
   tExplode: number;
@@ -65,6 +66,7 @@ export class Game implements IGame {
     this.reswap = false;
     this.fall = {};
     this.explosions = [];
+    this.tIdle = 0;
     this.tSelect = 0;
     this.tSwap = 0;
     this.tExplode = 0;

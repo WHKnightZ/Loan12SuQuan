@@ -36,7 +36,7 @@ const main = async () => {
 
   game.init();
 
-  document.addEventListener("click", (e) => {
+  base.canvas.addEventListener("click", (e) => {
     game.onClick(e);
   });
 

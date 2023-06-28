@@ -1,6 +1,6 @@
 import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_LENGTH } from "@/configs/consts";
-import { Direction } from "@/types";
-import { flipHorizontal, flipVertical, rotateCW90 } from "@/utils/canvas";
+import { Direction, HintArrow } from "@/types";
+import { flipHorizontal, flipVertical, resize, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
 const loadTilesAndExplosions = async () => {
@@ -76,17 +76,45 @@ const loadCornerSelections = () => {
 };
 
 export let hintArrows: {
-  [key in Direction]: HTMLImageElement;
+  [key in Direction]: HintArrow;
 } = {} as any;
 
+export const hintArrowOffsets = Array.from({ length: 20 }).map((_, i) => Math.sin((i / 20) * 2 * Math.PI) * 3);
+
 const loadCommonTextures = async () => {
-  const hintArrowUp = new Image();
-  hintArrowUp.src = getImageSrc("common/hint-arrow");
-  await new Promise((res) => (hintArrowUp.onload = () => res(null)));
-  hintArrows.UP = hintArrowUp;
-  hintArrows.RIGHT = await rotateCW90(hintArrowUp);
-  hintArrows.DOWN = await flipVertical(hintArrowUp);
-  hintArrows.LEFT = await flipHorizontal(hintArrows.RIGHT);
+  let image = new Image();
+  image.src = getImageSrc("common/hint-arrow");
+
+  await new Promise(
+    (res) =>
+      (image.onload = async () => {
+        image = await resize(image, SCALE_RATIO);
+        res(null);
+      })
+  );
+  hintArrows.UP = {
+    offset: { x: (CELL_SIZE - image.width) / 2, y: 0 },
+    texture: image,
+    drt: { x: 0, y: -1 },
+  };
+  image = await rotateCW90(image);
+  hintArrows.RIGHT = {
+    offset: { x: CELL_SIZE - image.width, y: (CELL_SIZE - image.height) / 2 },
+    texture: image,
+    drt: { x: 1, y: 0 },
+  };
+  image = await rotateCW90(image);
+  hintArrows.DOWN = {
+    offset: { x: (CELL_SIZE - image.width) / 2, y: CELL_SIZE - image.height },
+    texture: image,
+    drt: { x: 0, y: 1 },
+  };
+  image = await rotateCW90(image);
+  hintArrows.LEFT = {
+    offset: { x: 0, y: (CELL_SIZE - image.height) / 2 },
+    texture: image,
+    drt: { x: -1, y: 0 },
+  };
 };
 
 // All

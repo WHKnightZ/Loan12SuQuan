@@ -27,6 +27,7 @@ export interface IGame {
   explosions: Point[];
   explodedTiles: TileInfo[];
 
+  tIdle: number;
   tSelect: number;
   tSwap: number;
   tExplode: number;
@@ -58,4 +59,10 @@ export interface IGame {
 export type GameStateFunction = {
   render: (self: IGame) => void;
   update: (self: IGame) => void;
+};
+
+export type HintArrow = {
+  offset: { x: number; y: number };
+  drt: { x: number; y: number };
+  texture: HTMLImageElement;
 };
