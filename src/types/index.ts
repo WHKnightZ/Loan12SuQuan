@@ -8,7 +8,7 @@ export type TileInfo = { x: number; y: number; point: number; value: number };
 
 export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
-export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE_IN" | "FADE_OUT";
+export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";
 
 export interface IGame {
   state: GameState;
@@ -32,7 +32,11 @@ export interface IGame {
   tSwap: number;
   tExplode: number;
   tExplode2: number;
-  tFade: number;
+  tFadeIn: number;
+  tFadeOut: number;
+
+  fadeIn: boolean;
+  fadeOut: boolean;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;

@@ -12,8 +12,7 @@ import {
 import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction } from "@/types";
 import { check, generateMap } from "@/utils/common";
 import explodeStateFunction from "./explode";
-import fadeInStateFunction from "./fadeIn";
-import fadeOutStateFunction from "./fadeOut";
+import fadeStateFunction from "./fade";
 import fallStateFunction from "./fall";
 import idleStateFunction from "./idle";
 import selectStateFunction from "./select";
@@ -25,8 +24,7 @@ const mapFunction: {
   SELECT: selectStateFunction,
   EXPLODE: explodeStateFunction,
   FALL: fallStateFunction,
-  FADE_IN: fadeInStateFunction,
-  FADE_OUT: fadeOutStateFunction,
+  FADE: fadeStateFunction,
 };
 
 export class Game implements IGame {
@@ -50,7 +48,11 @@ export class Game implements IGame {
   tSwap: number;
   tExplode: number;
   tExplode2: number;
-  tFade: number;
+  tFadeIn: number;
+  tFadeOut: number;
+
+  fadeIn: boolean;
+  fadeOut: boolean;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;
@@ -71,7 +73,10 @@ export class Game implements IGame {
     this.tSwap = 0;
     this.tExplode = 0;
     this.tExplode2 = 0;
-    this.tFade = 0;
+    this.tFadeIn = 0;
+    this.tFadeOut = 0;
+    this.fadeIn = false;
+    this.fadeOut = false;
     this.hintIndex = 0;
   }
 
@@ -204,7 +209,9 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        this.state = "FADE_OUT";
+        this.state = "FADE";
+        this.tFadeOut = 0;
+        this.fadeOut = true;
         break;
     }
   }
@@ -216,7 +223,7 @@ export class Game implements IGame {
         const x = j * CELL_SIZE;
         const y = i * CELL_SIZE;
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-        if (base.map[i][j] === -1 || this.state === "FADE_IN" || this.state === "FADE_OUT") continue;
+        if (base.map[i][j] === -1 || this.state === "FADE") continue;
 
         base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }
