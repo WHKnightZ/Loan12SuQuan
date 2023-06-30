@@ -7,13 +7,14 @@ import {
   MAP_WIDTH_1,
   TILE_OFFSET,
   TILE_SIZE,
+  TOTAL_TILES,
   VELOCITY_BASE,
 } from "@/configs/consts";
 import { GameStateFunction, IGame } from "@/types";
-import { getKeys, randomTile } from "@/utils/common";
+import { getKeys } from "@/utils/common";
 import { clamp } from "@/utils/math";
 
-const done: {
+let fadeInDone: {
   x: number;
   y: number;
   offset: number;
@@ -34,7 +35,7 @@ const fadeInRender = (self: IGame) => {
       );
     });
   });
-  done.forEach(({ x, y, value }) =>
+  fadeInDone.forEach(({ x, y, value }) =>
     base.context.drawImage(mapTileInfo[value].texture, x * CELL_SIZE + TILE_OFFSET, y * CELL_SIZE + TILE_OFFSET)
   );
 };
@@ -65,8 +66,14 @@ const fadeInUpdate = (self: IGame) => {
     let newTFade = self.tFadeIn - i * 3;
     if (newTFade < 1) newTFade = 1;
 
-    if (newTFade % (6 ) === 0 && fall[i].pushCount! < MAP_WIDTH) {
-      fall[i].list.push({ x: i, y: -1, v: VELOCITY_BASE + 8, offset: 0, value: randomTile() });
+    if (newTFade % 6 === 0 && fall[i].pushCount! < MAP_WIDTH) {
+      fall[i].list.push({
+        x: i,
+        y: -1,
+        v: VELOCITY_BASE + 4,
+        offset: 0,
+        value: base.map[MAP_WIDTH_1 - fall[i].pushCount][i],
+      });
       fall[i].pushCount += 1;
     }
   }
@@ -78,7 +85,7 @@ const fadeInUpdate = (self: IGame) => {
     let shift = false;
 
     colData.list.forEach((i, index) => {
-      i.v += GRAVITY;
+      i.v += GRAVITY * 1.4;
       i.offset += i.v;
       const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
 
@@ -98,7 +105,12 @@ const fadeInUpdate = (self: IGame) => {
     if (shift) {
       const i = colData.list.shift();
       i.y = colData.below + 1;
-      done.push(i);
+      fadeInDone.push(i);
+      if (fadeInDone.length === TOTAL_TILES) {
+        self.state = "IDLE";
+        fadeInDone = [];
+        self.fadeIn = self.fadeOut = false;
+      }
     }
   });
 };
@@ -106,7 +118,7 @@ const fadeInUpdate = (self: IGame) => {
 const fadeOutUpdate = (self: IGame) => {
   self.tFadeOut += 1;
 
-  if (getScale(MAP_WIDTH_1 - 7, MAP_WIDTH_1 - 7, self.tFadeOut) !== 0) return;
+  if (getScale(2, 2, self.tFadeOut) !== 0) return;
 
   if (self.fadeIn) return;
 

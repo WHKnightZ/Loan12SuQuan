@@ -5,6 +5,7 @@ export const APP_NAME = "Loạn 12 Sứ Quân";
 export const BOARD_COLORS = ["#3e3226", "#554933"];
 export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
+export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
 export const CELL_SIZE = 60;
 export const SCREEN_SIZE = MAP_WIDTH * CELL_SIZE;
 

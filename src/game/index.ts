@@ -209,9 +209,9 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        this.state = "FADE";
-        this.tFadeOut = 0;
-        this.fadeOut = true;
+        // this.state = "FADE";
+        // this.tFadeOut = 0;
+        // this.fadeOut = true;
         break;
     }
   }
