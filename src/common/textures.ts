@@ -3,6 +3,12 @@ import { Direction, HintArrow } from "@/types";
 import { flipHorizontal, flipVertical, resize, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
+const loadTexture = (src: string) => {
+  const image = new Image();
+  image.src = getImageSrc(src);
+  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
+};
+
 const loadTilesAndExplosions = async () => {
   const loadImage = (key: number, src: string) => {
     const image = new Image();
@@ -115,12 +121,26 @@ const loadCommonTextures = async () => {
   };
 };
 
+type BarType = "life" | "energy" | "mana";
+
+export const barTextures: { [key in BarType]: HTMLImageElement } = {} as any;
+
+const loadBars = async () => {
+  const bars: BarType[] = ["life", "energy", "mana"];
+  let res = await Promise.all(bars.map((bar) => loadTexture(`common/${bar}bar`)));
+  res = await Promise.all(res.map((img) => resize(img, SCALE_RATIO * 1.2)));
+  res.forEach((img, index) => {
+    barTextures[bars[index]] = img;
+  });
+};
+
 // All
 export const loadTextures = () => {
   return Promise.all([
     loadTilesAndExplosions(),
     loadCornerSelections(),
     loadCommonTextures(),
+    loadBars(),
     //
   ]);
 };

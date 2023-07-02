@@ -1,5 +1,5 @@
 import { loadTextures } from "@/common/textures";
-import { base, SCREEN_SIZE } from "@/configs/consts";
+import { base, SCREEN_WIDTH, SCREEN_HEIGHT } from "@/configs/consts";
 import { Game } from "@/game";
 
 const game = new Game();
@@ -8,7 +8,8 @@ const init = () => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const context = canvas.getContext("2d")!;
 
-  canvas.width = canvas.height = SCREEN_SIZE;
+  canvas.width = SCREEN_WIDTH;
+  canvas.height = SCREEN_HEIGHT;
   context.imageSmoothingEnabled = false;
 
   base.canvas = canvas;

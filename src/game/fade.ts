@@ -109,7 +109,7 @@ const fadeInUpdate = (self: IGame) => {
       if (fadeInDone.length === TOTAL_TILES) {
         self.state = "IDLE";
         fadeInDone = [];
-        self.fadeIn = self.fadeOut = false;
+        self.isFadeIn = self.isFadeOut = false;
       }
     }
   });
@@ -120,22 +120,19 @@ const fadeOutUpdate = (self: IGame) => {
 
   if (getScale(2, 2, self.tFadeOut) !== 0) return;
 
-  if (self.fadeIn) return;
+  if (self.isFadeIn) return;
 
-  for (let i = 0; i < MAP_WIDTH; i += 1) self.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
-
-  self.tFadeIn = 0;
-  self.fadeIn = true;
+  self.fadeIn();
 };
 
 const fadeStateFunction: GameStateFunction = {
   render: (self) => {
-    if (self.fadeIn) fadeInRender(self);
-    if (self.fadeOut) fadeOutRender(self);
+    if (self.isFadeIn) fadeInRender(self);
+    if (self.isFadeOut) fadeOutRender(self);
   },
   update: (self) => {
-    if (self.fadeIn) fadeInUpdate(self);
-    if (self.fadeOut) fadeOutUpdate(self);
+    if (self.isFadeIn) fadeInUpdate(self);
+    if (self.isFadeOut) fadeOutUpdate(self);
   },
 };
 

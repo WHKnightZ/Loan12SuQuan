@@ -4,7 +4,7 @@ import { Direction, GameStateFunction } from "@/types";
 
 const idleStateFunction: GameStateFunction = {
   render: (self) => {
-    const hint = self.matchedPositions[0];
+    const hint = self.matchedPositions[self.hintIndex];
 
     if (!hint) return;
 

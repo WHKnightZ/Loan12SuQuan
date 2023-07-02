@@ -10,6 +10,28 @@ export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
 export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";
 
+export type FallItem = {
+  list: { x: number; y: number; offset: number; v: number; value: number }[];
+  below: number;
+  pushCount?: number;
+};
+
+export interface IPlayer {
+  index: number;
+
+  maxLife: number;
+  maxMana: number;
+  maxEnergy: number;
+  life: number;
+  mana: number;
+  energy: number;
+  attack: number;
+  intelligence: number;
+
+  getHintIndex(matchedLength: number): number;
+  render(): void;
+}
+
 export interface IGame {
   state: GameState;
   selected: Point | null;
@@ -17,11 +39,7 @@ export interface IGame {
   reswap: boolean;
 
   fall: {
-    [key: number]: {
-      list: { x: number; y: number; offset: number; v: number; value: number }[];
-      below: number;
-      pushCount?: number;
-    };
+    [key: number]: FallItem;
   };
 
   explosions: Point[];
@@ -35,11 +53,14 @@ export interface IGame {
   tFadeIn: number;
   tFadeOut: number;
 
-  fadeIn: boolean;
-  fadeOut: boolean;
+  isFadeIn: boolean;
+  isFadeOut: boolean;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;
+
+  players: IPlayer[];
+  playerTurn: number;
 
   init(): void;
   matchPosition(
@@ -56,6 +77,8 @@ export interface IGame {
   findAllMatchedPositions(): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
+  fadeIn(): void;
+  fadeOut(): void;
   render(): void;
   update(): void;
 }

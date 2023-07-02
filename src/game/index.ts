@@ -1,15 +1,21 @@
 import {
+  BACKGROUND_COLOR,
   base,
   BOARD_COLORS,
+  BOARD_SIZE,
   CELL_SIZE,
   GAIN_TURN,
   mapTileInfo,
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_POINT,
+  MENU_HEIGHT,
+  PLAYER_INTELLIGENCE,
+  SCREEN_WIDTH,
   TILE_OFFSET,
 } from "@/configs/consts";
-import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction } from "@/types";
+import { Player } from "@/objects/player";
+import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
 import { check, generateMap } from "@/utils/common";
 import explodeStateFunction from "./explode";
 import fadeStateFunction from "./fade";
@@ -34,10 +40,7 @@ export class Game implements IGame {
   reswap: boolean;
 
   fall: {
-    [key: number]: {
-      list: { x: number; y: number; offset: number; v: number; value: number }[];
-      below: number;
-    };
+    [key: number]: FallItem;
   };
 
   explosions: Point[];
@@ -51,15 +54,21 @@ export class Game implements IGame {
   tFadeIn: number;
   tFadeOut: number;
 
-  fadeIn: boolean;
-  fadeOut: boolean;
+  isFadeIn: boolean;
+  isFadeOut: boolean;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;
 
+  players: IPlayer[];
+  playerTurn: number;
+
   constructor() {}
 
   init() {
+    this.players = [new Player(0, 5, 100, PLAYER_INTELLIGENCE), new Player(1, 10, 100, 40)];
+    this.playerTurn = 0;
+
     base.map = generateMap();
     this.findAllMatchedPositions();
     this.state = "IDLE";
@@ -75,9 +84,11 @@ export class Game implements IGame {
     this.tExplode2 = 0;
     this.tFadeIn = 0;
     this.tFadeOut = 0;
-    this.fadeIn = false;
-    this.fadeOut = false;
+    this.isFadeIn = false;
+    this.isFadeOut = false;
     this.hintIndex = 0;
+
+    this.fadeIn();
   }
 
   matchPosition(x: number, y: number) {
@@ -174,6 +185,8 @@ export class Game implements IGame {
 
     allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
     this.matchedPositions = allMatchedPositions;
+
+    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
   }
 
   onClick(e: MouseEvent) {
@@ -209,11 +222,22 @@ export class Game implements IGame {
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
-        // this.state = "FADE";
-        // this.tFadeOut = 0;
-        // this.fadeOut = true;
+        this.fadeOut();
         break;
     }
+  }
+
+  fadeIn() {
+    this.state = "FADE";
+    for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
+    this.tFadeIn = 0;
+    this.isFadeIn = true;
+  }
+
+  fadeOut() {
+    this.state = "FADE";
+    this.tFadeOut = 0;
+    this.isFadeOut = true;
   }
 
   render() {
@@ -228,6 +252,10 @@ export class Game implements IGame {
         base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }
     }
+
+    base.context.fillStyle = BACKGROUND_COLOR;
+    base.context.fillRect(0, BOARD_SIZE, SCREEN_WIDTH, MENU_HEIGHT);
+    this.players.forEach((p) => p.render());
 
     mapFunction[this.state].render(this);
   }

@@ -18,13 +18,13 @@ body {
   border: 6px solid #3e3226;
   image-rendering: pixelated;
   width: 480px;
-  height: 480px;
+  height: 600px;
   background-color: #e5e6e7;
 }
 
 @media screen and (max-width: 600px) {
   #canvas {
     width: 80vw;
-    height: 80vw;
+    height: 100vw;
   }
 }
