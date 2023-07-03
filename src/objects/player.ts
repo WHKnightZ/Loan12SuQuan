@@ -1,5 +1,5 @@
 import { barTextures } from "@/common/textures";
-import { base, BOARD_SIZE, DEFAULT_ENERGY, DEFAULT_MANA, MENU_HEIGHT } from "@/configs/consts";
+import { base, BOARD_SIZE, DEFAULT_ENERGY, DEFAULT_MANA, SCREEN_WIDTH } from "@/configs/consts";
 import { IPlayer } from "@/types";
 import { random } from "@/utils/common";
 
@@ -45,8 +45,16 @@ export class Player implements IPlayer {
   }
 
   render() {
-    base.context.drawImage(barTextures.life, 0, BOARD_SIZE + 20);
-    base.context.drawImage(barTextures.energy, 0, BOARD_SIZE + 50);
-    base.context.drawImage(barTextures.mana, 0, BOARD_SIZE + 80);
+    let offsetX = 132;
+    if (this.index === 1) offsetX = SCREEN_WIDTH - offsetX - barTextures.life.width;
+
+    const lifePercent = Math.max(this.life / this.maxLife, 0);
+    const width = 84 * lifePercent;
+
+    base.context.drawImage(barTextures.life, 0, 0, width, 12, offsetX, BOARD_SIZE + 26, width, 12);
+    base.context.drawImage(barTextures.energy, offsetX, BOARD_SIZE + 44);
+    base.context.drawImage(barTextures.mana, offsetX, BOARD_SIZE + 62);
   }
+
+  update() {}
 }

@@ -132,7 +132,7 @@ const loadMenu = async () => {
   menuTexture = await resize(menuTexture, 2);
   const bars: BarType[] = ["life", "energy", "mana"];
   let res = await Promise.all(bars.map((bar) => loadTexture(`common/${bar}bar`)));
-  res = await Promise.all(res.map((img) => resize(img, SCALE_RATIO * 1.2)));
+  res = await Promise.all(res.map((img) => resize(img, 2)));
   res.forEach((img, index) => {
     barTextures[bars[index]] = img;
   });

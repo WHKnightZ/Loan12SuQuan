@@ -30,6 +30,7 @@ export interface IPlayer {
 
   getHintIndex(matchedLength: number): number;
   render(): void;
+  update(): void;
 }
 
 export interface IGame {

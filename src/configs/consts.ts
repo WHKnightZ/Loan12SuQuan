@@ -3,7 +3,6 @@ import { TileType } from "@/types";
 export const APP_NAME = "Loạn 12 Sứ Quân";
 
 export const BOARD_COLORS = ["#3e3226", "#554933"];
-export const BACKGROUND_COLOR = BOARD_COLORS[0];
 export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
 export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;

@@ -1,6 +1,5 @@
 import { menuTexture } from "@/common/textures";
 import {
-  BACKGROUND_COLOR,
   base,
   BOARD_COLORS,
   BOARD_SIZE,
@@ -67,7 +66,7 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(0, 5, 100, PLAYER_INTELLIGENCE), new Player(1, 10, 100, 40)];
+    this.players = [new Player(0, 5, 1000, PLAYER_INTELLIGENCE), new Player(1, 10, 500, 40)];
     this.playerTurn = 0;
 
     base.map = generateMap();
@@ -254,15 +253,15 @@ export class Game implements IGame {
       }
     }
 
-    // base.context.fillStyle = BACKGROUND_COLOR;
-    // base.context.fillRect(0, BOARD_SIZE, SCREEN_WIDTH, MENU_HEIGHT);
     base.context.drawImage(menuTexture, 0, BOARD_SIZE);
-    // this.players.forEach((p) => p.render());
+    this.players.forEach((p) => p.render());
 
     mapFunction[this.state].render(this);
   }
 
   update() {
+    this.players.forEach((p) => p.update());
+
     mapFunction[this.state].update(this);
   }
 }
