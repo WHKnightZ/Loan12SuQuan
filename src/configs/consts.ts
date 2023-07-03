@@ -9,7 +9,7 @@ export const MAP_WIDTH_1 = MAP_WIDTH - 1;
 export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
 export const CELL_SIZE = 60;
 export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
-export const MENU_HEIGHT = 120;
+export const MENU_HEIGHT = 96;
 export const SCREEN_WIDTH = BOARD_SIZE;
 export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
 
