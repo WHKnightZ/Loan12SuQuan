@@ -67,7 +67,7 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(0, 5, 100, PLAYER_INTELLIGENCE), new Player(1, 10, 100, 40)];
+    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE), new Player(this, 1, 10, 100, 40)];
     this.playerTurn = 0;
 
     base.map = generateMap();
@@ -241,9 +241,20 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
-  activateTile({ value }: TileInfo) {
-    if (value === TILES.SWORD) this.players[1 - this.playerTurn].life -= 2;
-    if (value === TILES.SWORDRED) this.players[1 - this.playerTurn].life -= 4;
+  acquireTile({ value }: TileInfo) {
+    switch (value) {
+      case TILES.MANA:
+        this.players[this.playerTurn].acquireMana(5);
+        break;
+
+      case TILES.SWORD:
+        this.players[1 - this.playerTurn].takeDamage(2);
+        break;
+
+      case TILES.SWORDRED:
+        this.players[1 - this.playerTurn].takeDamage(3);
+        break;
+    }
   }
 
   render() {

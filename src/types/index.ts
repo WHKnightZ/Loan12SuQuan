@@ -16,23 +16,36 @@ export type FallItem = {
   pushCount?: number;
 };
 
+export type PlayerAttribute = {
+  value: number;
+  maxValue: number;
+  timer: number;
+  display: number;
+};
+
+export type PlayerAttributeExtra = {
+  attribute: PlayerAttribute;
+  texture: HTMLImageElement;
+  maxTimer: number;
+};
+
 export interface IPlayer {
   index: number;
+  game: IGame;
 
-  maxLife: number;
-  displayLife: number;
-  life: number;
-  tLife: number;
-  maxMana: number;
-  mana: number;
-  maxEnergy: number;
-  energy: number;
+  life: PlayerAttribute;
+  mana: PlayerAttribute;
+  energy: PlayerAttribute;
   attack: number;
   intelligence: number;
   barOffsetX: number;
+  bars: PlayerAttributeExtra[];
+  energyTimer: number;
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;
+  acquireEnergy(value: number): void;
+  acquireMana(value: number): void;
   render(): void;
   update(): void;
 }
@@ -84,7 +97,7 @@ export interface IGame {
   onKeyDown(e: KeyboardEvent): void;
   fadeIn(): void;
   fadeOut(): void;
-  activateTile(tile: TileInfo): void;
+  acquireTile(tile: TileInfo): void;
   render(): void;
   update(): void;
 }

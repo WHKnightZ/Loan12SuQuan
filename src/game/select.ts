@@ -76,7 +76,7 @@ const selectStateFunction: GameStateFunction = {
         self.explosions = [];
         self.explodedTiles.forEach((tile) => {
           const { x, y } = tile;
-          self.activateTile(tile);
+          self.acquireTile(tile);
           self.explosions.push({ x, y, value: base.map[y][x] });
           base.map[y][x] = -1;
         });

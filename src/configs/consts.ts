@@ -34,6 +34,8 @@ export const PLAYER_INTELLIGENCE = 40;
 export const DEFAULT_MANA = 100;
 export const DEFAULT_ENERGY = 100;
 
+export const LOSE_ENERGY_INTERVAL = 300;
+
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
   HEART: 1,
