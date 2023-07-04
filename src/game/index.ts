@@ -12,6 +12,7 @@ import {
   MENU_HEIGHT,
   PLAYER_INTELLIGENCE,
   SCREEN_WIDTH,
+  TILES,
   TILE_OFFSET,
 } from "@/configs/consts";
 import { Player } from "@/objects/player";
@@ -66,7 +67,7 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(0, 5, 1000, PLAYER_INTELLIGENCE), new Player(1, 10, 500, 40)];
+    this.players = [new Player(0, 5, 100, PLAYER_INTELLIGENCE), new Player(1, 10, 100, 40)];
     this.playerTurn = 0;
 
     base.map = generateMap();
@@ -238,6 +239,11 @@ export class Game implements IGame {
     this.state = "FADE";
     this.tFadeOut = 0;
     this.isFadeOut = true;
+  }
+
+  activateTile({ value }: TileInfo) {
+    if (value === TILES.SWORD) this.players[1 - this.playerTurn].life -= 2;
+    if (value === TILES.SWORDRED) this.players[1 - this.playerTurn].life -= 4;
   }
 
   render() {

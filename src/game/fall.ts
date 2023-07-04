@@ -60,7 +60,9 @@ const fallStateFunction: GameStateFunction = {
     if (tt.length) {
       self.explodedTiles = combine(tt);
       self.explosions = [];
-      self.explodedTiles.forEach(({ x, y }) => {
+      self.explodedTiles.forEach((tile) => {
+        const { x, y } = tile;
+        self.activateTile(tile);
         self.explosions.push({ x, y, value: base.map[y][x] });
         base.map[y][x] = -1;
       });

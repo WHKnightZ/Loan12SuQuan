@@ -20,15 +20,19 @@ export interface IPlayer {
   index: number;
 
   maxLife: number;
-  maxMana: number;
-  maxEnergy: number;
+  displayLife: number;
   life: number;
+  tLife: number;
+  maxMana: number;
   mana: number;
+  maxEnergy: number;
   energy: number;
   attack: number;
   intelligence: number;
+  barOffsetX: number;
 
   getHintIndex(matchedLength: number): number;
+  takeDamage(damage: number): void;
   render(): void;
   update(): void;
 }
@@ -80,6 +84,7 @@ export interface IGame {
   onKeyDown(e: KeyboardEvent): void;
   fadeIn(): void;
   fadeOut(): void;
+  activateTile(tile: TileInfo): void;
   render(): void;
   update(): void;
 }
