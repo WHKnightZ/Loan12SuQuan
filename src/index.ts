@@ -1,6 +1,6 @@
-import { loadTextures } from "./common/textures";
-import { base, SCREEN_SIZE } from "./configs/consts";
-import { Game } from "./objs/game";
+import { loadTextures } from "@/common/textures";
+import { base, SCREEN_WIDTH, SCREEN_HEIGHT } from "@/configs/consts";
+import { Game } from "@/game";
 
 const game = new Game();
 
@@ -8,7 +8,8 @@ const init = () => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
   const context = canvas.getContext("2d")!;
 
-  canvas.width = canvas.height = SCREEN_SIZE;
+  canvas.width = SCREEN_WIDTH;
+  canvas.height = SCREEN_HEIGHT;
   context.imageSmoothingEnabled = false;
 
   base.canvas = canvas;
@@ -22,7 +23,7 @@ const update = (now = 0) => {
   requestAnimationFrame(update);
 
   // const elapsed = (now - then) / 1000;
-  // if (elapsed < 0) return;
+  // if (elapsed < 0.3) return;
   // then = now;
 
   game.update();
@@ -36,8 +37,12 @@ const main = async () => {
 
   game.init();
 
-  document.addEventListener("click", (e) => {
+  base.canvas.addEventListener("click", (e) => {
     game.onClick(e);
+  });
+
+  document.addEventListener("keydown", (e) => {
+    game.onKeyDown(e);
   });
 
   update();

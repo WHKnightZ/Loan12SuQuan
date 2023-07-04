@@ -34,6 +34,23 @@ export const flipVertical = (image: HTMLImageElement) => {
   return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
 };
 
+export const rotateCW90 = (image: HTMLImageElement) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.height;
+  canvas.height = image.width;
+  const cw = canvas.width;
+  const ch = canvas.height;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+  context.translate(cw, ch / cw);
+  context.rotate(Math.PI / 2);
+  context.drawImage(image, 0, 0);
+
+  image = new Image();
+  image.src = canvas.toDataURL("image/png");
+  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
+};
+
 export const resize = (image: HTMLImageElement, ratio: number = 1) => {
   const width = Math.floor(image.width * ratio);
   const height = Math.floor(image.height * ratio);
