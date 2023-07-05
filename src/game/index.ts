@@ -243,16 +243,28 @@ export class Game implements IGame {
 
   acquireTile({ value }: TileInfo) {
     switch (value) {
-      case TILES.MANA:
-        this.players[this.playerTurn].acquireMana(5);
-        break;
-
       case TILES.SWORD:
         this.players[1 - this.playerTurn].takeDamage(2);
         break;
 
+      case TILES.HEART:
+        break;
+
+      case TILES.GOLD:
+        break;
+
+      case TILES.ENERGY:
+        break;
+
+      case TILES.MANA:
+        this.players[this.playerTurn].acquireMana(5);
+        break;
+
+      case TILES.EXP:
+        break;
+
       case TILES.SWORDRED:
-        this.players[1 - this.playerTurn].takeDamage(3);
+        this.players[1 - this.playerTurn].takeDamage(4);
         break;
     }
   }

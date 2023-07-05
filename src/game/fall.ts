@@ -70,6 +70,7 @@ const fallStateFunction: GameStateFunction = {
     } else {
       self.findAllMatchedPositions();
       self.state = "IDLE";
+      self.playerTurn = 1 - self.playerTurn;
     }
   },
 };
