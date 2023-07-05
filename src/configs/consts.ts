@@ -31,7 +31,7 @@ export const CORNER_SELECTION_CYCLE = 30;
 export const HINT_ARROW_CYCLE = 30;
 
 export const PLAYER_INTELLIGENCE = 40;
-export const DEFAULT_MANA = 100;
+export const DEFAULT_MANA = 72;
 export const DEFAULT_ENERGY = 100;
 
 export const LOSE_ENERGY_INTERVAL = 300;

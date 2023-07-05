@@ -244,7 +244,7 @@ export class Game implements IGame {
   acquireTile({ value }: TileInfo) {
     switch (value) {
       case TILES.MANA:
-        this.players[this.playerTurn].acquireMana(5);
+        this.players[this.playerTurn].acquireMana(2);
         break;
 
       case TILES.SWORD:
