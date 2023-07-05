@@ -44,8 +44,8 @@ export interface IPlayer {
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;
-  acquireEnergy(value: number): void;
-  acquireMana(value: number): void;
+  gainEnergy(value: number): void;
+  gainMana(value: number): void;
   render(): void;
   update(): void;
 }
@@ -97,7 +97,7 @@ export interface IGame {
   onKeyDown(e: KeyboardEvent): void;
   fadeIn(): void;
   fadeOut(): void;
-  acquireTile(tile: TileInfo): void;
+  gainTile(tile: TileInfo): void;
   render(): void;
   update(): void;
 }

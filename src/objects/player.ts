@@ -27,8 +27,8 @@ export class Player implements IPlayer {
     this.mana = { maxValue: DEFAULT_MANA, value: 0, display: 0, timer: 0 };
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
-      { attribute: this.energy, maxTimer: 5, texture: barTextures.energy },
-      { attribute: this.mana, maxTimer: 5, texture: barTextures.mana },
+      { attribute: this.energy, maxTimer: 20, texture: barTextures.energy },
+      { attribute: this.mana, maxTimer: 25, texture: barTextures.mana },
     ];
     this.intelligence = intelligence;
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
@@ -60,12 +60,12 @@ export class Player implements IPlayer {
     this.life.value = this.life.value - damage;
   }
 
-  acquireEnergy(value: number) {
+  gainEnergy(value: number) {
     this.energy.timer = 0;
     this.energy.value = this.energy.value + value;
   }
 
-  acquireMana(value: number) {
+  gainMana(value: number) {
     this.mana.timer = 0;
     this.mana.value = this.mana.value + value;
   }
@@ -88,7 +88,7 @@ export class Player implements IPlayer {
     }
 
     this.bars.forEach(({ attribute, maxTimer }) => {
-      if (attribute.display <= attribute.value) return;
+      if (Math.abs(attribute.display - attribute.value) < 0.1) return;
 
       attribute.timer += 1;
 

@@ -9,9 +9,7 @@ import {
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_POINT,
-  MENU_HEIGHT,
   PLAYER_INTELLIGENCE,
-  SCREEN_WIDTH,
   TILES,
   TILE_OFFSET,
 } from "@/configs/consts";
@@ -197,7 +195,7 @@ export class Game implements IGame {
 
     const x = Math.floor((e.offsetX * canvas.width) / canvas.clientWidth / CELL_SIZE);
     const y = Math.floor((e.offsetY * canvas.height) / canvas.clientHeight / CELL_SIZE);
-    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
+    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) return;
 
     this.tSwap = 0;
 
@@ -241,8 +239,12 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
-  acquireTile({ value }: TileInfo) {
+  gainTile({ value }: TileInfo) {
     switch (value) {
+      case TILES.MANA:
+        this.players[this.playerTurn].gainMana(2);
+        break;
+
       case TILES.SWORD:
         this.players[1 - this.playerTurn].takeDamage(2);
         break;
@@ -257,7 +259,7 @@ export class Game implements IGame {
         break;
 
       case TILES.MANA:
-        this.players[this.playerTurn].acquireMana(5);
+        this.players[this.playerTurn].gainMana(5);
         break;
 
       case TILES.EXP:
