@@ -41,6 +41,8 @@ export interface IPlayer {
   barOffsetX: number;
   bars: PlayerAttributeExtra[];
   energyTimer: number;
+  avatar: HTMLImageElement;
+  avatarOffset: { x: number; y: number };
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;

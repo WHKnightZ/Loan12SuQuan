@@ -65,7 +65,7 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE), new Player(this, 1, 10, 100, 40)];
+    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 10, 100, 40, 1)];
     this.playerTurn = 0;
 
     base.map = generateMap();
