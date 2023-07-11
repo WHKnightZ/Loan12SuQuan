@@ -172,7 +172,7 @@ export class Spin {
     ctx.globalAlpha = this.opacity;
 
     ctx.lineWidth = this.thickness;
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "#96e6e0";
 
     if (x0 === x1 || y0 === y1) {
       ctx.beginPath();

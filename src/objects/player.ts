@@ -44,8 +44,8 @@ export class Player implements IPlayer {
       x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatar.width,
       y: AVATAR_OFFSET_Y,
     };
-    const addSpin = (reverse: boolean) => {
-      this.spins.push(
+    this.spins = Array.from({ length: 2 }).map(
+      (_, i) =>
         new Spin(
           this.avatarOffset.x - 3,
           this.avatarOffset.x + this.avatar.width + 3,
@@ -55,14 +55,10 @@ export class Player implements IPlayer {
           "CW",
           40,
           3,
-          this.avatarOffset.x + (reverse ? 10 - 3 : this.avatar.width + 3 - 10),
-          this.avatarOffset.y + (reverse ? -3 : this.avatar.height + 3)
+          this.avatarOffset.x + (i === 0 ? 10 - 3 : this.avatar.width + 3 - 10),
+          this.avatarOffset.y + (i === 0 ? -3 : this.avatar.height + 3)
         )
-      );
-    };
-    this.spins = [];
-    addSpin(false);
-    addSpin(true);
+    );
   }
 
   /**
