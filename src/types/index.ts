@@ -117,3 +117,5 @@ export type HintArrow = {
   drt: { x: number; y: number };
   texture: HTMLImageElement;
 };
+
+export type FontChar = { texture: HTMLImageElement; offsetY: number };

@@ -14,6 +14,7 @@ import {
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
 } from "@/configs/consts";
+import { font } from "@/objects/font";
 import { Player } from "@/objects/player";
 import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
 import { check, generateMap } from "@/utils/common";
@@ -293,6 +294,8 @@ export class Game implements IGame {
     this.players.forEach((p) => p.render());
 
     mapFunction[this.state].render(this);
+
+    font.draw({ text: "Còn 2 lượt" });
   }
 
   update() {
