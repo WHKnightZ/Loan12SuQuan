@@ -12,6 +12,7 @@ import {
   PLAYER_INTELLIGENCE,
   TILES,
   TILE_OFFSET,
+  TIMER_HINT_DELAY_DEFAULT,
 } from "@/configs/consts";
 import { Player } from "@/objects/player";
 import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
@@ -52,6 +53,7 @@ export class Game implements IGame {
   tExplode2: number;
   tFadeIn: number;
   tFadeOut: number;
+  tHintDelay: number;
 
   isFadeIn: boolean;
   isFadeOut: boolean;
@@ -210,7 +212,7 @@ export class Game implements IGame {
       const { x, y, value } = this.selected;
       base.map[y][x] = value;
       this.selected = null;
-      this.state = "IDLE";
+      this.idle();
       return;
     }
 
@@ -224,6 +226,11 @@ export class Game implements IGame {
         this.fadeOut();
         break;
     }
+  }
+
+  idle() {
+    this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
+    this.state = "IDLE";
   }
 
   fadeIn() {
@@ -241,21 +248,19 @@ export class Game implements IGame {
 
   gainTile({ value }: TileInfo) {
     switch (value) {
-      case TILES.MANA:
-        this.players[this.playerTurn].gainMana(2);
-        break;
-
       case TILES.SWORD:
         this.players[1 - this.playerTurn].takeDamage(2);
         break;
 
       case TILES.HEART:
+        this.players[this.playerTurn].gainLife(2);
         break;
 
       case TILES.GOLD:
         break;
 
       case TILES.ENERGY:
+        this.players[this.playerTurn].gainEnergy(2);
         break;
 
       case TILES.MANA:

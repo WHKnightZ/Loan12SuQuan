@@ -66,7 +66,7 @@ const selectStateFunction: GameStateFunction = {
     if (self.reswap) {
       self.reswap = false;
       self.selected = self.swapped = null;
-      self.state = "IDLE";
+      self.idle();
     } else {
       const { matched: m0, tiles: t0 } = self.matchPosition(x0, y0);
       const { matched: m1, tiles: t1 } = self.matchPosition(x1, y1);

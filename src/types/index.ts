@@ -46,6 +46,7 @@ export interface IPlayer {
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;
+  gainLife(value: number): void;
   gainEnergy(value: number): void;
   gainMana(value: number): void;
   render(): void;
@@ -72,6 +73,7 @@ export interface IGame {
   tExplode2: number;
   tFadeIn: number;
   tFadeOut: number;
+  tHintDelay: number;
 
   isFadeIn: boolean;
   isFadeOut: boolean;
@@ -97,6 +99,7 @@ export interface IGame {
   findAllMatchedPositions(): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
+  idle(): void;
   fadeIn(): void;
   fadeOut(): void;
   gainTile(tile: TileInfo): void;

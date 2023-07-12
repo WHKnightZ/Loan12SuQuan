@@ -4,6 +4,8 @@ import { Direction, GameStateFunction } from "@/types";
 
 const idleStateFunction: GameStateFunction = {
   render: (self) => {
+    if (self.tHintDelay > 0) return;
+
     const hint = self.matchedPositions[self.hintIndex];
 
     if (!hint) return;
@@ -26,6 +28,10 @@ const idleStateFunction: GameStateFunction = {
     );
   },
   update: (self) => {
+    if (self.tHintDelay > 0) {
+      self.tHintDelay -= 1;
+      return;
+    }
     self.tIdle += 1;
   },
 };

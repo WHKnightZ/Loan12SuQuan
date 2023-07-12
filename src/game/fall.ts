@@ -69,7 +69,7 @@ const fallStateFunction: GameStateFunction = {
       self.state = "EXPLODE";
     } else {
       self.findAllMatchedPositions();
-      self.state = "IDLE";
+      self.idle();
       self.playerTurn = 1 - self.playerTurn;
     }
   },

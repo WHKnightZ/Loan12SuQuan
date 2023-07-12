@@ -86,14 +86,22 @@ export class Player implements IPlayer {
     this.life.value = this.life.value - damage;
   }
 
+  gainLife(value: number) {
+    this.life.timer = 0;
+    this.life.value = this.life.value + (value * this.life.maxValue) / 100;
+    if (this.life.value > this.life.maxValue) this.life.value = this.life.maxValue;
+  }
+
   gainEnergy(value: number) {
     this.energy.timer = 0;
     this.energy.value = this.energy.value + value;
+    if (this.energy.value > this.energy.maxValue) this.energy.value = this.energy.maxValue;
   }
 
   gainMana(value: number) {
     this.mana.timer = 0;
     this.mana.value = this.mana.value + value;
+    if (this.mana.value > this.mana.maxValue) this.mana.value = this.mana.maxValue;
   }
 
   render() {

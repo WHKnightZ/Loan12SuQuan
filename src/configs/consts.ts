@@ -36,6 +36,8 @@ export const DEFAULT_ENERGY = 100;
 
 export const LOSE_ENERGY_INTERVAL = 300;
 
+export const TIMER_HINT_DELAY_DEFAULT = 200;
+
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
   HEART: 1,
