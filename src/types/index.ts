@@ -43,6 +43,7 @@ export interface IPlayer {
   energyTimer: number;
   avatar: HTMLImageElement;
   avatarOffset: { x: number; y: number };
+  turn: number;
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;

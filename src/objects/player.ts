@@ -23,6 +23,7 @@ export class Player implements IPlayer {
   avatar: HTMLImageElement;
   avatarOffset: { x: number; y: number };
   spins: Spin[];
+  turn: number;
 
   constructor(game: IGame, index: number, attack: number, life: number, intelligence: number, avatar: number) {
     this.index = index;
@@ -59,6 +60,7 @@ export class Player implements IPlayer {
           this.avatarOffset.y + (i === 0 ? -3 : this.avatar.height + 3)
         )
     );
+    this.turn = 0;
   }
 
   /**

@@ -14,6 +14,8 @@ import {
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
 } from "@/configs/consts";
+import { effects } from "@/effects";
+import { FlickeringText } from "@/effects/flickeringText";
 import { font } from "@/objects/font";
 import { Player } from "@/objects/player";
 import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
@@ -232,6 +234,7 @@ export class Game implements IGame {
   idle() {
     this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
     this.state = "IDLE";
+    effects.add(new FlickeringText({ text: "Địt mẹ mày" }));
   }
 
   fadeIn() {
@@ -295,12 +298,14 @@ export class Game implements IGame {
 
     mapFunction[this.state].render(this);
 
-    font.draw({ text: "Còn 2 lượt" });
+    effects.render();
   }
 
   update() {
     this.players.forEach((p) => p.update());
 
     mapFunction[this.state].update(this);
+
+    effects.update();
   }
 }
