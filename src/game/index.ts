@@ -16,9 +16,19 @@ import {
 } from "@/configs/consts";
 import { effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
-import { font } from "@/objects/font";
+import { FloatingText } from "@/effects/floatingText";
+import { StarExplosion } from "@/effects/starExplosion";
 import { Player } from "@/objects/player";
-import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
+import {
+  IGame,
+  AllMatchedPositions,
+  GameState,
+  PointExt,
+  TileInfo,
+  GameStateFunction,
+  FallItem,
+  IPlayer,
+} from "@/types";
 import { check, generateMap } from "@/utils/common";
 import explodeStateFunction from "./explode";
 import fadeStateFunction from "./fade";
@@ -38,15 +48,16 @@ const mapFunction: {
 
 export class Game implements IGame {
   state: GameState;
-  selected: Point | null;
-  swapped: Point | null;
+  selected: PointExt | null;
+  swapped: PointExt | null;
   reswap: boolean;
 
   fall: {
     [key: number]: FallItem;
   };
 
-  explosions: Point[];
+  combo: number;
+  explosions: PointExt[];
   explodedTiles: TileInfo[];
 
   tIdle: number;
@@ -66,12 +77,18 @@ export class Game implements IGame {
 
   players: IPlayer[];
   playerTurn: number;
+  turnCount: number;
+
+  needUpdate: boolean;
+
+  computerTimer: number;
 
   constructor() {}
 
   init() {
-    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 10, 100, 40, 1)];
+    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 20, 100, 100, 1)];
     this.playerTurn = 0;
+    this.turnCount = 1;
 
     base.map = generateMap();
     this.findAllMatchedPositions();
@@ -80,6 +97,7 @@ export class Game implements IGame {
     this.swapped = null;
     this.reswap = false;
     this.fall = {};
+    this.combo = 0;
     this.explosions = [];
     this.tIdle = 0;
     this.tSelect = 0;
@@ -91,6 +109,7 @@ export class Game implements IGame {
     this.isFadeIn = false;
     this.isFadeOut = false;
     this.hintIndex = 0;
+    this.needUpdate = true;
 
     this.fadeIn();
   }
@@ -189,8 +208,6 @@ export class Game implements IGame {
 
     allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
     this.matchedPositions = allMatchedPositions;
-
-    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
   }
 
   onClick(e: MouseEvent) {
@@ -231,10 +248,50 @@ export class Game implements IGame {
     }
   }
 
+  changePlayer() {
+    this.playerTurn = 1 - this.playerTurn;
+    this.turnCount = 1;
+
+    if (this.playerTurn === 1) {
+      // Computer
+      this.computerTimer = 0;
+    }
+  }
+
   idle() {
     this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
     this.state = "IDLE";
-    effects.add(new FlickeringText({ text: "Địt mẹ mày" }));
+    this.combo = 0;
+
+    if (this.needUpdate) {
+      if (this.turnCount > 1) effects.add(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+      else if (this.turnCount === 0) {
+        this.changePlayer();
+      }
+    }
+
+    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+
+    this.needUpdate = false;
+  }
+
+  explode() {
+    this.state = "EXPLODE";
+    const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+    // if (Math.random() < 0.5) {
+    //   console.log("more");
+    //   this.turnCount += 1;
+    // }
+    const x = center.x / this.explosions.length;
+    const y = center.y / this.explosions.length;
+    this.combo += 1;
+    const effectX = x * CELL_SIZE + CELL_SIZE / 2;
+    const effectY = y * CELL_SIZE + CELL_SIZE / 2;
+
+    if (this.combo < 2) return;
+
+    effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
+    effects.add(new StarExplosion(effectX, effectY));
   }
 
   fadeIn() {
@@ -280,6 +337,25 @@ export class Game implements IGame {
     }
   }
 
+  updateComputer() {
+    if (this.playerTurn !== 1) return;
+
+    this.computerTimer += 1;
+
+    if (this.computerTimer === 40) {
+      this.tSwap = 0;
+      const { x0, y0 } = this.matchedPositions[this.hintIndex];
+
+      this.selected = { x: x0, y: y0, value: base.map[y0][x0] };
+      base.map[y0][x0] = -1;
+      this.state = "SELECT";
+    } else if (this.computerTimer === 60) {
+      const { x1, y1 } = this.matchedPositions[this.hintIndex];
+      this.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
+      base.map[y1][x1] = -1;
+    }
+  }
+
   render() {
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
@@ -307,5 +383,7 @@ export class Game implements IGame {
     mapFunction[this.state].update(this);
 
     effects.update();
+
+    this.updateComputer();
   }
 }

@@ -71,6 +71,10 @@ const selectStateFunction: GameStateFunction = {
       const { matched: m0, tiles: t0 } = self.matchPosition(x0, y0);
       const { matched: m1, tiles: t1 } = self.matchPosition(x1, y1);
       if (m0 || m1) {
+        // Hoán đổi oke thì giảm 1 lượt
+        self.turnCount -= 1;
+        self.needUpdate = true;
+
         self.selected = self.swapped = null;
         self.explodedTiles = combine([t0, t1]);
         self.explosions = [];
@@ -80,7 +84,7 @@ const selectStateFunction: GameStateFunction = {
           self.explosions.push({ x, y, value: base.map[y][x] });
           base.map[y][x] = -1;
         });
-        self.state = "EXPLODE";
+        self.explode();
       } else {
         base.map[y0][x0] = -1;
         base.map[y1][x1] = -1;

@@ -2,21 +2,19 @@ import { base, OPACITY_ZERO } from "@/configs/consts";
 import { font } from "@/objects/font";
 import { Effect } from "./effect";
 
-export class FlickeringText extends Effect {
+export class FloatingText extends Effect {
   text: string;
-  show: boolean;
-  speed: number;
+  isFadeIn: boolean;
 
   constructor({ text, x = 0, y = 0 }: { text: string; x?: number; y?: number }) {
     super(x, y);
 
     this.text = text;
-    this.show = true;
-    this.speed = 8;
+    this.isFadeIn = true;
+    this.opacity = 0;
   }
 
   render() {
-    if (!this.show) return;
     base.context.save();
     base.context.globalAlpha = this.opacity;
     font.draw({ text: this.text, x: this.x, y: this.y });
@@ -24,16 +22,17 @@ export class FlickeringText extends Effect {
   }
 
   update() {
-    this.timer += 1;
+    this.y -= 0.8;
 
-    this.opacity -= 0.012;
-
-    if (this.timer % Math.floor(this.speed) === 0) {
-      this.timer = 0;
-      this.speed -= 0.01;
-      this.show = !this.show;
+    if (this.isFadeIn) {
+      this.opacity += 0.12;
+      if (this.opacity > 1) {
+        this.isFadeIn = false;
+        this.opacity = 1;
+      }
+    } else {
+      this.opacity -= 0.04;
+      if (this.opacity < OPACITY_ZERO) this.isAlive = false;
     }
-
-    if (this.opacity < OPACITY_ZERO) this.isAlive = false;
   }
 }

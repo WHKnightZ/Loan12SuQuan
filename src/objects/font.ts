@@ -8,6 +8,8 @@ export class Font {
   constructor() {}
 
   draw({ text, x, y }: { text: string; x?: number; y?: number }) {
+    x = x || SCREEN_WIDTH / 2;
+    y = y || BOARD_SIZE / 2;
     const chars: FontChar[] = [];
     let width = 0;
     for (let i = 0; i < text.length; i += 1) {
@@ -18,8 +20,8 @@ export class Font {
       width += charTexture.texture.width + OFFSET_CHAR;
     }
 
-    if (!x) x = Math.floor((SCREEN_WIDTH - width) / 2);
-    if (!y) y = Math.floor((BOARD_SIZE - 24) / 2);
+    x = x - Math.floor(width / 2);
+    y = y - 12;
     let offsetX = x;
     for (let i = 0; i < text.length; i += 1) {
       const c = text.charAt(i).toUpperCase();

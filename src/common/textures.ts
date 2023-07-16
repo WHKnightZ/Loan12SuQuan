@@ -1,6 +1,6 @@
 import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_LENGTH } from "@/configs/consts";
 import { Direction, FontChar, HintArrow } from "@/types";
-import { flipHorizontal, flipVertical, resize, rotateCW90 } from "@/utils/canvas";
+import { flipHorizontal, flipVertical, resize, rotate180, rotateCCW90, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
 const loadTexture = (src: string) => {
@@ -245,6 +245,22 @@ const loadFont = async () => {
   return Promise.all(promises);
 };
 
+export let starTextures: HTMLImageElement[] = [];
+
+const loadStars = async () => {
+  const texture = await loadTexture("common/star");
+  starTextures[0] = await resize(texture, 2);
+
+  const promises: Promise<any>[] = [];
+
+  const t = starTextures[0];
+  promises.push(rotateCW90(t).then((img) => (starTextures[1] = img)));
+  promises.push(rotate180(t).then((img) => (starTextures[2] = img)));
+  promises.push(rotateCCW90(t).then((img) => (starTextures[3] = img)));
+
+  return Promise.all(promises);
+};
+
 // All
 export const loadTextures = () => {
   return Promise.all([
@@ -254,6 +270,7 @@ export const loadTextures = () => {
     loadMenu(),
     loadAvatars(),
     loadFont(),
+    loadStars(),
     //
   ]);
 };

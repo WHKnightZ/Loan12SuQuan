@@ -2,11 +2,11 @@ import { base } from "@/configs/consts";
 
 type Rotation = "CW" | "CCW"; // Clockwise, Counter Clockwise
 type Direction = "HT" | "VR" | "HB" | "VL"; // Horizontal Top, Vertical Right, Horizontal Bottom, Vertical Left
-type Point = { x: number; y: number; direction: Direction };
+type PointExt = { x: number; y: number; direction: Direction };
 
 const mapDirection: {
   [key in Rotation]: {
-    [key in Direction]: (self: Spin, point: Point) => void;
+    [key in Direction]: (self: Spin, point: PointExt) => void;
   };
 } = {
   CW: {
@@ -87,7 +87,7 @@ export class Spin {
   speed: number;
   rotation: Rotation;
   thickness: number;
-  points: Point[];
+  points: PointExt[];
   active: boolean;
   opacity: number;
 

@@ -66,11 +66,10 @@ const fallStateFunction: GameStateFunction = {
         self.explosions.push({ x, y, value: base.map[y][x] });
         base.map[y][x] = -1;
       });
-      self.state = "EXPLODE";
+      self.explode();
     } else {
       self.findAllMatchedPositions();
       self.idle();
-      self.playerTurn = 1 - self.playerTurn;
     }
   },
 };

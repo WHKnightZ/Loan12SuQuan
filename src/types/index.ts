@@ -1,17 +1,19 @@
 export type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
-export type Point = { x: number; y: number; value: number };
+export type Point = { x: number; y: number };
+
+export type PointExt = Point & { value: number };
 
 export type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: number; point: number }[];
 
-export type TileInfo = { x: number; y: number; point: number; value: number };
+export type TileInfo = PointExt & { point: number };
 
 export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
 export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";
 
 export type FallItem = {
-  list: { x: number; y: number; offset: number; v: number; value: number }[];
+  list: (PointExt & { offset: number; v: number })[];
   below: number;
   pushCount?: number;
 };
@@ -56,15 +58,16 @@ export interface IPlayer {
 
 export interface IGame {
   state: GameState;
-  selected: Point | null;
-  swapped: Point | null;
+  selected: PointExt | null;
+  swapped: PointExt | null;
   reswap: boolean;
 
   fall: {
     [key: number]: FallItem;
   };
 
-  explosions: Point[];
+  combo: number;
+  explosions: PointExt[];
   explodedTiles: TileInfo[];
 
   tIdle: number;
@@ -84,6 +87,11 @@ export interface IGame {
 
   players: IPlayer[];
   playerTurn: number;
+  turnCount: number;
+
+  needUpdate: boolean;
+
+  computerTimer: number;
 
   init(): void;
   matchPosition(
@@ -100,10 +108,13 @@ export interface IGame {
   findAllMatchedPositions(): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
+  changePlayer(): void;
   idle(): void;
+  explode(): void;
   fadeIn(): void;
   fadeOut(): void;
   gainTile(tile: TileInfo): void;
+  updateComputer(): void;
   render(): void;
   update(): void;
 }
