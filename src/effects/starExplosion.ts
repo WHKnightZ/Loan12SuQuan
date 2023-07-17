@@ -12,7 +12,7 @@ export class StarExplosion extends Effect {
     this.list = [];
     for (let i = 0; i < COUNT_STARS; i += 1) {
       const angle = (Math.PI * 2 * i) / COUNT_STARS;
-      this.list.push(new Star(x, y, 3 * Math.cos(angle), 3 * Math.sin(angle)));
+      this.list.push(new Star(x, y, 3.5 * Math.cos(angle), 3.5 * Math.sin(angle)));
     }
   }
 
@@ -24,7 +24,7 @@ export class StarExplosion extends Effect {
   }
 
   update() {
-    this.opacity -= 0.03;
+    this.opacity -= 0.025;
 
     this.list.forEach((star) => star.update());
 

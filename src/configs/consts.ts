@@ -30,7 +30,7 @@ export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
 export const CORNER_SELECTION_CYCLE = 30;
 export const HINT_ARROW_CYCLE = 30;
 
-export const PLAYER_INTELLIGENCE = 40;
+export const PLAYER_INTELLIGENCE = 20;
 export const DEFAULT_MANA = 72;
 export const DEFAULT_ENERGY = 100;
 

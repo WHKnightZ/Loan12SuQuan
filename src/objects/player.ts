@@ -73,7 +73,7 @@ export class Player implements IPlayer {
     // Ngẫu nhiên một số trong khoảng intel => 100
     const chance = random(this.intelligence, 101);
 
-    const hintIndex = Math.ceil(((1 - matchedLength) * chance) / 100) + matchedLength - 1;
+    const hintIndex = Math.floor(((1 - matchedLength) * chance) / 100) + matchedLength - 1;
 
     console.log("Intelligence: ", this.intelligence);
     console.log("Chance: ", chance);

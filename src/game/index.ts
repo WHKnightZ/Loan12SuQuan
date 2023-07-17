@@ -251,11 +251,6 @@ export class Game implements IGame {
   changePlayer() {
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
-
-    if (this.playerTurn === 1) {
-      // Computer
-      this.computerTimer = 0;
-    }
   }
 
   idle() {
@@ -271,6 +266,11 @@ export class Game implements IGame {
     }
 
     this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+
+    if (this.playerTurn === 1) {
+      // Computer
+      this.computerTimer = 0;
+    }
 
     this.needUpdate = false;
   }
@@ -310,11 +310,13 @@ export class Game implements IGame {
   gainTile({ value }: TileInfo) {
     switch (value) {
       case TILES.SWORD:
-        this.players[1 - this.playerTurn].takeDamage(2);
+      case TILES.SWORDRED:
+        const dmg = this.players[this.playerTurn].attack / 4;
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 1.5 : 1));
         break;
 
       case TILES.HEART:
-        this.players[this.playerTurn].gainLife(2);
+        this.players[this.playerTurn].gainLife(1.5);
         break;
 
       case TILES.GOLD:
@@ -329,10 +331,6 @@ export class Game implements IGame {
         break;
 
       case TILES.EXP:
-        break;
-
-      case TILES.SWORDRED:
-        this.players[1 - this.playerTurn].takeDamage(4);
         break;
     }
   }
@@ -349,7 +347,7 @@ export class Game implements IGame {
       this.selected = { x: x0, y: y0, value: base.map[y0][x0] };
       base.map[y0][x0] = -1;
       this.state = "SELECT";
-    } else if (this.computerTimer === 60) {
+    } else if (this.computerTimer === 70) {
       const { x1, y1 } = this.matchedPositions[this.hintIndex];
       this.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
       base.map[y1][x1] = -1;
