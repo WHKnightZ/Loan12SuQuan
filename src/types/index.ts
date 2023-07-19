@@ -69,6 +69,7 @@ export interface IGame {
   combo: number;
   explosions: PointExt[];
   explodedTiles: TileInfo[];
+  matched4Tiles: Point[];
 
   tIdle: number;
   tSelect: number;
@@ -101,7 +102,7 @@ export interface IGame {
     matched: boolean;
     tiles: TileInfo[];
     point: number;
-    turn: number;
+    matched4Tiles: Point[];
   };
   swap(x0: number, y0: number, x1: number, y1: number): void;
   addMatchedPosition(allMatchedPositions: AllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;

@@ -28,6 +28,7 @@ import {
   GameStateFunction,
   FallItem,
   IPlayer,
+  Point,
 } from "@/types";
 import { check, generateMap } from "@/utils/common";
 import explodeStateFunction from "./explode";
@@ -59,6 +60,7 @@ export class Game implements IGame {
   combo: number;
   explosions: PointExt[];
   explodedTiles: TileInfo[];
+  matched4Tiles: Point[];
 
   tIdle: number;
   tSelect: number;
@@ -164,7 +166,13 @@ export class Game implements IGame {
 
     const matched = hasH || hasV;
     const value = base.map[y][x];
-    const tiles = matched ? [...h, ...v, { x, y, point: mapTileInfo[value].point, value }] : [];
+    const thisPoint = { x, y, point: mapTileInfo[value].point, value };
+    const tiles = matched ? [...h, ...v, thisPoint] : [];
+
+    let matched4Tiles: Point[] = [];
+    if (h.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(h);
+    if (v.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(v);
+    if (matched4Tiles.length) matched4Tiles.push(thisPoint);
 
     return {
       matched,
@@ -173,7 +181,7 @@ export class Game implements IGame {
         tiles.reduce((a, b) => a + b.point, 0) +
         (h.length >= GAIN_TURN ? MATCH_4_POINT : 0) +
         (v.length >= GAIN_TURN ? MATCH_4_POINT : 0),
-      turn: Number(h.length >= GAIN_TURN) + Number(v.length >= GAIN_TURN),
+      matched4Tiles,
     };
   }
 
@@ -278,6 +286,8 @@ export class Game implements IGame {
   explode() {
     this.state = "EXPLODE";
     const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+
+    // console.log(this.matched4Tiles);
     // if (Math.random() < 0.5) {
     //   console.log("more");
     //   this.turnCount += 1;
@@ -312,7 +322,7 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
-        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 1.5 : 1));
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2 : 1));
         break;
 
       case TILES.HEART:
