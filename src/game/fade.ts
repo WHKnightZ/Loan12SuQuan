@@ -107,7 +107,7 @@ const fadeInUpdate = (self: IGame) => {
       i.y = colData.below + 1;
       fadeInDone.push(i);
       if (fadeInDone.length === TOTAL_TILES) {
-        self.state = "IDLE";
+        self.idle();
         fadeInDone = [];
         self.isFadeIn = self.isFadeOut = false;
       }

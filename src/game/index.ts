@@ -9,14 +9,27 @@ import {
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_POINT,
-  MENU_HEIGHT,
   PLAYER_INTELLIGENCE,
-  SCREEN_WIDTH,
   TILES,
   TILE_OFFSET,
+  TIMER_HINT_DELAY_DEFAULT,
 } from "@/configs/consts";
+import { effects } from "@/effects";
+import { FlickeringText } from "@/effects/flickeringText";
+import { FloatingText } from "@/effects/floatingText";
+import { StarExplosion } from "@/effects/starExplosion";
 import { Player } from "@/objects/player";
-import { IGame, AllMatchedPositions, GameState, Point, TileInfo, GameStateFunction, FallItem, IPlayer } from "@/types";
+import {
+  IGame,
+  AllMatchedPositions,
+  GameState,
+  PointExt,
+  TileInfo,
+  GameStateFunction,
+  FallItem,
+  IPlayer,
+  Point,
+} from "@/types";
 import { check, generateMap } from "@/utils/common";
 import explodeStateFunction from "./explode";
 import fadeStateFunction from "./fade";
@@ -36,16 +49,18 @@ const mapFunction: {
 
 export class Game implements IGame {
   state: GameState;
-  selected: Point | null;
-  swapped: Point | null;
+  selected: PointExt | null;
+  swapped: PointExt | null;
   reswap: boolean;
 
   fall: {
     [key: number]: FallItem;
   };
 
-  explosions: Point[];
+  combo: number;
+  explosions: PointExt[];
   explodedTiles: TileInfo[];
+  matched4Tiles: Point[];
 
   tIdle: number;
   tSelect: number;
@@ -54,6 +69,7 @@ export class Game implements IGame {
   tExplode2: number;
   tFadeIn: number;
   tFadeOut: number;
+  tHintDelay: number;
 
   isFadeIn: boolean;
   isFadeOut: boolean;
@@ -63,12 +79,18 @@ export class Game implements IGame {
 
   players: IPlayer[];
   playerTurn: number;
+  turnCount: number;
+
+  needUpdate: boolean;
+
+  computerTimer: number;
 
   constructor() {}
 
   init() {
-    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE), new Player(this, 1, 10, 100, 40)];
+    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 20, 100, 100, 1)];
     this.playerTurn = 0;
+    this.turnCount = 1;
 
     base.map = generateMap();
     this.findAllMatchedPositions();
@@ -77,6 +99,7 @@ export class Game implements IGame {
     this.swapped = null;
     this.reswap = false;
     this.fall = {};
+    this.combo = 0;
     this.explosions = [];
     this.tIdle = 0;
     this.tSelect = 0;
@@ -88,6 +111,7 @@ export class Game implements IGame {
     this.isFadeIn = false;
     this.isFadeOut = false;
     this.hintIndex = 0;
+    this.needUpdate = true;
 
     this.fadeIn();
   }
@@ -142,7 +166,13 @@ export class Game implements IGame {
 
     const matched = hasH || hasV;
     const value = base.map[y][x];
-    const tiles = matched ? [...h, ...v, { x, y, point: mapTileInfo[value].point, value }] : [];
+    const thisPoint = { x, y, point: mapTileInfo[value].point, value };
+    const tiles = matched ? [...h, ...v, thisPoint] : [];
+
+    let matched4Tiles: Point[] = [];
+    if (h.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(h);
+    if (v.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(v);
+    if (matched4Tiles.length) matched4Tiles.push(thisPoint);
 
     return {
       matched,
@@ -151,7 +181,7 @@ export class Game implements IGame {
         tiles.reduce((a, b) => a + b.point, 0) +
         (h.length >= GAIN_TURN ? MATCH_4_POINT : 0) +
         (v.length >= GAIN_TURN ? MATCH_4_POINT : 0),
-      turn: Number(h.length >= GAIN_TURN) + Number(v.length >= GAIN_TURN),
+      matched4Tiles,
     };
   }
 
@@ -186,8 +216,6 @@ export class Game implements IGame {
 
     allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
     this.matchedPositions = allMatchedPositions;
-
-    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
   }
 
   onClick(e: MouseEvent) {
@@ -197,7 +225,7 @@ export class Game implements IGame {
 
     const x = Math.floor((e.offsetX * canvas.width) / canvas.clientWidth / CELL_SIZE);
     const y = Math.floor((e.offsetY * canvas.height) / canvas.clientHeight / CELL_SIZE);
-    if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return;
+    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) return;
 
     this.tSwap = 0;
 
@@ -212,7 +240,7 @@ export class Game implements IGame {
       const { x, y, value } = this.selected;
       base.map[y][x] = value;
       this.selected = null;
-      this.state = "IDLE";
+      this.idle();
       return;
     }
 
@@ -228,6 +256,54 @@ export class Game implements IGame {
     }
   }
 
+  changePlayer() {
+    this.playerTurn = 1 - this.playerTurn;
+    this.turnCount = 1;
+  }
+
+  idle() {
+    this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
+    this.state = "IDLE";
+    this.combo = 0;
+
+    if (this.needUpdate) {
+      if (this.turnCount > 1) effects.add(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+      else if (this.turnCount === 0) {
+        this.changePlayer();
+      }
+    }
+
+    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+
+    if (this.playerTurn === 1) {
+      // Computer
+      this.computerTimer = 0;
+    }
+
+    this.needUpdate = false;
+  }
+
+  explode() {
+    this.state = "EXPLODE";
+    const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+
+    // console.log(this.matched4Tiles);
+    // if (Math.random() < 0.5) {
+    //   console.log("more");
+    //   this.turnCount += 1;
+    // }
+    const x = center.x / this.explosions.length;
+    const y = center.y / this.explosions.length;
+    this.combo += 1;
+    const effectX = x * CELL_SIZE + CELL_SIZE / 2;
+    const effectY = y * CELL_SIZE + CELL_SIZE / 2;
+
+    if (this.combo < 2) return;
+
+    effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
+    effects.add(new StarExplosion(effectX, effectY));
+  }
+
   fadeIn() {
     this.state = "FADE";
     for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
@@ -241,19 +317,50 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
-  acquireTile({ value }: TileInfo) {
+  gainTile({ value }: TileInfo) {
     switch (value) {
-      case TILES.MANA:
-        this.players[this.playerTurn].acquireMana(5);
-        break;
-
       case TILES.SWORD:
-        this.players[1 - this.playerTurn].takeDamage(2);
+      case TILES.SWORDRED:
+        const dmg = this.players[this.playerTurn].attack / 4;
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2 : 1));
         break;
 
-      case TILES.SWORDRED:
-        this.players[1 - this.playerTurn].takeDamage(3);
+      case TILES.HEART:
+        this.players[this.playerTurn].gainLife(1.5);
         break;
+
+      case TILES.GOLD:
+        break;
+
+      case TILES.ENERGY:
+        this.players[this.playerTurn].gainEnergy(2);
+        break;
+
+      case TILES.MANA:
+        this.players[this.playerTurn].gainMana(5);
+        break;
+
+      case TILES.EXP:
+        break;
+    }
+  }
+
+  updateComputer() {
+    if (this.playerTurn !== 1) return;
+
+    this.computerTimer += 1;
+
+    if (this.computerTimer === 40) {
+      this.tSwap = 0;
+      const { x0, y0 } = this.matchedPositions[this.hintIndex];
+
+      this.selected = { x: x0, y: y0, value: base.map[y0][x0] };
+      base.map[y0][x0] = -1;
+      this.state = "SELECT";
+    } else if (this.computerTimer === 70) {
+      const { x1, y1 } = this.matchedPositions[this.hintIndex];
+      this.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
+      base.map[y1][x1] = -1;
     }
   }
 
@@ -274,11 +381,17 @@ export class Game implements IGame {
     this.players.forEach((p) => p.render());
 
     mapFunction[this.state].render(this);
+
+    effects.render();
   }
 
   update() {
     this.players.forEach((p) => p.update());
 
     mapFunction[this.state].update(this);
+
+    effects.update();
+
+    this.updateComputer();
   }
 }

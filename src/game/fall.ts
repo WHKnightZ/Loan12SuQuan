@@ -49,11 +49,13 @@ const fallStateFunction: GameStateFunction = {
 
     if (newFalling) return;
 
+    self.matched4Tiles = [];
     const tt: TileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
-        const { matched: m0, tiles: t0 } = self.matchPosition(j, i);
+        const { matched: m0, tiles: t0, matched4Tiles: m40 } = self.matchPosition(j, i);
         if (m0) tt.push(t0);
+        if (m40.length) self.matched4Tiles = self.matched4Tiles.concat(m40);
       }
     }
 
@@ -62,14 +64,14 @@ const fallStateFunction: GameStateFunction = {
       self.explosions = [];
       self.explodedTiles.forEach((tile) => {
         const { x, y } = tile;
-        self.acquireTile(tile);
+        self.gainTile(tile);
         self.explosions.push({ x, y, value: base.map[y][x] });
         base.map[y][x] = -1;
       });
-      self.state = "EXPLODE";
+      self.explode();
     } else {
       self.findAllMatchedPositions();
-      self.state = "IDLE";
+      self.idle();
     }
   },
 };

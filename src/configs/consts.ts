@@ -25,16 +25,20 @@ export const MATCH_4_POINT = 50;
 export const SWAP_DURATION = 10;
 export const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 export const VELOCITY_BASE = 2;
-export const GRAVITY = 0.4;
+export const GRAVITY = 0.3;
 export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
 export const CORNER_SELECTION_CYCLE = 30;
 export const HINT_ARROW_CYCLE = 30;
 
-export const PLAYER_INTELLIGENCE = 40;
-export const DEFAULT_MANA = 100;
+export const PLAYER_INTELLIGENCE = 20;
+export const DEFAULT_MANA = 72;
 export const DEFAULT_ENERGY = 100;
 
+export const OPACITY_ZERO = 0.0001;
+
 export const LOSE_ENERGY_INTERVAL = 300;
+
+export const TIMER_HINT_DELAY_DEFAULT = 300;
 
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
