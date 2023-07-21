@@ -219,7 +219,7 @@ export class Game implements IGame {
   }
 
   onClick(e: MouseEvent) {
-    if (this.state !== "IDLE" && this.state !== "SELECT") return;
+    if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
 
     const canvas = base.canvas;
 
