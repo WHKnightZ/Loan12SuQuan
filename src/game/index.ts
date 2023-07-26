@@ -95,7 +95,10 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 20, 100, 100, 1)];
+    this.players = [
+      new Player({ game: this, index: 0, attack: 5, life: 100, intelligence: PLAYER_INTELLIGENCE, avatar: 0 }),
+      new Player({ game: this, index: 1, attack: 8, life: 100, intelligence: 100, avatar: 1 }),
+    ];
     this.playerTurn = 0;
     this.turnCount = 1;
     this.matched4 = { turnCount: 0, matchedList: {} };
@@ -334,7 +337,7 @@ export class Game implements IGame {
 
     this.wait = {
       timer: 0,
-      maxTimer: this.combo === 0 ? 4 : 7,
+      maxTimer: this.combo === 0 ? 4 : 8,
       callback,
     };
     this.state = "WAIT";
@@ -362,7 +365,7 @@ export class Game implements IGame {
         break;
 
       case TILES.HEART:
-        this.players[this.playerTurn].gainLife(1.5);
+        this.players[this.playerTurn].gainLife(1.8);
         break;
 
       case TILES.GOLD:

@@ -25,7 +25,21 @@ export class Player implements IPlayer {
   spins: Spin[];
   turn: number;
 
-  constructor(game: IGame, index: number, attack: number, life: number, intelligence: number, avatar: number) {
+  constructor({
+    game,
+    index,
+    attack,
+    life,
+    intelligence,
+    avatar,
+  }: {
+    game: IGame;
+    index: number;
+    attack: number;
+    life: number;
+    intelligence: number;
+    avatar: number;
+  }) {
     this.index = index;
     this.game = game;
     this.attack = attack;
