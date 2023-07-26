@@ -68,6 +68,7 @@ const selectStateFunction: GameStateFunction = {
       self.selected = self.swapped = null;
       self.idle();
     } else {
+      self.matched4 = { turnCount: 0, matchedList: {} };
       const { matched: m0, tiles: t0, matched4Tiles: m40 } = self.matchPosition(x0, y0);
       const { matched: m1, tiles: t1, matched4Tiles: m41 } = self.matchPosition(x1, y1);
       if (m0 || m1) {
@@ -84,7 +85,6 @@ const selectStateFunction: GameStateFunction = {
           const { x, y } = tile;
           self.gainTile(tile);
           self.explosions.push({ x, y, value: base.map[y][x] });
-          base.map[y][x] = -1;
         });
         self.explode();
       } else {
