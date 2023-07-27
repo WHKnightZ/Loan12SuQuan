@@ -29,13 +29,16 @@ import {
   FallItem,
   IPlayer,
   Point,
+  Matched4,
+  Wait,
 } from "@/types";
-import { check, generateMap } from "@/utils/common";
+import { check, generateMap, getKey } from "@/utils/common";
 import explodeStateFunction from "./explode";
 import fadeStateFunction from "./fade";
 import fallStateFunction from "./fall";
 import idleStateFunction from "./idle";
 import selectStateFunction from "./select";
+import waitStateFunction from "./wait";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;
@@ -45,6 +48,7 @@ const mapFunction: {
   EXPLODE: explodeStateFunction,
   FALL: fallStateFunction,
   FADE: fadeStateFunction,
+  WAIT: waitStateFunction,
 };
 
 export class Game implements IGame {
@@ -61,6 +65,7 @@ export class Game implements IGame {
   explosions: PointExt[];
   explodedTiles: TileInfo[];
   matched4Tiles: Point[];
+  matched4: Matched4;
 
   tIdle: number;
   tSelect: number;
@@ -73,6 +78,8 @@ export class Game implements IGame {
 
   isFadeIn: boolean;
   isFadeOut: boolean;
+
+  wait: Wait;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;
@@ -88,9 +95,13 @@ export class Game implements IGame {
   constructor() {}
 
   init() {
-    this.players = [new Player(this, 0, 5, 100, PLAYER_INTELLIGENCE, 0), new Player(this, 1, 20, 100, 100, 1)];
+    this.players = [
+      new Player({ game: this, index: 0, attack: 7, life: 100, intelligence: PLAYER_INTELLIGENCE, avatar: 0 }),
+      new Player({ game: this, index: 1, attack: 9, life: 100, intelligence: 100, avatar: 1 }),
+    ];
     this.playerTurn = 0;
     this.turnCount = 1;
+    this.matched4 = { turnCount: 0, matchedList: {} };
 
     base.map = generateMap();
     this.findAllMatchedPositions();
@@ -169,9 +180,27 @@ export class Game implements IGame {
     const thisPoint = { x, y, point: mapTileInfo[value].point, value };
     const tiles = matched ? [...h, ...v, thisPoint] : [];
 
+    const checkMatch4Turn = (tiles: TileInfo[]) => {
+      let check = 0;
+      tiles.forEach((tile) => {
+        const key = getKey(tile.x, tile.y);
+        if (this.matched4.matchedList[key]) return;
+
+        this.matched4.matchedList[key] = true;
+        check = 1;
+      });
+      return check;
+    };
+
     let matched4Tiles: Point[] = [];
-    if (h.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(h);
-    if (v.length >= GAIN_TURN) matched4Tiles = matched4Tiles.concat(v);
+    if (h.length >= GAIN_TURN) {
+      matched4Tiles = matched4Tiles.concat(h);
+      this.matched4.turnCount += checkMatch4Turn([...h, thisPoint]);
+    }
+    if (v.length >= GAIN_TURN) {
+      matched4Tiles = matched4Tiles.concat(v);
+      this.matched4.turnCount += checkMatch4Turn([...v, thisPoint]);
+    }
     if (matched4Tiles.length) matched4Tiles.push(thisPoint);
 
     return {
@@ -219,7 +248,7 @@ export class Game implements IGame {
   }
 
   onClick(e: MouseEvent) {
-    if (this.state !== "IDLE" && this.state !== "SELECT") return;
+    if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
 
     const canvas = base.canvas;
 
@@ -284,24 +313,32 @@ export class Game implements IGame {
   }
 
   explode() {
-    this.state = "EXPLODE";
-    const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+    const callback = () => {
+      this.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
 
-    // console.log(this.matched4Tiles);
-    // if (Math.random() < 0.5) {
-    //   console.log("more");
-    //   this.turnCount += 1;
-    // }
-    const x = center.x / this.explosions.length;
-    const y = center.y / this.explosions.length;
-    this.combo += 1;
-    const effectX = x * CELL_SIZE + CELL_SIZE / 2;
-    const effectY = y * CELL_SIZE + CELL_SIZE / 2;
+      this.state = "EXPLODE";
+      const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
 
-    if (this.combo < 2) return;
+      this.turnCount += this.matched4.turnCount;
 
-    effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
-    effects.add(new StarExplosion(effectX, effectY));
+      const x = center.x / this.explosions.length;
+      const y = center.y / this.explosions.length;
+      this.combo += 1;
+      const effectX = x * CELL_SIZE + CELL_SIZE / 2;
+      const effectY = y * CELL_SIZE + CELL_SIZE / 2;
+
+      if (this.combo < 2) return;
+
+      effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
+      effects.add(new StarExplosion(effectX, effectY));
+    };
+
+    this.wait = {
+      timer: 0,
+      maxTimer: this.combo === 0 ? 4 : 8,
+      callback,
+    };
+    this.state = "WAIT";
   }
 
   fadeIn() {
@@ -322,7 +359,7 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
-        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2 : 1));
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2.5 : 1));
         break;
 
       case TILES.HEART:
@@ -350,14 +387,14 @@ export class Game implements IGame {
 
     this.computerTimer += 1;
 
-    if (this.computerTimer === 40) {
+    if (this.computerTimer === 70) {
       this.tSwap = 0;
       const { x0, y0 } = this.matchedPositions[this.hintIndex];
 
       this.selected = { x: x0, y: y0, value: base.map[y0][x0] };
       base.map[y0][x0] = -1;
       this.state = "SELECT";
-    } else if (this.computerTimer === 70) {
+    } else if (this.computerTimer === 100) {
       const { x1, y1 } = this.matchedPositions[this.hintIndex];
       this.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
       base.map[y1][x1] = -1;

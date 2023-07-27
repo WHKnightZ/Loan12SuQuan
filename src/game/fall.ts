@@ -49,6 +49,7 @@ const fallStateFunction: GameStateFunction = {
 
     if (newFalling) return;
 
+    self.matched4 = { turnCount: 0, matchedList: {} };
     self.matched4Tiles = [];
     const tt: TileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
@@ -66,7 +67,6 @@ const fallStateFunction: GameStateFunction = {
         const { x, y } = tile;
         self.gainTile(tile);
         self.explosions.push({ x, y, value: base.map[y][x] });
-        base.map[y][x] = -1;
       });
       self.explode();
     } else {

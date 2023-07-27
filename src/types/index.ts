@@ -10,12 +10,23 @@ export type TileInfo = PointExt & { point: number };
 
 export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
-export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE";
+export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
 
 export type FallItem = {
   list: (PointExt & { offset: number; v: number })[];
   below: number;
   pushCount?: number;
+};
+
+export type Matched4 = {
+  turnCount: number;
+  matchedList: { [key: string]: boolean };
+};
+
+export type Wait = {
+  timer: number;
+  maxTimer: number;
+  callback: () => void;
 };
 
 export type PlayerAttribute = {
@@ -70,6 +81,7 @@ export interface IGame {
   explosions: PointExt[];
   explodedTiles: TileInfo[];
   matched4Tiles: Point[];
+  matched4: Matched4;
 
   tIdle: number;
   tSelect: number;
@@ -82,6 +94,8 @@ export interface IGame {
 
   isFadeIn: boolean;
   isFadeOut: boolean;
+
+  wait: Wait;
 
   matchedPositions: AllMatchedPositions;
   hintIndex: number;
