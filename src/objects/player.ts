@@ -100,6 +100,7 @@ export class Player implements IPlayer {
   takeDamage(damage: number) {
     this.life.timer = 0;
     this.life.value = this.life.value - damage;
+    if (this.life.value < 0) this.life.value = 0;
   }
 
   gainLife(value: number) {

@@ -96,8 +96,8 @@ export class Game implements IGame {
 
   init() {
     this.players = [
-      new Player({ game: this, index: 0, attack: 5, life: 100, intelligence: PLAYER_INTELLIGENCE, avatar: 0 }),
-      new Player({ game: this, index: 1, attack: 8, life: 100, intelligence: 100, avatar: 1 }),
+      new Player({ game: this, index: 0, attack: 7, life: 100, intelligence: PLAYER_INTELLIGENCE, avatar: 0 }),
+      new Player({ game: this, index: 1, attack: 9, life: 100, intelligence: 100, avatar: 1 }),
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
@@ -319,8 +319,6 @@ export class Game implements IGame {
       this.state = "EXPLODE";
       const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
 
-      console.log(this.matched4);
-
       this.turnCount += this.matched4.turnCount;
 
       const x = center.x / this.explosions.length;
@@ -361,11 +359,11 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
-        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2 : 1));
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2.5 : 1));
         break;
 
       case TILES.HEART:
-        this.players[this.playerTurn].gainLife(1.8);
+        this.players[this.playerTurn].gainLife(1.5);
         break;
 
       case TILES.GOLD:
