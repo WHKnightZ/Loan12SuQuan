@@ -26,6 +26,8 @@
 - [ ] Ban đầu sẽ xử lý ở FE, về sau sẽ implement socket để xử lý BE
 - [ ] Admin sẽ dùng Nextjs (Reactjs) làm FE, Giao diện chơi dùng thuần js canvas
 - [ ] Hiệu ứng chain lightning làm như nào?
+- [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
+- [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 
 ### Bug:
 - [X] Click ngoài canvas không select tile nữa
