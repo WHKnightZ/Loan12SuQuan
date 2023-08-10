@@ -25,6 +25,7 @@
 - [ ] Vật phẩm, skill theo hero
 - [ ] Ban đầu sẽ xử lý ở FE, về sau sẽ implement socket để xử lý BE
 - [ ] Admin sẽ dùng Nextjs (Reactjs) làm FE, Giao diện chơi dùng thuần js canvas
+- [ ] Hiệu ứng chain lightning làm như nào?
 
 ### Bug:
 - [X] Click ngoài canvas không select tile nữa
