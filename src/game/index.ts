@@ -13,6 +13,8 @@ import {
   TILES,
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
+  CELL_SIZE_2,
+  SCREEN_WIDTH,
 } from "@/configs/consts";
 import { effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
@@ -39,6 +41,8 @@ import fallStateFunction from "./fall";
 import idleStateFunction from "./idle";
 import selectStateFunction from "./select";
 import waitStateFunction from "./wait";
+import { GainTile } from "@/effects/gainTile";
+import { SwordAttack } from "@/effects/swordAttack";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;
@@ -252,9 +256,13 @@ export class Game implements IGame {
 
     const canvas = base.canvas;
 
-    const x = Math.floor((e.offsetX * canvas.width) / canvas.clientWidth / CELL_SIZE);
-    const y = Math.floor((e.offsetY * canvas.height) / canvas.clientHeight / CELL_SIZE);
-    if (x < 0 || x >= BOARD_SIZE || y < 0 || y >= BOARD_SIZE) return;
+    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
+    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
+
+    if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
+
+    const x = Math.floor(offsetX / CELL_SIZE);
+    const y = Math.floor(offsetY / CELL_SIZE);
 
     this.tSwap = 0;
 
@@ -319,13 +327,26 @@ export class Game implements IGame {
       this.state = "EXPLODE";
       const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
 
+      if (this.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
+        const player = this.players[1 - this.playerTurn];
+        effects.add(
+          new SwordAttack(
+            this.playerTurn,
+            this.playerTurn === 0 ? 0 : SCREEN_WIDTH,
+            0,
+            player.avatarOffset.x + player.avatar.width / 2,
+            player.avatarOffset.y + player.avatar.height / 2
+          )
+        );
+      }
+
       this.turnCount += this.matched4.turnCount;
 
       const x = center.x / this.explosions.length;
       const y = center.y / this.explosions.length;
       this.combo += 1;
-      const effectX = x * CELL_SIZE + CELL_SIZE / 2;
-      const effectY = y * CELL_SIZE + CELL_SIZE / 2;
+      const effectX = x * CELL_SIZE + CELL_SIZE_2;
+      const effectY = y * CELL_SIZE + CELL_SIZE_2;
 
       if (this.combo < 2) return;
 
@@ -354,7 +375,20 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
-  gainTile({ value }: TileInfo) {
+  gainTile({ value, x, y }: TileInfo) {
+    if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
+      const currentPlayer = this.players[this.playerTurn];
+      effects.add(
+        new GainTile({
+          tile: value,
+          startX: x * CELL_SIZE + CELL_SIZE_2,
+          startY: y * CELL_SIZE + CELL_SIZE_2,
+          endX: currentPlayer.avatarOffset.x + currentPlayer.avatar.width / 2,
+          endY: currentPlayer.avatarOffset.y,
+        })
+      );
+    }
+
     switch (value) {
       case TILES.SWORD:
       case TILES.SWORDRED:

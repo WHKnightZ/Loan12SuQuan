@@ -14,7 +14,7 @@
 - [X] Đếm số lượng 4 như thế nào?
 - [X] Làm chức năng test combo 4 được cộng bao nhiêu turn
 - [X] Sau khi ăn 4 mà số lượt >=2 sẽ show text còn bao nhiêu lượt
-- [ ] Tile giọt nước là gì? Ở phần 2 có 8 tile thay vì 6, check lại
+- [X] Tile giọt nước là gì? Ở phần 2 có 8 tile thay vì 6, check lại => cũng là kinh nghiệm nhưng mà ít hơn
 - [ ] Hiệu ứng kiếm (sau khi kiếm đến nơi sẽ tan dần + xuất hiện hiệu ứng gây sát thương)
 - [ ] Hiệu ứng máu, mana, năng lượng bay từ chỗ ăn tile vào
 - [ ] Hiệu ứng máu hồi + mana ... (bay lên từ avatar)
@@ -28,6 +28,10 @@
 - [ ] Hiệu ứng chain lightning làm như nào?
 - [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
+- [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 
 ### Bug:
 - [X] Click ngoài canvas không select tile nữa
+
+### Referrences:
+- https://easings.net/

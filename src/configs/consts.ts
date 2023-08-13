@@ -7,6 +7,7 @@ export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
 export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
 export const CELL_SIZE = 60;
+export const CELL_SIZE_2 = CELL_SIZE / 2;
 export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
 export const MENU_HEIGHT = 96;
 export const SCREEN_WIDTH = BOARD_SIZE;
@@ -83,3 +84,6 @@ export const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCL
 export const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
   Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
 );
+
+export const AVATAR_OFFSET_X = 62;
+export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;

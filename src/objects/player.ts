@@ -1,12 +1,19 @@
 import { avatarTextures, barTextures } from "@/common/textures";
-import { base, BOARD_SIZE, DEFAULT_ENERGY, DEFAULT_MANA, LOSE_ENERGY_INTERVAL, SCREEN_WIDTH } from "@/configs/consts";
+import {
+  AVATAR_OFFSET_X,
+  AVATAR_OFFSET_Y,
+  base,
+  BOARD_SIZE,
+  DEFAULT_ENERGY,
+  DEFAULT_MANA,
+  LOSE_ENERGY_INTERVAL,
+  SCREEN_WIDTH,
+} from "@/configs/consts";
 import { IGame, IPlayer, PlayerAttribute, PlayerAttributeExtra } from "@/types";
 import { random } from "@/utils/common";
 import { Spin } from "./spin";
 
 const BAR_OFFSET_X = 132;
-const AVATAR_OFFSET_X = 62;
-const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
 
 export class Player implements IPlayer {
   index: number;
