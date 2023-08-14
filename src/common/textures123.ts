@@ -1,4 +1,4 @@
-import { CELL_SIZE, mapTileInfo, SCALE_RATIO, TILES, TILE_LENGTH } from "@/configs/consts";
+import { CELL_SIZE, SCALE_RATIO, TILES, TILE_LENGTH, mapTileInfo } from "@/configs/consts";
 import { Direction, FontChar, HintArrow } from "@/types";
 import { flipHorizontal, flipVertical, resize, rotate180, rotateCCW90, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
@@ -9,44 +9,56 @@ const loadTexture = (src: string) => {
   return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
 };
 
+const getCropImage = (image: HTMLImageElement, pos: number) => {
+  const width = Math.floor((image.width / TILE_LENGTH) * SCALE_RATIO);
+  const height = Math.floor(image.height * SCALE_RATIO);
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  context.imageSmoothingEnabled = false;
+
+  const newPosition = (image.width / TILE_LENGTH) * pos;
+  const newWidth = image.width / TILE_LENGTH;
+
+  context.drawImage(image, newPosition, 0, newWidth, image.height, 0, 0, width, height);
+
+  const image2 = new Image();
+  image2.src = canvas.toDataURL("image/png");
+
+  return new Promise<HTMLImageElement>((res) => (image2.onload = () => res(image2)));
+};
+
 const loadTilesAndExplosions = async () => {
-  const loadImage = (key: number, src: string) => {
+  const loadImage = async (key: number, src: string) => {
     const image = new Image();
     image.src = getImageSrc(`tiles/${src}`);
     return new Promise(
       (res) =>
         (image.onload = async () => {
-          const getCropImage = (pos: number) => {
-            const width = Math.floor((image.width / TILE_LENGTH) * SCALE_RATIO);
-            const height = Math.floor(image.height * SCALE_RATIO);
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-            context.imageSmoothingEnabled = false;
-
-            const newPosition = (image.width / TILE_LENGTH) * pos;
-            const newWidth = image.width / TILE_LENGTH;
-
-            context.drawImage(image, newPosition, 0, newWidth, image.height, 0, 0, width, height);
-
-            const image2 = new Image();
-            image2.src = canvas.toDataURL("image/png");
-
-            return new Promise<HTMLImageElement>((res) => (image2.onload = () => res(image2)));
-          };
-
-          mapTileInfo[key].texture = await getCropImage(0);
+          mapTileInfo[key].texture = await getCropImage(image, 0);
           mapTileInfo[key].explosions = [];
           for (let i = 0; i < 6; i += 1) {
-            mapTileInfo[key].explosions[i] = await getCropImage(i + 1);
+            mapTileInfo[key].explosions[i] = await getCropImage(image, i + 1);
           }
           res(null);
         })
     );
   };
-
   await Promise.all(getKeys(TILES).map((tile) => loadImage(TILES[tile], tile.toLowerCase())));
+};
+
+export let bloodTextures: HTMLImageElement[] = [];
+
+const loadBloods = async () => {
+  const texture = await loadTexture("common/bloodthrowaround");
+
+  const promises: Promise<any>[] = [];
+
+  for (let pos = 0; pos < 5; pos++) {
+    promises.push(getCropImage(texture, pos).then((img) => (bloodTextures[pos] = img)));
+  }
+  return Promise.all(promises);
 };
 
 export let cornerSelections: {

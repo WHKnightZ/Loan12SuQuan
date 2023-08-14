@@ -1,37 +1,41 @@
 import { menuTexture } from "@/common/textures";
 import {
-  base,
   BOARD_COLORS,
   BOARD_SIZE,
   CELL_SIZE,
+  CELL_SIZE_2,
   GAIN_TURN,
-  mapTileInfo,
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_POINT,
   PLAYER_INTELLIGENCE,
+  SCREEN_WIDTH,
   TILES,
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
-  CELL_SIZE_2,
-  SCREEN_WIDTH,
+  base,
+  mapTileInfo,
 } from "@/configs/consts";
 import { effects } from "@/effects";
+import { BloodThrowAround } from "@/effects/bloodThrowAround";
 import { FlickeringText } from "@/effects/flickeringText";
 import { FloatingText } from "@/effects/floatingText";
+import { GainTile } from "@/effects/gainTile";
 import { StarExplosion } from "@/effects/starExplosion";
+import { StarFly } from "@/effects/starFly";
+import { SwordAttack } from "@/effects/swordAttack";
 import { Player } from "@/objects/player";
 import {
-  IGame,
   AllMatchedPositions,
+  FallItem,
   GameState,
+  GameStateFunction,
+  IGame,
+  IPlayer,
+  Matched4,
+  Point,
   PointExt,
   TileInfo,
-  GameStateFunction,
-  FallItem,
-  IPlayer,
-  Point,
-  Matched4,
   Wait,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
@@ -41,8 +45,6 @@ import fallStateFunction from "./fall";
 import idleStateFunction from "./idle";
 import selectStateFunction from "./select";
 import waitStateFunction from "./wait";
-import { GainTile } from "@/effects/gainTile";
-import { SwordAttack } from "@/effects/swordAttack";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;
@@ -318,6 +320,16 @@ export class Game implements IGame {
     }
 
     this.needUpdate = false;
+
+    const effectX = 7 * CELL_SIZE + CELL_SIZE / 2;
+    const effectY = 1 * CELL_SIZE + CELL_SIZE / 2;
+
+    const targetX = 0 * CELL_SIZE + CELL_SIZE / 2;
+    const targetY = 7 * CELL_SIZE + CELL_SIZE / 2;
+
+    // effects.add(new StarExplosion(effectX, effectY));
+    effects.add(new StarFly(0, 0, targetX, targetY));
+    effects.add(new BloodThrowAround(effectX, effectY, this.playerTurn));
   }
 
   explode() {
@@ -352,6 +364,7 @@ export class Game implements IGame {
 
       effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
       effects.add(new StarExplosion(effectX, effectY));
+      console.log("Starrrrrr");
     };
 
     this.wait = {
@@ -393,6 +406,8 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
+        // Add the effect sword flying to the enemy
+
         this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2.5 : 1));
         break;
 

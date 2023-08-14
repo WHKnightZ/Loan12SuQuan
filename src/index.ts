@@ -1,5 +1,5 @@
-import { loadTextures } from "@/common/textures";
-import { base, SCREEN_WIDTH, SCREEN_HEIGHT } from "@/configs/consts";
+import loadTextures from "@/common/textures";
+import { SCREEN_HEIGHT, SCREEN_WIDTH, base } from "@/configs/consts";
 import { Game } from "@/game";
 
 const game = new Game();
