@@ -1,23 +1,24 @@
 # Loạn 12 Sứ Quân
 
 ### Chức năng bố sung:
-- [X] Hiệu ứng khi select 1 tile
-- [X] Ăn kiếm đỏ nổ khu vực xung quanh
-- [X] Đổi sprite cũ sang mới
-- [X] Thêm avatar 2 nhân vật
-- [X] Animation chạy quanh để báo người chơi active
-- [X] Hệ thống hint: Hint tốt nhất và hint random theo chỉ số thông minh + hiệu ứng mũi tên hint
-- [X] Hiệu ứng tan biến + tile rơi xuống dần dần từ trái qua phải (fade out + fade in)
-- [X] Hiệu ứng combo x2, x3, x4, Hiệu ứng nổ sao khi combo
-- [X] Action khi ăn các tile (kiếm, máu, mana, năng lượng)
-- [X] Đổi lượt người chơi
-- [X] Đếm số lượng 4 như thế nào?
-- [X] Làm chức năng test combo 4 được cộng bao nhiêu turn
-- [X] Sau khi ăn 4 mà số lượt >=2 sẽ show text còn bao nhiêu lượt
-- [X] Tile giọt nước là gì? Ở phần 2 có 8 tile thay vì 6, check lại => cũng là kinh nghiệm nhưng mà ít hơn
-- [ ] Hiệu ứng kiếm (sau khi kiếm đến nơi sẽ tan dần + xuất hiện hiệu ứng gây sát thương)
-- [ ] Hiệu ứng máu, mana, năng lượng bay từ chỗ ăn tile vào
-- [ ] Hiệu ứng máu hồi + mana ... (bay lên từ avatar)
+
+- [x] Hiệu ứng khi select 1 tile
+- [x] Ăn kiếm đỏ nổ khu vực xung quanh
+- [x] Đổi sprite cũ sang mới
+- [x] Thêm avatar 2 nhân vật
+- [x] Animation chạy quanh để báo người chơi active
+- [x] Hệ thống hint: Hint tốt nhất và hint random theo chỉ số thông minh + hiệu ứng mũi tên hint
+- [x] Hiệu ứng tan biến + tile rơi xuống dần dần từ trái qua phải (fade out + fade in)
+- [x] Hiệu ứng combo x2, x3, x4, Hiệu ứng nổ sao khi combo
+- [x] Action khi ăn các tile (kiếm, máu, mana, năng lượng)
+- [x] Đổi lượt người chơi
+- [x] Đếm số lượng 4 như thế nào?
+- [x] Làm chức năng test combo 4 được cộng bao nhiêu turn
+- [x] Sau khi ăn 4 mà số lượt >=2 sẽ show text còn bao nhiêu lượt
+- [x] Tile giọt nước là gì? Ở phần 2 có 8 tile thay vì 6, check lại => cũng là kinh nghiệm nhưng mà ít hơn
+- [x] Hiệu ứng kiếm (sau khi kiếm đến nơi sẽ tan dần + xuất hiện hiệu ứng gây sát thương)
+- [x] Hiệu ứng máu, mana, năng lượng bay từ chỗ ăn tile vào
+- [ ] ~~Hiệu ứng máu hồi + mana ... (bay lên từ avatar)~~
 - [ ] Thiếu chức năng check xem hết nước đi chưa => Hiệu ứng xoá map cũ, generate map mới
 - [ ] Hiệu ứng rơi xuống núng nính của loạn 12 android (https://youtu.be/4Tr4awGTUck?t=18)
 - [ ] Server + nâng cấp
@@ -31,7 +32,13 @@
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 
 ### Bug:
-- [X] Click ngoài canvas không select tile nữa
+
+- [x] Click ngoài canvas không select tile nữa
+
+### Improve
+
+- [ ]
 
 ### Referrences:
+
 - https://easings.net/
