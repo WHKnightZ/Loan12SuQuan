@@ -333,7 +333,7 @@ export class Game implements IGame {
           new SwordAttack(
             this.playerTurn,
             this.playerTurn === 0 ? 0 : SCREEN_WIDTH,
-            0,
+            30,
             player.avatarOffset.x + player.avatar.width / 2,
             player.avatarOffset.y + player.avatar.height / 2
           )

@@ -311,8 +311,8 @@ const loadCrystals = async () => {
   texture = await loadTexture("common/damage");
   texture = await resize(texture, 2);
 
-  const dmgWidth = 60;
-  const dmgHeight = 33;
+  const dmgWidth = 120;
+  const dmgHeight = 66;
 
   damageTextures = await Promise.all(
     Array.from({ length: 5 }).map(

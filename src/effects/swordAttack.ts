@@ -2,19 +2,23 @@ import { base } from "@/configs/consts";
 import { Effect } from "./effect";
 import { swordCrystalTextures } from "@/common/textures";
 import { animate } from "@/utils/math";
+import { effects } from ".";
+import { CauseDamage } from "./causeDamage";
 
 const swords = [
-  { delay: 20, x: 10, y: 0 },
-  { delay: 10, x: 0, y: 10 },
-  { delay: 0, x: 0, y: 0 },
+  { delay: 8, x: 10, y: 0 },
+  { delay: 4, x: -5, y: 10 },
+  { delay: 0, x: 20, y: 0 },
 ];
 
 const COUNT = swords.length;
-const MAX_TIMER = 50;
+const MAX_TIMER = 40;
 
 export class SwordAttack extends Effect {
   playerIndex: number;
   halfSize: number;
+  endX: number;
+  endY: number;
   list: {
     x: number;
     y: number;
@@ -30,8 +34,10 @@ export class SwordAttack extends Effect {
     super(0, 0);
     this.playerIndex = playerIndex;
     this.halfSize = swordCrystalTextures[0][2].width / 2;
+    this.endX = endX;
+    this.endY = endY;
     this.list = swords.map(({ x, y, delay }) => {
-      const newStartX = x + startX;
+      const newStartX = (playerIndex === 0 ? 1 : -1) * x + startX;
       const newStartY = y + startY;
       const distanceX = endX - startX;
       const distanceY = endY - startY;
@@ -76,6 +82,9 @@ export class SwordAttack extends Effect {
       }
     });
 
-    if (countDead === COUNT) this.isAlive = false;
+    if (countDead === COUNT) {
+      this.isAlive = false;
+      effects.add(new CauseDamage(this.endX, this.endY));
+    }
   }
 }
