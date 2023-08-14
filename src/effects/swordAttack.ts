@@ -1,9 +1,9 @@
 import { base } from "@/configs/consts";
 import { Effect } from "./effect";
-import { swordCrystalTextures } from "@/common/textures";
 import { animate } from "@/utils/math";
 import { effects } from ".";
 import { CauseDamage } from "./causeDamage";
+import { swordCrystalTextures } from "@/textures";
 
 const swords = [
   { delay: 8, x: 10, y: 0 },

@@ -1,5 +1,5 @@
-import { starTextures } from "@/common/textures";
 import { base } from "@/configs/consts";
+import { starTextures } from "@/textures";
 
 export class Star {
   x: number;

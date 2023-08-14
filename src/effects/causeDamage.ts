@@ -1,6 +1,6 @@
-import { damageTextures } from "@/common/textures";
 import { base } from "@/configs/consts";
 import { Effect } from "./effect";
+import { damageTextures } from "@/textures";
 
 export class CauseDamage extends Effect {
   frame: number;

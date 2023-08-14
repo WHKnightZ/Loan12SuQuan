@@ -1,5 +1,5 @@
-import { mapFontChar } from "@/common/textures";
 import { base, BOARD_SIZE, SCREEN_WIDTH } from "@/configs/consts";
+import { mapFontChar } from "@/textures";
 import { FontChar } from "@/types";
 
 const OFFSET_CHAR = 2;

@@ -1,4 +1,3 @@
-import { cornerSelections } from "@/common/textures";
 import {
   base,
   CELL_SIZE,
@@ -9,6 +8,7 @@ import {
   SWAP_OFFSET,
   TILE_OFFSET,
 } from "@/configs/consts";
+import { cornerSelections } from "@/textures";
 import { GameStateFunction } from "@/types";
 import { combine } from "@/utils/common";
 

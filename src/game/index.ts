@@ -1,4 +1,3 @@
-import { menuTexture } from "@/common/textures";
 import {
   base,
   BOARD_COLORS,
@@ -43,6 +42,7 @@ import selectStateFunction from "./select";
 import waitStateFunction from "./wait";
 import { GainTile } from "@/effects/gainTile";
 import { SwordAttack } from "@/effects/swordAttack";
+import { menuTexture } from "@/textures";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;

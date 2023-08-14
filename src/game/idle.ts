@@ -1,5 +1,5 @@
-import { hintArrows } from "@/common/textures";
 import { base, CELL_SIZE, hintArrowOffsets, HINT_ARROW_CYCLE } from "@/configs/consts";
+import { hintArrows } from "@/textures";
 import { Direction, GameStateFunction } from "@/types";
 
 const idleStateFunction: GameStateFunction = {
