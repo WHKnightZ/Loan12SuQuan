@@ -130,3 +130,9 @@ export const combine = (arr: TileInfo[][]) => {
 
   return lst;
 };
+
+export const loadTexture = (src: string) => {
+  const image = new Image();
+  image.src = getImageSrc(src);
+  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
+};

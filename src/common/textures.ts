@@ -3,12 +3,6 @@ import { Direction, FontChar, HintArrow } from "@/types";
 import { flipHorizontal, flipVertical, resize, rotate180, rotateCCW90, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc, getKeys } from "@/utils/common";
 
-const loadTexture = (src: string) => {
-  const image = new Image();
-  image.src = getImageSrc(src);
-  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
-};
-
 const loadTilesAndExplosions = async () => {
   const loadImage = (key: number, src: string) => {
     const image = new Image();
