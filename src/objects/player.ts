@@ -1,4 +1,3 @@
-import { avatarTextures, barTextures } from "@/common/textures";
 import {
   AVATAR_OFFSET_X,
   AVATAR_OFFSET_Y,
@@ -12,6 +11,7 @@ import {
 import { IGame, IPlayer, PlayerAttribute, PlayerAttributeExtra } from "@/types";
 import { random } from "@/utils/common";
 import { Spin } from "./spin";
+import { avatarTextures, barTextures } from "@/textures";
 
 const BAR_OFFSET_X = 132;
 
