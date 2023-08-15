@@ -1,9 +1,10 @@
-import { base } from "@/configs/consts";
+import { SCREEN_WIDTH, base } from "@/configs/consts";
 import { Effect } from "./effect";
 import { animate } from "@/utils/math";
 import { effects } from ".";
 import { CauseDamage } from "./causeDamage";
 import { swordCrystalTextures } from "@/textures";
+import { IPlayer } from "@/types";
 
 const swords = [
   { delay: 8, x: 10, y: 0 },
@@ -15,10 +16,13 @@ const COUNT = swords.length;
 const MAX_TIMER = 40;
 
 export class SwordAttack extends Effect {
+  attackingPlayer: IPlayer;
+  attackedPlayer: IPlayer;
   playerIndex: number;
   halfSize: number;
   endX: number;
   endY: number;
+  countDead: number;
   list: {
     x: number;
     y: number;
@@ -30,14 +34,20 @@ export class SwordAttack extends Effect {
     alive: boolean;
   }[];
 
-  constructor(playerIndex: number, startX: number, startY: number, endX: number, endY: number) {
+  constructor(attackingPlayer: IPlayer, attackedPlayer: IPlayer) {
     super(0, 0);
-    this.playerIndex = playerIndex;
+    this.attackingPlayer = attackingPlayer;
+    this.attackedPlayer = attackedPlayer;
+    this.playerIndex = attackingPlayer.index;
+    const startX = this.playerIndex * SCREEN_WIDTH;
+    const startY = 30;
+    const endX = attackedPlayer.avatarOffset.x + attackedPlayer.avatar.width / 2;
+    const endY = attackedPlayer.avatarOffset.y + attackedPlayer.avatar.height / 2;
     this.halfSize = swordCrystalTextures[0][2].width / 2;
     this.endX = endX;
     this.endY = endY;
     this.list = swords.map(({ x, y, delay }) => {
-      const newStartX = (playerIndex === 0 ? 1 : -1) * x + startX;
+      const newStartX = (this.playerIndex === 0 ? 1 : -1) * x + startX;
       const newStartY = y + startY;
       const distanceX = endX - startX;
       const distanceY = endY - startY;
@@ -52,6 +62,7 @@ export class SwordAttack extends Effect {
         distanceY,
       };
     });
+    this.countDead = 0;
   }
 
   render() {
@@ -63,8 +74,6 @@ export class SwordAttack extends Effect {
   }
 
   update() {
-    let countDead = 0;
-
     this.list.forEach((item) => {
       item.timer += 1;
 
@@ -76,15 +85,15 @@ export class SwordAttack extends Effect {
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;
 
-      if (item.timer >= MAX_TIMER) {
-        item.alive = false;
-        countDead += 1;
+      if (item.timer !== MAX_TIMER) return;
+
+      item.alive = false;
+      this.countDead += 1;
+      if (this.countDead === 1) this.attackedPlayer.shock();
+      if (this.countDead === COUNT) {
+        this.isAlive = false;
+        effects.add(new CauseDamage(this.endX, this.endY - 10));
       }
     });
-
-    if (countDead === COUNT) {
-      this.isAlive = false;
-      effects.add(new CauseDamage(this.endX, this.endY));
-    }
   }
 }

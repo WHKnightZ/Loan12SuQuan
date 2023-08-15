@@ -2,6 +2,9 @@ import { TileType } from "@/types";
 
 export const APP_NAME = "Loạn 12 Sứ Quân";
 
+export const FPS = 60;
+export const INTERVAL = 1000 / FPS;
+
 export const BOARD_COLORS = ["#3e3226", "#554933"];
 export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
