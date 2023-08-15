@@ -16,7 +16,7 @@ import { createSpringEffect } from "@/utils/physics";
 
 const BAR_OFFSET_X = 132;
 
-const SPRING_OFFSETS = createSpringEffect(10);
+const SPRING_OFFSETS = createSpringEffect(8);
 
 export class Player implements IPlayer {
   index: number;

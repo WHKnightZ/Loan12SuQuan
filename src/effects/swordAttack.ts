@@ -22,6 +22,7 @@ export class SwordAttack extends Effect {
   halfSize: number;
   endX: number;
   endY: number;
+  countDead: number;
   list: {
     x: number;
     y: number;
@@ -61,6 +62,7 @@ export class SwordAttack extends Effect {
         distanceY,
       };
     });
+    this.countDead = 0;
   }
 
   render() {
@@ -72,8 +74,6 @@ export class SwordAttack extends Effect {
   }
 
   update() {
-    let countDead = 0;
-
     this.list.forEach((item) => {
       item.timer += 1;
 
@@ -85,20 +85,15 @@ export class SwordAttack extends Effect {
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;
 
-      if (item.timer === MAX_TIMER && countDead === 0) {
-        this.attackedPlayer.shock();
-        console.log("first");
-      }
+      if (item.timer !== MAX_TIMER) return;
 
-      if (item.timer >= MAX_TIMER) {
-        item.alive = false;
-        countDead += 1;
+      item.alive = false;
+      this.countDead += 1;
+      if (this.countDead === 1) this.attackedPlayer.shock();
+      if (this.countDead === COUNT) {
+        this.isAlive = false;
+        effects.add(new CauseDamage(this.endX, this.endY - 10));
       }
     });
-
-    if (countDead === COUNT) {
-      this.isAlive = false;
-      effects.add(new CauseDamage(this.endX, this.endY - 10));
-    }
   }
 }
