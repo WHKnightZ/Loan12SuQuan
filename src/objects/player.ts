@@ -12,8 +12,11 @@ import { IGame, IPlayer, PlayerAttribute, PlayerAttributeExtra } from "@/types";
 import { random } from "@/utils/common";
 import { Spin } from "./spin";
 import { avatarTextures, barTextures } from "@/textures";
+import { createSpringEffect } from "@/utils/physics";
 
 const BAR_OFFSET_X = 132;
+
+const SPRING_OFFSETS = createSpringEffect(10);
 
 export class Player implements IPlayer {
   index: number;
@@ -31,6 +34,7 @@ export class Player implements IPlayer {
   avatarOffset: { x: number; y: number };
   spins: Spin[];
   turn: number;
+  springIndex: number;
 
   constructor({
     game,
@@ -82,6 +86,7 @@ export class Player implements IPlayer {
         )
     );
     this.turn = 0;
+    this.springIndex = -1;
   }
 
   /**
@@ -128,6 +133,10 @@ export class Player implements IPlayer {
     if (this.mana.value > this.mana.maxValue) this.mana.value = this.mana.maxValue;
   }
 
+  shock() {
+    this.springIndex = 0;
+  }
+
   render() {
     this.bars.forEach(({ texture, attribute }, index) => {
       const amount = attribute.display / attribute.maxValue;
@@ -136,7 +145,8 @@ export class Player implements IPlayer {
       base.context.drawImage(texture, 0, 0, width, 14, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 14);
     });
 
-    base.context.drawImage(this.avatar, this.avatarOffset.x, this.avatarOffset.y);
+    const offsetAvatar = this.springIndex > -1 ? SPRING_OFFSETS[this.springIndex] : 0;
+    base.context.drawImage(this.avatar, this.avatarOffset.x + offsetAvatar, this.avatarOffset.y);
 
     this.spins.forEach((e) => e.render());
   }
@@ -168,5 +178,10 @@ export class Player implements IPlayer {
 
       e.update();
     });
+
+    if (this.springIndex > -1) {
+      this.springIndex += 1;
+      if (this.springIndex >= SPRING_OFFSETS.length) this.springIndex = -1;
+    }
   }
 }

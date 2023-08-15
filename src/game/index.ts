@@ -13,7 +13,6 @@ import {
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
   CELL_SIZE_2,
-  SCREEN_WIDTH,
 } from "@/configs/consts";
 import { effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
@@ -329,15 +328,7 @@ export class Game implements IGame {
 
       if (this.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
         const player = this.players[1 - this.playerTurn];
-        effects.add(
-          new SwordAttack(
-            this.playerTurn,
-            this.playerTurn === 0 ? 0 : SCREEN_WIDTH,
-            30,
-            player.avatarOffset.x + player.avatar.width / 2,
-            player.avatarOffset.y + player.avatar.height / 2
-          )
-        );
+        effects.add(new SwordAttack(this.players[this.playerTurn], this.players[1 - this.playerTurn]));
       }
 
       this.turnCount += this.matched4.turnCount;

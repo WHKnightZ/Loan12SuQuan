@@ -57,12 +57,14 @@ export interface IPlayer {
   avatar: HTMLImageElement;
   avatarOffset: { x: number; y: number };
   turn: number;
+  springIndex: number;
 
   getHintIndex(matchedLength: number): number;
   takeDamage(damage: number): void;
   gainLife(value: number): void;
   gainEnergy(value: number): void;
   gainMana(value: number): void;
+  shock(): void;
   render(): void;
   update(): void;
 }

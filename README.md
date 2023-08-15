@@ -30,6 +30,8 @@
 - [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
+- [ ] Hiệu ứng rung avatar khi bị tấn công
+- [ ] Loading
 
 ### Bug:
 
