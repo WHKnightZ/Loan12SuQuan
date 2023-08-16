@@ -4,3 +4,6 @@
 yarn.lock
 package-lock.json
 
+# Yarn v2
+/.yarn/*
+.pnp.*
