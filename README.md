@@ -32,7 +32,8 @@
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 - [ ] Hiệu ứng rung avatar khi bị tấn công
 - [ ] Loading
-- [ ] Thay màu các bar cho giống vật phẩm
+- [ ] Thay màu các bar cho giống vật phẩm + giảm bar height nhỏ đi, tăng padding bar lên 2px
+- [ ] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt
 
 ### Bug:
 
