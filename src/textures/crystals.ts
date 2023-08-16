@@ -46,7 +46,7 @@ export const loadCrystals = async () => {
     })
   );
 
-  swordCrystalTextures[0] = crystalTextures[TILES.SWORD];
+  swordCrystalTextures[0] = crystalTextures[TILES.SWORDRED];
   swordCrystalTextures[1] = await Promise.all(swordCrystalTextures[0].map((i) => flipHorizontal(i)));
 
   texture = await loadTexture("common/damage");

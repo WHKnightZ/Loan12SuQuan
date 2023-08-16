@@ -32,6 +32,7 @@
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 - [ ] Hiệu ứng rung avatar khi bị tấn công
 - [ ] Loading
+- [ ] Thay màu các bar cho giống vật phẩm
 
 ### Bug:
 

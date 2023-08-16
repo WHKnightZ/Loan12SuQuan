@@ -1,15 +1,15 @@
 import { SCREEN_WIDTH, base } from "@/configs/consts";
 import { Effect } from "./effect";
-import { animate } from "@/utils/math";
+import { animateSword } from "@/utils/math";
 import { effects } from ".";
 import { CauseDamage } from "./causeDamage";
 import { swordCrystalTextures } from "@/textures";
 import { IPlayer } from "@/types";
 
 const swords = [
-  { delay: 8, x: 10, y: 0 },
-  { delay: 4, x: -5, y: 10 },
-  { delay: 0, x: 20, y: 0 },
+  { delay: 8, x: 10, y: -5 },
+  { delay: 4, x: -5, y: 5 },
+  { delay: 0, x: 20, y: -5 },
 ];
 
 const COUNT = swords.length;
@@ -39,13 +39,14 @@ export class SwordAttack extends Effect {
     this.attackingPlayer = attackingPlayer;
     this.attackedPlayer = attackedPlayer;
     this.playerIndex = attackingPlayer.index;
-    const startX = this.playerIndex * SCREEN_WIDTH;
-    const startY = 30;
     const endX = attackedPlayer.avatarOffset.x + attackedPlayer.avatar.width / 2;
     const endY = attackedPlayer.avatarOffset.y + attackedPlayer.avatar.height / 2;
     this.halfSize = swordCrystalTextures[0][2].width / 2;
     this.endX = endX;
     this.endY = endY;
+    const offset = 0;
+    const startX = this.playerIndex * SCREEN_WIDTH + (this.playerIndex === 0 ? -offset : offset);
+    const startY = 143 - offset; // Linear, kiếm chạy xuyên 1 góc chéo
     this.list = swords.map(({ x, y, delay }) => {
       const newStartX = (this.playerIndex === 0 ? 1 : -1) * x + startX;
       const newStartY = y + startY;
@@ -80,7 +81,7 @@ export class SwordAttack extends Effect {
       if (item.timer < 0) return;
       if (item.timer === 0) item.alive = true;
 
-      const t = animate(item.timer / MAX_TIMER);
+      const t = animateSword(item.timer / MAX_TIMER);
 
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;
