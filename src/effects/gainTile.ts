@@ -1,7 +1,7 @@
 import { base } from "@/configs/consts";
 import { Effect } from "./effect";
 import { random } from "@/utils/common";
-import { animate } from "@/utils/math";
+import { animateGainTile } from "@/utils/math";
 import { crystalTextures } from "@/textures";
 
 const COUNT = 3;
@@ -22,6 +22,7 @@ export class GainTile extends Effect {
     timer: number;
     frame: number;
     alive: boolean;
+    opacity: number;
   }[];
 
   constructor({
@@ -62,15 +63,23 @@ export class GainTile extends Effect {
         timer: random(-20, -1),
         frame: -1,
         alive: false,
+        opacity: 1,
       };
     });
   }
 
   render() {
-    this.list.forEach(({ alive, frame, x, y }) => {
+    this.list.forEach(({ alive, frame, x, y, opacity }) => {
       if (!alive) return;
 
+      if (opacity !== 1) {
+        base.context.save();
+        base.context.globalAlpha = opacity;
+      }
       base.context.drawImage(crystalTextures[this.tile][frame], x - this.halfSize, y - this.halfSize);
+      if (opacity !== 1) {
+        base.context.restore();
+      }
     });
   }
 
@@ -83,12 +92,15 @@ export class GainTile extends Effect {
       if (item.timer < 0) return;
       if (item.timer === 0) item.alive = true;
 
-      const t = animate(item.timer / this.maxTimer);
+      const t = animateGainTile(item.timer / this.maxTimer);
 
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;
 
       if (item.timer % 4 === 0) item.frame = (item.timer / 4) % 6;
+      if (item.timer >= this.maxTimer - 4) {
+        item.opacity -= 0.25;
+      }
       if (item.timer >= this.maxTimer) {
         item.alive = false;
         countDead += 1;
