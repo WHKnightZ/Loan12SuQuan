@@ -142,7 +142,7 @@ export class Player implements IPlayer {
       const amount = attribute.display / attribute.maxValue;
       const width = 84 * amount;
       if (width < 1) return;
-      base.context.drawImage(texture, 0, 0, width, 14, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 14);
+      base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
     });
 
     const offsetAvatar = this.springIndex > -1 ? SPRING_OFFSETS[this.springIndex] : 0;
