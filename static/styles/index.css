@@ -6,7 +6,7 @@ html {
 }
 
 body {
-  background: linear-gradient(to bottom, transparent, #b6bbbc) #dddddd;
+  background: linear-gradient(to bottom, transparent, #c6cbcc) #e7e7e7;
   min-height: 100vh;
   margin: 0;
   display: flex;

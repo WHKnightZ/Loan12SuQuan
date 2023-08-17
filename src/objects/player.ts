@@ -73,16 +73,16 @@ export class Player implements IPlayer {
     this.spins = Array.from({ length: 2 }).map(
       (_, i) =>
         new Spin(
-          this.avatarOffset.x - 3,
-          this.avatarOffset.x + this.avatar.width + 3,
-          this.avatarOffset.y - 3,
-          this.avatarOffset.y + this.avatar.height + 3,
+          this.avatarOffset.x - 4,
+          this.avatarOffset.x + this.avatar.width + 4,
+          this.avatarOffset.y - 4,
+          this.avatarOffset.y + this.avatar.height + 4,
           0.8,
           "CW",
           40,
           3,
-          this.avatarOffset.x + (i === 0 ? 10 - 3 : this.avatar.width + 3 - 10),
-          this.avatarOffset.y + (i === 0 ? -3 : this.avatar.height + 3)
+          this.avatarOffset.x + (i === 0 ? 10 - 4 : this.avatar.width + 4 - 10),
+          this.avatarOffset.y + (i === 0 ? -4 : this.avatar.height + 4)
         )
     );
     this.turn = 0;

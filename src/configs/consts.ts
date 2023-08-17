@@ -19,9 +19,6 @@ export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
 export const TILE_SIZE = 50;
 export const REAL_TILE_SIZE = 28;
 export const TILE_LENGTH = 7;
-// export const TILE_SIZE = 76;
-// export const REAL_TILE_SIZE = 33;
-// export const TILE_LENGTH = 5;
 
 export const TILE_OFFSET = Math.floor((CELL_SIZE - TILE_SIZE) / 2);
 export const GAIN_TURN = 3;
