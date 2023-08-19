@@ -72,14 +72,10 @@ export class GainTile extends Effect {
     this.list.forEach(({ alive, frame, x, y, opacity }) => {
       if (!alive) return;
 
-      if (opacity !== 1) {
-        base.context.save();
-        base.context.globalAlpha = opacity;
-      }
+      base.context.save();
+      base.context.globalAlpha = opacity;
       base.context.drawImage(crystalTextures[this.tile][frame], x - this.halfSize, y - this.halfSize);
-      if (opacity !== 1) {
-        base.context.restore();
-      }
+      base.context.restore();
     });
   }
 
@@ -98,8 +94,8 @@ export class GainTile extends Effect {
       item.y = item.startY + t * item.distanceY;
 
       if (item.timer % 4 === 0) item.frame = (item.timer / 4) % 6;
-      if (item.timer >= this.maxTimer - 4) {
-        item.opacity -= 0.25;
+      if (item.timer >= this.maxTimer - 5) {
+        item.opacity -= 0.2;
       }
       if (item.timer >= this.maxTimer) {
         item.alive = false;

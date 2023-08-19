@@ -28,11 +28,14 @@
 - [ ] Admin sẽ dùng Nextjs (Reactjs) làm FE, Giao diện chơi dùng thuần js canvas
 - [ ] Hiệu ứng chain lightning làm như nào?
 - [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
+- [ ] Hiệu ứng full power (giống khi dùng item kiếm)
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 - [ ] Hiệu ứng rung avatar khi bị tấn công
 - [ ] Loading
-- [ ] Thay màu các bar cho giống vật phẩm
+- [ ] Thay màu các bar cho giống vật phẩm + giảm bar height nhỏ đi, tăng padding bar lên 2px
+- [ ] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt
+- [ ] Duration animation gain (lose) máu sẽ phụ thuộc theo chênh lệch, chênh lệch càng lớn thì duration càng lâu
 
 ### Bug:
 

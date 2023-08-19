@@ -56,7 +56,7 @@ export class Player implements IPlayer {
     this.attack = attack;
     this.life = { maxValue: life, value: life, display: life, timer: 0 };
     this.energy = { maxValue: DEFAULT_ENERGY, value: DEFAULT_ENERGY, display: DEFAULT_ENERGY, timer: 0 };
-    this.mana = { maxValue: DEFAULT_MANA, value: 0, display: 0, timer: 0 };
+    this.mana = { maxValue: DEFAULT_MANA, value: DEFAULT_MANA, display: DEFAULT_MANA, timer: 0 };
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
       { attribute: this.energy, maxTimer: 20, texture: barTextures.energy },
@@ -73,16 +73,16 @@ export class Player implements IPlayer {
     this.spins = Array.from({ length: 2 }).map(
       (_, i) =>
         new Spin(
-          this.avatarOffset.x - 3,
-          this.avatarOffset.x + this.avatar.width + 3,
-          this.avatarOffset.y - 3,
-          this.avatarOffset.y + this.avatar.height + 3,
+          this.avatarOffset.x - 4,
+          this.avatarOffset.x + this.avatar.width + 4,
+          this.avatarOffset.y - 4,
+          this.avatarOffset.y + this.avatar.height + 4,
           0.8,
           "CW",
           40,
           3,
-          this.avatarOffset.x + (i === 0 ? 10 - 3 : this.avatar.width + 3 - 10),
-          this.avatarOffset.y + (i === 0 ? -3 : this.avatar.height + 3)
+          this.avatarOffset.x + (i === 0 ? 10 - 4 : this.avatar.width + 4 - 10),
+          this.avatarOffset.y + (i === 0 ? -4 : this.avatar.height + 4)
         )
     );
     this.turn = 0;
@@ -142,7 +142,7 @@ export class Player implements IPlayer {
       const amount = attribute.display / attribute.maxValue;
       const width = 84 * amount;
       if (width < 1) return;
-      base.context.drawImage(texture, 0, 0, width, 14, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 14);
+      base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
     });
 
     const offsetAvatar = this.springIndex > -1 ? SPRING_OFFSETS[this.springIndex] : 0;
