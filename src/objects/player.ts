@@ -56,7 +56,7 @@ export class Player implements IPlayer {
     this.attack = attack;
     this.life = { maxValue: life, value: life, display: life, timer: 0 };
     this.energy = { maxValue: DEFAULT_ENERGY, value: DEFAULT_ENERGY, display: DEFAULT_ENERGY, timer: 0 };
-    this.mana = { maxValue: DEFAULT_MANA, value: 0, display: 0, timer: 0 };
+    this.mana = { maxValue: DEFAULT_MANA, value: DEFAULT_MANA, display: DEFAULT_MANA, timer: 0 };
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
       { attribute: this.energy, maxTimer: 20, texture: barTextures.energy },
