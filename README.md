@@ -31,9 +31,9 @@
 - [ ] Hiệu ứng full power (giống khi dùng item kiếm)
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
-- [ ] Hiệu ứng rung avatar khi bị tấn công
+- [x] Hiệu ứng rung avatar khi bị tấn công
 - [ ] Loading
-- [ ] Thay màu các bar cho giống vật phẩm + giảm bar height nhỏ đi, tăng padding bar lên 2px
+- [x] Thay màu các bar cho giống vật phẩm + giảm bar height nhỏ đi, tăng padding bar lên 2px
 - [ ] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt
 - [ ] Duration animation gain (lose) máu sẽ phụ thuộc theo chênh lệch, chênh lệch càng lớn thì duration càng lâu
 
