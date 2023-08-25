@@ -3,45 +3,45 @@ import {
   BOARD_COLORS,
   BOARD_SIZE,
   CELL_SIZE,
+  CELL_SIZE_2,
   GAIN_TURN,
-  mapTileInfo,
   MAP_WIDTH,
   MAP_WIDTH_1,
+  mapTileInfo,
   MATCH_4_POINT,
   PLAYER_INTELLIGENCE,
-  TILES,
   TILE_OFFSET,
+  TILES,
   TIMER_HINT_DELAY_DEFAULT,
-  CELL_SIZE_2,
 } from "@/configs/consts";
-import { effects } from "@/effects";
-import { FlickeringText } from "@/effects/flickeringText";
-import { FloatingText } from "@/effects/floatingText";
-import { StarExplosion } from "@/effects/starExplosion";
-import { Player } from "@/objects/player";
+import {effects} from "@/effects";
+import {FlickeringText} from "@/effects/flickeringText";
+import {FloatingText} from "@/effects/floatingText";
+import {GainTile} from "@/effects/gainTile";
+import {StarExplosion} from "@/effects/starExplosion";
+import {SwordAttack} from "@/effects/swordAttack";
+import {Player} from "@/objects/player";
+import {menuTexture} from "@/textures";
 import {
-  IGame,
   AllMatchedPositions,
+  FallItem,
   GameState,
+  GameStateFunction,
+  IGame,
+  IPlayer,
+  Matched4,
+  Point,
   PointExt,
   TileInfo,
-  GameStateFunction,
-  FallItem,
-  IPlayer,
-  Point,
-  Matched4,
   Wait,
 } from "@/types";
-import { check, generateMap, getKey } from "@/utils/common";
+import {check, generateMap, getKey} from "@/utils/common";
 import explodeStateFunction from "./explode";
 import fadeStateFunction from "./fade";
 import fallStateFunction from "./fall";
 import idleStateFunction from "./idle";
 import selectStateFunction from "./select";
 import waitStateFunction from "./wait";
-import { GainTile } from "@/effects/gainTile";
-import { SwordAttack } from "@/effects/swordAttack";
-import { menuTexture } from "@/textures";
 
 const mapFunction: {
   [key in GameState]: GameStateFunction;
@@ -90,6 +90,7 @@ export class Game implements IGame {
   players: IPlayer[];
   playerTurn: number;
   turnCount: number;
+  startTurnTime: number;
 
   needUpdate: boolean;
 
@@ -104,6 +105,7 @@ export class Game implements IGame {
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
+    this.startTurnTime = performance.now();
     this.matched4 = { turnCount: 0, matchedList: {} };
 
     base.map = generateMap();
@@ -332,6 +334,7 @@ export class Game implements IGame {
       }
 
       this.turnCount += this.matched4.turnCount;
+      this.startTurnTime = performance.now();
 
       const x = center.x / this.explosions.length;
       const y = center.y / this.explosions.length;
