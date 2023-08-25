@@ -41,6 +41,8 @@ export const LOSE_ENERGY_INTERVAL = 300;
 
 export const TIMER_HINT_DELAY_DEFAULT = 300;
 
+export const TURN_DURATION = 30 * 1000;
+
 export const TILES: { [key in TileType]: number } = {
   SWORD: 0,
   HEART: 1,

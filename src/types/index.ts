@@ -93,6 +93,7 @@ export interface IGame {
   tFadeIn: number;
   tFadeOut: number;
   tHintDelay: number;
+  startTurnTime: number;
 
   isFadeIn: boolean;
   isFadeOut: boolean;

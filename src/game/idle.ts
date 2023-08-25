@@ -1,4 +1,4 @@
-import { base, CELL_SIZE, hintArrowOffsets, HINT_ARROW_CYCLE } from "@/configs/consts";
+import {base, CELL_SIZE, hintArrowOffsets, HINT_ARROW_CYCLE, TURN_DURATION} from "@/configs/consts";
 import { hintArrows } from "@/textures";
 import { Direction, GameStateFunction } from "@/types";
 
@@ -28,6 +28,17 @@ const idleStateFunction: GameStateFunction = {
     );
   },
   update: (self) => {
+    if (performance.now() - self.startTurnTime > TURN_DURATION) {
+      console.log(self.startTurnTime);
+      self.startTurnTime = performance.now();
+      self.turnCount -= 1;
+      self.tIdle +=1;
+      self.tHintDelay = 0;
+      self.hintIndex = 0;
+      self.needUpdate = true;
+      self.idle();
+      return;
+    }
     if (self.tHintDelay > 0) {
       self.tHintDelay -= 1;
       return;
