@@ -1,7 +1,6 @@
 import { base } from "@/configs/consts";
 import { Effect } from "./effect";
-import { random } from "@/utils/common";
-import { animateGainTile } from "@/utils/math";
+import { animateGainTile, random } from "@/utils/math";
 import { crystalTextures } from "@/textures";
 
 const COUNT = 3;

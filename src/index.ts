@@ -1,12 +1,16 @@
 import { base, SCREEN_WIDTH, SCREEN_HEIGHT, INTERVAL } from "@/configs/consts";
 import { Game } from "@/game";
-import { loadTextures } from "./textures";
+import { loadTextures } from "@/textures";
+import { updateFps } from "@/utils/misc";
+import { Loading } from "@/common/loading";
+import { pause } from "./utils/common";
 
-const game = new Game();
+let game: Game;
+let loading: Loading;
 
 const init = () => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-  const context = canvas.getContext("2d")!;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
 
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
@@ -26,6 +30,12 @@ const update = (now = 0) => {
   if (elapsed < INTERVAL) return;
   then = now - (elapsed % INTERVAL);
 
+  updateFps(now);
+
+  loading.update();
+
+  if (!game) return;
+
   game.update();
   game.render();
 };
@@ -33,8 +43,15 @@ const update = (now = 0) => {
 const main = async () => {
   init();
 
-  await loadTextures();
+  loading = new Loading({ context: base.context });
+  loading.begin();
 
+  update();
+
+  await loadTextures();
+  await pause(500);
+
+  game = new Game();
   game.init();
 
   base.canvas.addEventListener("click", (e) => {
@@ -44,8 +61,6 @@ const main = async () => {
   document.addEventListener("keydown", (e) => {
     game.onKeyDown(e);
   });
-
-  update();
 };
 
 main();

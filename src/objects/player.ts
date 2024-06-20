@@ -9,10 +9,10 @@ import {
   SCREEN_WIDTH,
 } from "@/configs/consts";
 import { IGame, IPlayer, PlayerAttribute, PlayerAttributeExtra } from "@/types";
-import { random } from "@/utils/common";
 import { Spin } from "./spin";
 import { avatarTextures, barTextures } from "@/textures";
 import { createSpringEffect } from "@/utils/physics";
+import { random } from "@/utils/math";
 
 const BAR_OFFSET_X = 132;
 

@@ -1,5 +1,5 @@
-import { SCALE_RATIO, TILES, TILE_LENGTH, mapTileInfo } from "@/configs/consts";
-import { getImageSrc, getKeys } from "@/utils/common";
+import { SCALE_RATIO, TILES, TILE_LENGTH, getKeys, mapTileInfo } from "@/configs/consts";
+import { getImageSrc } from "@/utils/common";
 
 export const loadTilesAndExplosions = async () => {
   const loadImage = (key: number, src: string) => {

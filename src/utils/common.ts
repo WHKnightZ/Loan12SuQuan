@@ -1,13 +1,18 @@
-import { APP_NAME, base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
+import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
 import { TileInfo } from "@/types";
+import { random } from "./math";
 
-export const getAppName = () => APP_NAME;
-
-export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
+export const pause = (duration: number) => {
+  return new Promise((res) => setTimeout(() => res(null), duration));
+};
 
 export const getImageSrc = (src: string, ext: "png" | "jpg" | "svg" = "png") => `/static/images/${src}.${ext}`;
 
-export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max
+export const loadTexture = (src: string) => {
+  const image = new Image();
+  image.src = getImageSrc(src);
+  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
+};
 
 let sumProbability = 0;
 const tileProbabilities = Array.from({ length: COUNT_TILES }).map((_, index) => {
@@ -131,8 +136,22 @@ export const combine = (arr: TileInfo[][]) => {
   return lst;
 };
 
-export const loadTexture = (src: string) => {
-  const image = new Image();
-  image.src = getImageSrc(src);
-  return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
+export const isNumber = (value: any): value is number => {
+  return typeof value === "number";
+};
+
+export const isString = (value: any): value is string => {
+  const type = typeof value;
+
+  return (
+    type === "string" ||
+    (type === "object" &&
+      value != null &&
+      !Array.isArray(value) &&
+      Object.prototype.toString.call(value) === "[object String]")
+  );
+};
+
+export const isFunction = (value: any): value is Function => {
+  return typeof value === "function";
 };

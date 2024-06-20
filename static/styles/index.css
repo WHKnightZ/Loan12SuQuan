@@ -3,6 +3,7 @@ html {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -22,9 +23,81 @@ body {
   background-color: #e5e6e7;
 }
 
+#fps {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  border-radius: 100px;
+  background-color: #f5f6f7;
+  z-index: 2;
+  box-shadow: 0 1px 8px hsla(0, 0%, 60%, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 12px;
+  line-height: 16px;
+  font-size: 13px;
+}
+
+#version {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  border-radius: 100px;
+  background-color: #e5e6e7;
+  z-index: 2;
+  box-shadow: 0 1px 8px hsla(0, 0%, 60%, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 12px;
+  font-size: 14px;
+  line-height: 16px;
+}
+
+#github {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  border-radius: 100px;
+  background-color: #e5e6e7;
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  z-index: 2;
+  box-shadow: 0 1px 8px hsla(0, 0%, 60%, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.4s ease, background-color 0.4s ease;
+}
+
+#github:hover {
+  transform: translateY(-4px);
+  background-color: #dadbdc;
+}
+
+#github img {
+  width: 28px;
+  height: 28px;
+}
+
 @media screen and (max-width: 600px) {
   #canvas {
     width: 80vw;
     height: 96vw;
+  }
+
+  #github {
+    right: 18px;
+    bottom: 18px;
+    min-width: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  #github img {
+    width: 24px;
+    height: 24px;
   }
 }

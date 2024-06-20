@@ -1,6 +1,6 @@
-import { TILES } from "@/configs/consts";
+import { TILES, getKeys } from "@/configs/consts";
 import { flipHorizontal, resize } from "@/utils/canvas";
-import { getKeys, loadTexture } from "@/utils/common";
+import { loadTexture } from "@/utils/common";
 
 export const crystalTextures: HTMLImageElement[][] = [];
 export const swordCrystalTextures: HTMLImageElement[][] = [];

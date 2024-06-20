@@ -1,11 +1,13 @@
 import { TileType } from "@/types";
 
-export const APP_NAME = "Loạn 12 Sứ Quân";
+export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
 
 export const FPS = 60;
 export const INTERVAL = 1000 / FPS;
 
 export const BOARD_COLORS = ["#3e3226", "#554933"];
+export const BACKGROUND_COLOR = BOARD_COLORS[1];
+
 export const MAP_WIDTH = 8;
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
 export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
@@ -13,8 +15,11 @@ export const CELL_SIZE = 60;
 export const CELL_SIZE_2 = CELL_SIZE / 2;
 export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
 export const MENU_HEIGHT = 96;
+
 export const SCREEN_WIDTH = BOARD_SIZE;
 export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
+export const SCREEN_WIDTH_HALF = SCREEN_WIDTH / 2;
+export const SCREEN_HEIGHT_HALF = SCREEN_HEIGHT / 2;
 
 export const TILE_SIZE = 50;
 export const REAL_TILE_SIZE = 28;

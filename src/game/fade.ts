@@ -9,9 +9,9 @@ import {
   TILE_SIZE,
   TOTAL_TILES,
   VELOCITY_BASE,
+  getKeys,
 } from "@/configs/consts";
 import { GameStateFunction, IGame } from "@/types";
-import { getKeys } from "@/utils/common";
 import { clamp } from "@/utils/math";
 
 let fadeInDone: {

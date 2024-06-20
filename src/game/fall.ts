@@ -1,6 +1,15 @@
-import { base, CELL_SIZE, GRAVITY, mapTileInfo, MAP_WIDTH, TILE_OFFSET, VELOCITY_BASE } from "@/configs/consts";
+import {
+  base,
+  CELL_SIZE,
+  GRAVITY,
+  mapTileInfo,
+  MAP_WIDTH,
+  TILE_OFFSET,
+  VELOCITY_BASE,
+  getKeys,
+} from "@/configs/consts";
 import { GameStateFunction, TileInfo } from "@/types";
-import { combine, getKeys } from "@/utils/common";
+import { combine } from "@/utils/common";
 
 const fallStateFunction: GameStateFunction = {
   render: (self) => {

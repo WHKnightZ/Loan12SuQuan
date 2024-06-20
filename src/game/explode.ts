@@ -1,6 +1,6 @@
-import { base, CELL_SIZE, mapTileInfo, VELOCITY_BASE } from "@/configs/consts";
+import { base, CELL_SIZE, getKeys, mapTileInfo, VELOCITY_BASE } from "@/configs/consts";
 import { GameStateFunction } from "@/types";
-import { findBelow, getKeys, randomTile } from "@/utils/common";
+import { findBelow, randomTile } from "@/utils/common";
 
 const explodeStateFunction: GameStateFunction = {
   render: (self) => {
