@@ -11,7 +11,7 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { GameStateFunction, IGame } from "@/types";
+import { IGameStateFunction, IGame } from "@/types";
 import { clamp } from "@/utils/math";
 
 let fadeInDone: {
@@ -125,7 +125,7 @@ const fadeOutUpdate = (self: IGame) => {
   self.fadeIn();
 };
 
-const fadeStateFunction: GameStateFunction = {
+const fadeStateFunction: IGameStateFunction = {
   render: (self) => {
     if (self.isFadeIn) fadeInRender(self);
     if (self.isFadeOut) fadeOutRender(self);

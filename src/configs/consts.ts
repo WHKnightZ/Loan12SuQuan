@@ -1,4 +1,4 @@
-import { TileType } from "@/types";
+import { ITileType } from "@/types";
 
 export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
 
@@ -46,7 +46,7 @@ export const LOSE_ENERGY_INTERVAL = 300;
 
 export const TIMER_HINT_DELAY_DEFAULT = 300;
 
-export const TILES: { [key in TileType]: number } = {
+export const TILES: { [key in ITileType]: number } = {
   SWORD: 0,
   HEART: 1,
   GOLD: 2,

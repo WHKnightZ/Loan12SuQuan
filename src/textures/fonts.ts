@@ -1,7 +1,7 @@
-import { FontChar } from "@/types";
+import { IFontChar } from "@/types";
 import { loadTexture } from "@/utils/common";
 
-export const mapFontChar: { [key: string]: FontChar } = {};
+export const mapFontChar: { [key: string]: IFontChar } = {};
 
 export const loadFont = async () => {
   const fontTexture = await loadTexture("fonts/fontcap");

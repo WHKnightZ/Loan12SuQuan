@@ -1,6 +1,6 @@
-import { GameStateFunction } from "@/types";
+import { IGameStateFunction } from "@/types";
 
-const waitStateFunction: GameStateFunction = {
+const waitStateFunction: IGameStateFunction = {
   render: () => {},
   update: (self) => {
     self.wait.timer += 1;

@@ -1,10 +1,10 @@
 import { CELL_SIZE } from "@/configs/consts";
-import { Direction, HintArrow } from "@/types";
+import { IDirection, IHintArrow } from "@/types";
 import { resize, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc } from "@/utils/common";
 
 export let hintArrows: {
-  [key in Direction]: HintArrow;
+  [key in IDirection]: IHintArrow;
 } = {} as any;
 
 export const loadCommonTextures = async () => {

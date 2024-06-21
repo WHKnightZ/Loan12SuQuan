@@ -1,5 +1,5 @@
 import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
-import { TileInfo } from "@/types";
+import { ITileInfo } from "@/types";
 import { random } from "./math";
 
 export const pause = (duration: number) => {
@@ -99,8 +99,8 @@ const aroundTiles = [
   { x: -1, y: -1, condition: (x: number, y: number) => x >= 1 && y >= 1 },
 ];
 
-export const combine = (arr: TileInfo[][]) => {
-  const lst: TileInfo[] = [];
+export const combine = (arr: ITileInfo[][]) => {
+  const lst: ITileInfo[] = [];
   const has: { [key: number]: boolean } = {};
   arr.forEach((tiles) => {
     tiles.forEach((tile) => {
@@ -114,7 +114,7 @@ export const combine = (arr: TileInfo[][]) => {
   });
 
   // Xử lý kiếm đỏ: Nổ 1 vùng xung quanh
-  const explodeList: TileInfo[] = [];
+  const explodeList: ITileInfo[] = [];
 
   lst.forEach(({ x, y, value }) => {
     if (value !== TILES.SWORDRED) return;

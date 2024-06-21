@@ -1,12 +1,12 @@
 import { base } from "@/configs/consts";
 
 type Rotation = "CW" | "CCW"; // Clockwise, Counter Clockwise
-type Direction = "HT" | "VR" | "HB" | "VL"; // Horizontal Top, Vertical Right, Horizontal Bottom, Vertical Left
-type PointExt = { x: number; y: number; direction: Direction };
+type IDirection = "HT" | "VR" | "HB" | "VL"; // Horizontal Top, Vertical Right, Horizontal Bottom, Vertical Left
+type IPointExt = { x: number; y: number; direction: IDirection };
 
 const mapDirection: {
   [key in Rotation]: {
-    [key in Direction]: (self: Spin, point: PointExt) => void;
+    [key in IDirection]: (self: Spin, point: IPointExt) => void;
   };
 } = {
   CW: {
@@ -87,7 +87,7 @@ export class Spin {
   speed: number;
   rotation: Rotation;
   thickness: number;
-  points: PointExt[];
+  points: IPointExt[];
   active: boolean;
   opacity: number;
 
@@ -110,7 +110,7 @@ export class Spin {
     this.rotation = rotation;
     this.thickness = thickness;
 
-    const findDrt = (x: number, y: number): Direction => {
+    const findDrt = (x: number, y: number): IDirection => {
       if (x === boundLeft) return "VL";
       if (x === boundRight) return "VR";
       if (y === boundTop) return "HT";

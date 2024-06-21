@@ -21,16 +21,16 @@ import { StarExplosion } from "@/effects/starExplosion";
 import { Player } from "@/objects/player";
 import {
   IGame,
-  AllMatchedPositions,
-  GameState,
-  PointExt,
-  TileInfo,
-  GameStateFunction,
-  FallItem,
+  IAllMatchedPositions,
+  IGameState,
+  IPointExt,
+  ITileInfo,
+  IGameStateFunction,
+  IFallItem,
   IPlayer,
-  Point,
-  Matched4,
-  Wait,
+  IPoint,
+  IMatched4,
+  IWait,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import explodeStateFunction from "./explode";
@@ -44,7 +44,7 @@ import { SwordAttack } from "@/effects/swordAttack";
 import { menuTexture } from "@/textures";
 
 const mapFunction: {
-  [key in GameState]: GameStateFunction;
+  [key in IGameState]: IGameStateFunction;
 } = {
   IDLE: idleStateFunction,
   SELECT: selectStateFunction,
@@ -55,20 +55,20 @@ const mapFunction: {
 };
 
 export class Game implements IGame {
-  state: GameState;
-  selected: PointExt | null;
-  swapped: PointExt | null;
+  state: IGameState;
+  selected: IPointExt | null;
+  swapped: IPointExt | null;
   reswap: boolean;
 
   fall: {
-    [key: number]: FallItem;
+    [key: number]: IFallItem;
   };
 
   combo: number;
-  explosions: PointExt[];
-  explodedTiles: TileInfo[];
-  matched4Tiles: Point[];
-  matched4: Matched4;
+  explosions: IPointExt[];
+  explodedTiles: ITileInfo[];
+  matched4Tiles: IPoint[];
+  matched4: IMatched4;
 
   tIdle: number;
   tSelect: number;
@@ -82,9 +82,9 @@ export class Game implements IGame {
   isFadeIn: boolean;
   isFadeOut: boolean;
 
-  wait: Wait;
+  wait: IWait;
 
-  matchedPositions: AllMatchedPositions;
+  matchedPositions: IAllMatchedPositions;
   hintIndex: number;
 
   players: IPlayer[];
@@ -131,8 +131,8 @@ export class Game implements IGame {
   }
 
   matchPosition(x: number, y: number) {
-    let h: TileInfo[] = [];
-    let v: TileInfo[] = [];
+    let h: ITileInfo[] = [];
+    let v: ITileInfo[] = [];
     let newX: number, newY: number;
     const posValue = base.map[y][x];
     const compatible = mapTileInfo[posValue].compatible;
@@ -183,7 +183,7 @@ export class Game implements IGame {
     const thisPoint = { x, y, point: mapTileInfo[value].point, value };
     const tiles = matched ? [...h, ...v, thisPoint] : [];
 
-    const checkMatch4Turn = (tiles: TileInfo[]) => {
+    const checkMatch4Turn = (tiles: ITileInfo[]) => {
       let check = 0;
       tiles.forEach((tile) => {
         const key = getKey(tile.x, tile.y);
@@ -195,7 +195,7 @@ export class Game implements IGame {
       return check;
     };
 
-    let matched4Tiles: Point[] = [];
+    let matched4Tiles: IPoint[] = [];
     if (h.length >= GAIN_TURN) {
       matched4Tiles = matched4Tiles.concat(h);
       this.matched4.turnCount += checkMatch4Turn([...h, thisPoint]);
@@ -223,18 +223,18 @@ export class Game implements IGame {
     base.map[y1][x1] = tmp;
   }
 
-  addMatchedPosition(allMatchedPositions: AllMatchedPositions, x0: number, y0: number, x1: number, y1: number) {
+  addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number) {
     this.swap(x0, y0, x1, y1);
     const { matched: m0, point: p0 } = this.matchPosition(x0, y0);
     const { matched: m1, point: p1 } = this.matchPosition(x1, y1);
     const swapDirection = Math.random() < 0.5;
     const pos = swapDirection ? { x0: x1, y0: y1, x1: x0, y1: y0 } : { x0, y0, x1, y1 };
-    if (m0 || m1) allMatchedPositions.push({ ...pos, point: p0 + p1 });
+    if (m0 || m1) allMatchedPositions.push({ ...pos, score: p0 + p1 });
     this.swap(x0, y0, x1, y1);
   }
 
   findAllMatchedPositions() {
-    const allMatchedPositions: AllMatchedPositions = [];
+    const allMatchedPositions: IAllMatchedPositions = [];
     for (let i = 0; i < MAP_WIDTH_1; i += 1) {
       for (let j = 0; j < MAP_WIDTH_1; j += 1) {
         this.addMatchedPosition(allMatchedPositions, j, i, j + 1, i);
@@ -246,7 +246,7 @@ export class Game implements IGame {
     for (let j = 0; j < MAP_WIDTH_1; j += 1)
       this.addMatchedPosition(allMatchedPositions, j, MAP_WIDTH_1, j + 1, MAP_WIDTH_1);
 
-    allMatchedPositions.sort((a, b) => (a.point < b.point ? 1 : -1));
+    allMatchedPositions.sort((a, b) => (a.score < b.score ? 1 : -1));
     this.matchedPositions = allMatchedPositions;
   }
 
@@ -366,7 +366,7 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
-  gainTile({ value, x, y }: TileInfo) {
+  gainTile({ value, x, y }: ITileInfo) {
     if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
       const currentPlayer = this.players[this.playerTurn];
       effects.add(

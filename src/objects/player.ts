@@ -8,7 +8,7 @@ import {
   LOSE_ENERGY_INTERVAL,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IGame, IPlayer, PlayerAttribute, PlayerAttributeExtra } from "@/types";
+import { IGame, IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
 import { Spin } from "./spin";
 import { avatarTextures, barTextures } from "@/textures";
 import { createSpringEffect } from "@/utils/physics";
@@ -22,13 +22,13 @@ export class Player implements IPlayer {
   index: number;
   game: IGame;
 
-  life: PlayerAttribute;
-  mana: PlayerAttribute;
-  energy: PlayerAttribute;
+  life: IPlayerAttribute;
+  mana: IPlayerAttribute;
+  energy: IPlayerAttribute;
   attack: number;
   intelligence: number;
   barOffsetX: number;
-  bars: PlayerAttributeExtra[];
+  bars: IPlayerAttributeExtra[];
   energyTimer: number;
   avatar: HTMLImageElement;
   avatarOffset: { x: number; y: number };

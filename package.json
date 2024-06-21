@@ -3,11 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
+    "checktype": "tsc --noEmit",
     "dev": "node esbuild.dev.mjs",
     "build": "node esbuild.prd.mjs && node updateVersion"
   },
-  "devDependencies": {},
-  "dependencies": {
-    "esbuild": "^0.21.5"
+  "devDependencies": {
+    "esbuild": "^0.21.5",
+    "typescript": "^5.5.2"
   }
 }

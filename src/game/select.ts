@@ -9,10 +9,10 @@ import {
   TILE_OFFSET,
 } from "@/configs/consts";
 import { cornerSelections } from "@/textures";
-import { GameStateFunction } from "@/types";
+import { IGameStateFunction } from "@/types";
 import { combine } from "@/utils/common";
 
-const selectStateFunction: GameStateFunction = {
+const selectStateFunction: IGameStateFunction = {
   render: (self) => {
     const offset = self.tSwap * SWAP_OFFSET;
 

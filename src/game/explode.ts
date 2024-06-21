@@ -1,8 +1,8 @@
 import { base, CELL_SIZE, getKeys, mapTileInfo, VELOCITY_BASE } from "@/configs/consts";
-import { GameStateFunction } from "@/types";
+import { IGameStateFunction } from "@/types";
 import { findBelow, randomTile } from "@/utils/common";
 
-const explodeStateFunction: GameStateFunction = {
+const explodeStateFunction: IGameStateFunction = {
   render: (self) => {
     self.explosions.forEach(({ x, y, value }) => {
       const texture = mapTileInfo[value].explosions[self.tExplode];

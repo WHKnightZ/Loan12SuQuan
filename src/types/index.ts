@@ -1,43 +1,43 @@
-export type TileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
+export type ITileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
 
-export type Point = { x: number; y: number };
+export type IPoint = { x: number; y: number };
 
-export type PointExt = Point & { value: number };
+export type IPointExt = IPoint & { value: number };
 
-export type AllMatchedPositions = { x0: number; y0: number; x1: number; y1: number; point: number }[];
+export type IAllMatchedPositions = { x0: number; y0: number; x1: number; y1: number; score: number }[];
 
-export type TileInfo = PointExt & { point: number };
+export type ITileInfo = IPointExt & { point: number };
 
-export type Direction = "UP" | "RIGHT" | "DOWN" | "LEFT";
+export type IDirection = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
-export type GameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
+export type IGameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
 
-export type FallItem = {
-  list: (PointExt & { offset: number; v: number })[];
+export type IFallItem = {
+  list: (IPointExt & { offset: number; v: number })[];
   below: number;
   pushCount?: number;
 };
 
-export type Matched4 = {
+export type IMatched4 = {
   turnCount: number;
   matchedList: { [key: string]: boolean };
 };
 
-export type Wait = {
+export type IWait = {
   timer: number;
   maxTimer: number;
   callback: () => void;
 };
 
-export type PlayerAttribute = {
+export type IPlayerAttribute = {
   value: number;
   maxValue: number;
   timer: number;
   display: number;
 };
 
-export type PlayerAttributeExtra = {
-  attribute: PlayerAttribute;
+export type IPlayerAttributeExtra = {
+  attribute: IPlayerAttribute;
   texture: HTMLImageElement;
   maxTimer: number;
 };
@@ -46,13 +46,13 @@ export interface IPlayer {
   index: number;
   game: IGame;
 
-  life: PlayerAttribute;
-  mana: PlayerAttribute;
-  energy: PlayerAttribute;
+  life: IPlayerAttribute;
+  mana: IPlayerAttribute;
+  energy: IPlayerAttribute;
   attack: number;
   intelligence: number;
   barOffsetX: number;
-  bars: PlayerAttributeExtra[];
+  bars: IPlayerAttributeExtra[];
   energyTimer: number;
   avatar: HTMLImageElement;
   avatarOffset: { x: number; y: number };
@@ -70,20 +70,20 @@ export interface IPlayer {
 }
 
 export interface IGame {
-  state: GameState;
-  selected: PointExt | null;
-  swapped: PointExt | null;
+  state: IGameState;
+  selected: IPointExt | null;
+  swapped: IPointExt | null;
   reswap: boolean;
 
   fall: {
-    [key: number]: FallItem;
+    [key: number]: IFallItem;
   };
 
   combo: number;
-  explosions: PointExt[];
-  explodedTiles: TileInfo[];
-  matched4Tiles: Point[];
-  matched4: Matched4;
+  explosions: IPointExt[];
+  explodedTiles: ITileInfo[];
+  matched4Tiles: IPoint[];
+  matched4: IMatched4;
 
   tIdle: number;
   tSelect: number;
@@ -97,9 +97,9 @@ export interface IGame {
   isFadeIn: boolean;
   isFadeOut: boolean;
 
-  wait: Wait;
+  wait: IWait;
 
-  matchedPositions: AllMatchedPositions;
+  matchedPositions: IAllMatchedPositions;
   hintIndex: number;
 
   players: IPlayer[];
@@ -116,12 +116,12 @@ export interface IGame {
     y: number
   ): {
     matched: boolean;
-    tiles: TileInfo[];
+    tiles: ITileInfo[];
     point: number;
-    matched4Tiles: Point[];
+    matched4Tiles: IPoint[];
   };
   swap(x0: number, y0: number, x1: number, y1: number): void;
-  addMatchedPosition(allMatchedPositions: AllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
+  addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
   findAllMatchedPositions(): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
@@ -130,21 +130,21 @@ export interface IGame {
   explode(): void;
   fadeIn(): void;
   fadeOut(): void;
-  gainTile(tile: TileInfo): void;
+  gainTile(tile: ITileInfo): void;
   updateComputer(): void;
   render(): void;
   update(): void;
 }
 
-export type GameStateFunction = {
+export type IGameStateFunction = {
   render: (self: IGame) => void;
   update: (self: IGame) => void;
 };
 
-export type HintArrow = {
+export type IHintArrow = {
   offset: { x: number; y: number };
   drt: { x: number; y: number };
   texture: HTMLImageElement;
 };
 
-export type FontChar = { texture: HTMLImageElement; offsetY: number };
+export type IFontChar = { texture: HTMLImageElement; offsetY: number };

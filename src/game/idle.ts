@@ -1,8 +1,8 @@
 import { base, CELL_SIZE, hintArrowOffsets, HINT_ARROW_CYCLE } from "@/configs/consts";
 import { hintArrows } from "@/textures";
-import { Direction, GameStateFunction } from "@/types";
+import { IDirection, IGameStateFunction } from "@/types";
 
-const idleStateFunction: GameStateFunction = {
+const idleStateFunction: IGameStateFunction = {
   render: (self) => {
     if (self.tHintDelay > 0) return;
 
@@ -12,7 +12,7 @@ const idleStateFunction: GameStateFunction = {
 
     const { x0, y0, x1, y1 } = hint;
 
-    let direction: Direction = "UP";
+    let direction: IDirection = "UP";
     if (x1 > x0) direction = "RIGHT";
     else if (x1 < x0) direction = "LEFT";
     else if (y1 > y0) direction = "DOWN";

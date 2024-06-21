@@ -8,10 +8,10 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { GameStateFunction, TileInfo } from "@/types";
+import { IGameStateFunction, ITileInfo } from "@/types";
 import { combine } from "@/utils/common";
 
-const fallStateFunction: GameStateFunction = {
+const fallStateFunction: IGameStateFunction = {
   render: (self) => {
     const fall = self.fall;
     getKeys(fall).forEach((col) => {
@@ -60,7 +60,7 @@ const fallStateFunction: GameStateFunction = {
 
     self.matched4 = { turnCount: 0, matchedList: {} };
     self.matched4Tiles = [];
-    const tt: TileInfo[][] = [];
+    const tt: ITileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
         const { matched: m0, tiles: t0, matched4Tiles: m40 } = self.matchPosition(j, i);

@@ -1,6 +1,6 @@
 import { base, BOARD_SIZE, SCREEN_WIDTH } from "@/configs/consts";
 import { mapFontChar } from "@/textures";
-import { FontChar } from "@/types";
+import { IFontChar } from "@/types";
 
 const OFFSET_CHAR = 2;
 
@@ -10,7 +10,7 @@ export class Font {
   draw({ text, x, y }: { text: string; x?: number; y?: number }) {
     x = x || SCREEN_WIDTH / 2;
     y = y || BOARD_SIZE / 2;
-    const chars: FontChar[] = [];
+    const chars: IFontChar[] = [];
     let width = 0;
     for (let i = 0; i < text.length; i += 1) {
       const c = text.charAt(i).toUpperCase();
