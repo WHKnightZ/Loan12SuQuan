@@ -8,84 +8,81 @@ import {
   LOSE_ENERGY_INTERVAL,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IGame, IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
+import { IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
 import { Spin } from "./spin";
 import { avatarTextures, barTextures } from "@/textures";
 import { createSpringEffect } from "@/utils/physics";
 import { random } from "@/utils/math";
 
 const BAR_OFFSET_X = 132;
-
 const SPRING_OFFSETS = createSpringEffect(8);
 
 export class Player implements IPlayer {
   index: number;
-  game: IGame;
+  attack: number;
+  intelligence: number;
 
   life: IPlayerAttribute;
   mana: IPlayerAttribute;
   energy: IPlayerAttribute;
-  attack: number;
-  intelligence: number;
   barOffsetX: number;
   bars: IPlayerAttributeExtra[];
   energyTimer: number;
-  avatar: HTMLImageElement;
-  avatarOffset: { x: number; y: number };
-  spins: Spin[];
-  turn: number;
-  springIndex: number;
+
+  private avatar: HTMLImageElement;
+  private avatarOffset: { x: number; y: number };
+  private spins: Spin[];
+  private springIndex: number;
 
   constructor({
-    game,
     index,
     attack,
-    life,
     intelligence,
+    life,
     avatar,
   }: {
-    game: IGame;
     index: number;
     attack: number;
-    life: number;
     intelligence: number;
+    life: number;
     avatar: number;
   }) {
     this.index = index;
-    this.game = game;
     this.attack = attack;
+    this.intelligence = intelligence;
+
     this.life = { maxValue: life, value: life, display: life, timer: 0 };
     this.energy = { maxValue: DEFAULT_ENERGY, value: DEFAULT_ENERGY, display: DEFAULT_ENERGY, timer: 0 };
     this.mana = { maxValue: DEFAULT_MANA, value: DEFAULT_MANA, display: DEFAULT_MANA, timer: 0 };
+    this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
       { attribute: this.energy, maxTimer: 20, texture: barTextures.energy },
       { attribute: this.mana, maxTimer: 25, texture: barTextures.mana },
     ];
-    this.intelligence = intelligence;
-    this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
+
     this.energyTimer = 0;
     this.avatar = avatarTextures[avatar][index];
     this.avatarOffset = {
       x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatar.width,
       y: AVATAR_OFFSET_Y,
     };
+    const padding = 4;
     this.spins = Array.from({ length: 2 }).map(
       (_, i) =>
         new Spin(
-          this.avatarOffset.x - 4,
-          this.avatarOffset.x + this.avatar.width + 4,
-          this.avatarOffset.y - 4,
-          this.avatarOffset.y + this.avatar.height + 4,
+          this.avatarOffset.x - padding,
+          this.avatarOffset.x + this.avatar.width + padding,
+          this.avatarOffset.y - padding,
+          this.avatarOffset.y + this.avatar.height + padding,
           0.8,
           "CW",
           40,
           3,
-          this.avatarOffset.x + (i === 0 ? 10 - 4 : this.avatar.width + 4 - 10),
-          this.avatarOffset.y + (i === 0 ? -4 : this.avatar.height + 4)
+          this.avatarOffset.x + (i === 0 ? 10 - padding : this.avatar.width + padding - 10),
+          this.avatarOffset.y + (i === 0 ? -padding : this.avatar.height + padding)
         )
     );
-    this.turn = 0;
     this.springIndex = -1;
   }
 
@@ -152,13 +149,14 @@ export class Player implements IPlayer {
   }
 
   update() {
-    if (this.index === this.game.playerTurn) {
+    if (this.index === base.game.playerTurn) {
       this.energyTimer += 1;
       if (this.energyTimer % LOSE_ENERGY_INTERVAL === 0) {
         this.energy.value -= 1;
       }
     }
 
+    // TODO: Tách các hàm ra private function
     this.bars.forEach(({ attribute, maxTimer }) => {
       if (Math.abs(attribute.display - attribute.value) < 0.1) return;
 
@@ -172,13 +170,17 @@ export class Player implements IPlayer {
       attribute.display = attribute.value + (attribute.display - attribute.value) * value;
     });
 
+    // TODO: Spin nên tách ra thành AvatarSpinner (hoặc AvatarSpin, bên này chỉ gọi)
     this.spins.forEach((e) => {
-      if (this.index === this.game.playerTurn) e.activate();
+      if (this.index === base.game.playerTurn) e.activate();
       else e.deactivate();
 
       e.update();
     });
 
+    // Spring tách ra thành plugin
+    // object.plugins.forEach(x=>x.update, render) ở super.update()
+    // plugin có parent: game object
     if (this.springIndex > -1) {
       this.springIndex += 1;
       if (this.springIndex >= SPRING_OFFSETS.length) this.springIndex = -1;

@@ -1,6 +1,12 @@
-import { base, CELL_SIZE, hintArrowOffsets, HINT_ARROW_CYCLE } from "@/configs/consts";
+import { base, CELL_SIZE } from "@/configs/consts";
 import { hintArrows } from "@/textures";
 import { IDirection, IGameStateFunction } from "@/types";
+
+const HINT_ARROW_CYCLE = 30;
+
+const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
+  Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
+);
 
 const idleStateFunction: IGameStateFunction = {
   render: (self) => {

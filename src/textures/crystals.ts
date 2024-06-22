@@ -1,5 +1,5 @@
 import { TILES, getKeys } from "@/configs/consts";
-import { flipHorizontal, resize } from "@/utils/canvas";
+import { crop, flipHorizontal, resize } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
 export const crystalTextures: HTMLImageElement[][] = [];
@@ -16,29 +16,18 @@ export const loadCrystals = async () => {
       const tile = TILES[key];
 
       const crystals = await Promise.all(
-        Array.from({ length: 6 }).map(
-          (_, index2) =>
-            new Promise<HTMLImageElement>((res) => {
-              const canvas = document.createElement("canvas");
-              canvas.width = crystalSize;
-              canvas.height = crystalSize;
-              const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-              context.imageSmoothingEnabled = false;
-              context.drawImage(
-                texture,
-                crystalSize * index2,
-                crystalSize * index,
-                crystalSize,
-                crystalSize,
-                0,
-                0,
-                crystalSize,
-                crystalSize
-              );
-              const image = new Image();
-              image.src = canvas.toDataURL();
-              image.onload = () => res(image);
-            })
+        Array.from({ length: 6 }).map((_, index2) =>
+          crop(
+            texture,
+            crystalSize * index2,
+            crystalSize * index,
+            crystalSize,
+            crystalSize,
+            0,
+            0,
+            crystalSize,
+            crystalSize
+          )
         )
       );
 
@@ -56,19 +45,8 @@ export const loadCrystals = async () => {
   const dmgHeight = 66;
 
   damageTextures = await Promise.all(
-    Array.from({ length: 5 }).map(
-      (_, index) =>
-        new Promise<HTMLImageElement>((res) => {
-          const canvas = document.createElement("canvas");
-          canvas.width = dmgWidth;
-          canvas.height = dmgHeight;
-          const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-          context.imageSmoothingEnabled = false;
-          context.drawImage(texture, dmgWidth * index, 0, dmgWidth, dmgHeight, 0, 0, dmgWidth, dmgHeight);
-          const image = new Image();
-          image.src = canvas.toDataURL();
-          image.onload = () => res(image);
-        })
+    Array.from({ length: 5 }).map((_, index) =>
+      crop(texture, dmgWidth * index, 0, dmgWidth, dmgHeight, 0, 0, dmgWidth, dmgHeight)
     )
   );
 };

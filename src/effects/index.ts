@@ -1,7 +1,7 @@
-import { Effect } from "./effect";
+import { IEffect } from "@/types";
 
 export class Effects {
-  list: Effect[];
+  private list: IEffect[];
 
   constructor() {
     this.list = [];
@@ -15,14 +15,16 @@ export class Effects {
     let needUpdate = false;
     this.list.forEach((obj) => {
       obj.update();
-      needUpdate = needUpdate || !obj.isAlive;
+      needUpdate = needUpdate || !obj.alive;
     });
-    if (needUpdate) this.list = this.list.filter((obj) => obj.isAlive);
+    if (needUpdate) this.list = this.list.filter((obj) => obj.alive);
   }
 
-  add(effect: Effect) {
+  create(effect: IEffect) {
     this.list.push(effect);
   }
-}
 
-export const effects = new Effects();
+  reset() {
+    this.list = [];
+  }
+}

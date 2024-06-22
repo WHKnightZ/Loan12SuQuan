@@ -8,10 +8,10 @@ const COUNT = 3;
 const BASE_LIST = Array.from({ length: COUNT });
 
 export class GainTile extends Effect {
-  tile: number;
-  maxTimer: number;
-  halfSize: number;
-  list: {
+  private tile: number;
+  private maxTimer: number;
+  private halfSize: number;
+  private list: {
     x: number;
     y: number;
     startX: number;
@@ -102,6 +102,6 @@ export class GainTile extends Effect {
       }
     });
 
-    if (countDead === COUNT) this.isAlive = false;
+    if (countDead === COUNT) this.alive = false;
   }
 }

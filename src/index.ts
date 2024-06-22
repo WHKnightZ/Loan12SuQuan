@@ -53,14 +53,10 @@ const main = async () => {
 
   game = new Game();
   game.init();
+  base.game = game;
 
-  base.canvas.addEventListener("click", (e) => {
-    game.onClick(e);
-  });
-
-  document.addEventListener("keydown", (e) => {
-    game.onKeyDown(e);
-  });
+  base.canvas.addEventListener("click", (e) => game.onClick(e));
+  document.addEventListener("keydown", (e) => game.onKeyDown(e));
 };
 
 main();

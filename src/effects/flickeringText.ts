@@ -1,11 +1,11 @@
-import { base, OPACITY_ZERO } from "@/configs/consts";
+import { base, EPSILON } from "@/configs/consts";
 import { font } from "@/objects/font";
 import { Effect } from "./effect";
 
 export class FlickeringText extends Effect {
-  text: string;
-  show: boolean;
-  speed: number;
+  private text: string;
+  private show: boolean;
+  private speed: number;
 
   constructor({ text, x = 0, y = 0 }: { text: string; x?: number; y?: number }) {
     super(x, y);
@@ -34,6 +34,6 @@ export class FlickeringText extends Effect {
       this.show = !this.show;
     }
 
-    if (this.opacity < OPACITY_ZERO) this.isAlive = false;
+    if (this.opacity < EPSILON) this.alive = false;
   }
 }

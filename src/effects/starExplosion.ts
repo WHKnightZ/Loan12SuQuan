@@ -1,4 +1,4 @@
-import { base, OPACITY_ZERO } from "@/configs/consts";
+import { base, EPSILON } from "@/configs/consts";
 import { Star } from "@/objects/star";
 import { Effect } from "./effect";
 
@@ -28,6 +28,6 @@ export class StarExplosion extends Effect {
 
     this.list.forEach((star) => star.update());
 
-    if (this.opacity < OPACITY_ZERO) this.isAlive = false;
+    if (this.opacity < EPSILON) this.alive = false;
   }
 }

@@ -1,16 +1,13 @@
-import {
-  base,
-  CELL_SIZE,
-  cornerSelectionOffsets,
-  CORNER_SELECTION_CYCLE,
-  mapTileInfo,
-  SWAP_DURATION,
-  SWAP_OFFSET,
-  TILE_OFFSET,
-} from "@/configs/consts";
+import { base, CELL_SIZE, mapTileInfo, SWAP_DURATION, SWAP_OFFSET, TILE_OFFSET } from "@/configs/consts";
 import { cornerSelections } from "@/textures";
 import { IGameStateFunction } from "@/types";
 import { combine } from "@/utils/common";
+
+const CORNER_SELECTION_CYCLE = 30;
+
+const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, i) =>
+  Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
+);
 
 const selectStateFunction: IGameStateFunction = {
   render: (self) => {

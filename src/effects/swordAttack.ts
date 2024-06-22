@@ -1,7 +1,6 @@
 import { SCREEN_WIDTH, base } from "@/configs/consts";
 import { Effect } from "./effect";
 import { animateSword } from "@/utils/math";
-import { effects } from ".";
 import { CauseDamage } from "./causeDamage";
 import { swordCrystalTextures } from "@/textures";
 import { IPlayer } from "@/types";
@@ -47,11 +46,13 @@ export class SwordAttack extends Effect {
     const offset = 0;
     const startX = this.playerIndex * SCREEN_WIDTH + (this.playerIndex === 0 ? -offset : offset);
     const startY = 143 - offset; // Linear, kiếm chạy xuyên 1 góc chéo
+
     this.list = swords.map(({ x, y, delay }) => {
       const newStartX = (this.playerIndex === 0 ? 1 : -1) * x + startX;
       const newStartY = y + startY;
       const distanceX = endX - startX;
       const distanceY = endY - startY;
+
       return {
         x: newStartX,
         y: newStartY,
@@ -63,6 +64,7 @@ export class SwordAttack extends Effect {
         distanceY,
       };
     });
+
     this.countDead = 0;
   }
 
@@ -90,10 +92,12 @@ export class SwordAttack extends Effect {
 
       item.alive = false;
       this.countDead += 1;
+
       if (this.countDead === 1) this.attackedPlayer.shock();
+
       if (this.countDead === COUNT) {
-        this.isAlive = false;
-        effects.add(new CauseDamage(this.endX, this.endY - 10));
+        this.alive = false;
+        base.game.addEffect(new CauseDamage(this.endX, this.endY - 10));
       }
     });
   }

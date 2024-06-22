@@ -7,14 +7,16 @@ import {
   mapTileInfo,
   MAP_WIDTH,
   MAP_WIDTH_1,
-  MATCH_4_POINT,
+  MATCH_4_SCORE,
   PLAYER_INTELLIGENCE,
   TILES,
   TILE_OFFSET,
   TIMER_HINT_DELAY_DEFAULT,
-  CELL_SIZE_2,
+  CELL_SIZE_HALF,
+  COMPUTER_INTELLIGENCE,
+  SWORDRED_ATTACK_MULTIPLIER,
 } from "@/configs/consts";
-import { effects } from "@/effects";
+import { Effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
 import { FloatingText } from "@/effects/floatingText";
 import { StarExplosion } from "@/effects/starExplosion";
@@ -31,6 +33,7 @@ import {
   IPoint,
   IMatched4,
   IWait,
+  IEffect,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import explodeStateFunction from "./explode";
@@ -55,6 +58,8 @@ const mapFunction: {
 };
 
 export class Game implements IGame {
+  private effects: Effects;
+
   state: IGameState;
   selected: IPointExt | null;
   swapped: IPointExt | null;
@@ -95,12 +100,16 @@ export class Game implements IGame {
 
   computerTimer: number;
 
-  constructor() {}
+  constructor() {
+    this.effects = new Effects();
+  }
 
   init() {
+    this.effects.reset();
+
     this.players = [
-      new Player({ game: this, index: 0, attack: 7, life: 100, intelligence: PLAYER_INTELLIGENCE, avatar: 0 }),
-      new Player({ game: this, index: 1, attack: 9, life: 100, intelligence: 100, avatar: 1 }),
+      new Player({ index: 0, attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
+      new Player({ index: 1, attack: 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
@@ -141,28 +150,28 @@ export class Game implements IGame {
     while (newX >= 0) {
       const value = base.map[y][newX];
       if (!check(value, posValue, compatible)) break;
-      h.push({ x: newX, y, point: mapTileInfo[value].point, value });
+      h.push({ x: newX, y, score: mapTileInfo[value].score, value });
       newX -= 1;
     }
     newX = x + 1;
     while (newX < MAP_WIDTH) {
       const value = base.map[y][newX];
       if (!check(value, posValue, compatible)) break;
-      h.push({ x: newX, y, point: mapTileInfo[value].point, value });
+      h.push({ x: newX, y, score: mapTileInfo[value].score, value });
       newX += 1;
     }
     newY = y - 1;
     while (newY >= 0) {
       const value = base.map[newY][x];
       if (!check(value, posValue, compatible)) break;
-      v.push({ x, y: newY, point: mapTileInfo[value].point, value });
+      v.push({ x, y: newY, score: mapTileInfo[value].score, value });
       newY -= 1;
     }
     newY = y + 1;
     while (newY < MAP_WIDTH) {
       const value = base.map[newY][x];
       if (!check(value, posValue, compatible)) break;
-      v.push({ x, y: newY, point: mapTileInfo[value].point, value });
+      v.push({ x, y: newY, score: mapTileInfo[value].score, value });
       newY += 1;
     }
 
@@ -180,7 +189,7 @@ export class Game implements IGame {
 
     const matched = hasH || hasV;
     const value = base.map[y][x];
-    const thisPoint = { x, y, point: mapTileInfo[value].point, value };
+    const thisPoint = { x, y, score: mapTileInfo[value].score, value };
     const tiles = matched ? [...h, ...v, thisPoint] : [];
 
     const checkMatch4Turn = (tiles: ITileInfo[]) => {
@@ -209,10 +218,10 @@ export class Game implements IGame {
     return {
       matched,
       tiles,
-      point:
-        tiles.reduce((a, b) => a + b.point, 0) +
-        (h.length >= GAIN_TURN ? MATCH_4_POINT : 0) +
-        (v.length >= GAIN_TURN ? MATCH_4_POINT : 0),
+      score:
+        tiles.reduce((a, b) => a + b.score, 0) +
+        (h.length >= GAIN_TURN ? MATCH_4_SCORE : 0) +
+        (v.length >= GAIN_TURN ? MATCH_4_SCORE : 0),
       matched4Tiles,
     };
   }
@@ -225,8 +234,8 @@ export class Game implements IGame {
 
   addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number) {
     this.swap(x0, y0, x1, y1);
-    const { matched: m0, point: p0 } = this.matchPosition(x0, y0);
-    const { matched: m1, point: p1 } = this.matchPosition(x1, y1);
+    const { matched: m0, score: p0 } = this.matchPosition(x0, y0);
+    const { matched: m1, score: p1 } = this.matchPosition(x1, y1);
     const swapDirection = Math.random() < 0.5;
     const pos = swapDirection ? { x0: x1, y0: y1, x1: x0, y1: y0 } : { x0, y0, x1, y1 };
     if (m0 || m1) allMatchedPositions.push({ ...pos, score: p0 + p1 });
@@ -303,7 +312,7 @@ export class Game implements IGame {
     this.combo = 0;
 
     if (this.needUpdate) {
-      if (this.turnCount > 1) effects.add(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+      if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
       else if (this.turnCount === 0) {
         this.changePlayer();
       }
@@ -328,7 +337,7 @@ export class Game implements IGame {
 
       if (this.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
         const player = this.players[1 - this.playerTurn];
-        effects.add(new SwordAttack(this.players[this.playerTurn], this.players[1 - this.playerTurn]));
+        this.createEffect(new SwordAttack(this.players[this.playerTurn], this.players[1 - this.playerTurn]));
       }
 
       this.turnCount += this.matched4.turnCount;
@@ -336,13 +345,13 @@ export class Game implements IGame {
       const x = center.x / this.explosions.length;
       const y = center.y / this.explosions.length;
       this.combo += 1;
-      const effectX = x * CELL_SIZE + CELL_SIZE_2;
-      const effectY = y * CELL_SIZE + CELL_SIZE_2;
+      const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
+      const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
 
       if (this.combo < 2) return;
 
-      effects.add(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
-      effects.add(new StarExplosion(effectX, effectY));
+      this.createEffect(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
+      this.createEffect(new StarExplosion(effectX, effectY));
     };
 
     this.wait = {
@@ -369,11 +378,11 @@ export class Game implements IGame {
   gainTile({ value, x, y }: ITileInfo) {
     if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
       const currentPlayer = this.players[this.playerTurn];
-      effects.add(
+      this.createEffect(
         new GainTile({
           tile: value,
-          startX: x * CELL_SIZE + CELL_SIZE_2,
-          startY: y * CELL_SIZE + CELL_SIZE_2,
+          startX: x * CELL_SIZE + CELL_SIZE_HALF,
+          startY: y * CELL_SIZE + CELL_SIZE_HALF,
           endX: currentPlayer.avatarOffset.x + currentPlayer.avatar.width / 2,
           endY: currentPlayer.avatarOffset.y,
         })
@@ -384,7 +393,7 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
-        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? 2.5 : 1));
+        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
         break;
 
       case TILES.HEART:
@@ -426,6 +435,10 @@ export class Game implements IGame {
     }
   }
 
+  createEffect(effect: IEffect) {
+    this.effects.create(effect);
+  }
+
   render() {
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
@@ -444,7 +457,7 @@ export class Game implements IGame {
 
     mapFunction[this.state].render(this);
 
-    effects.render();
+    this.effects.render();
   }
 
   update() {
@@ -452,7 +465,7 @@ export class Game implements IGame {
 
     mapFunction[this.state].update(this);
 
-    effects.update();
+    this.effects.update();
 
     this.updateComputer();
   }

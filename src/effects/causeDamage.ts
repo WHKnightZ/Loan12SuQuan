@@ -3,9 +3,9 @@ import { Effect } from "./effect";
 import { damageTextures } from "@/textures";
 
 export class CauseDamage extends Effect {
-  frame: number;
-  halfWidth: number;
-  halfHeight: number;
+  private frame: number;
+  private halfWidth: number;
+  private halfHeight: number;
 
   constructor(x: number, y: number) {
     super(x, y);
@@ -25,6 +25,6 @@ export class CauseDamage extends Effect {
 
     this.frame += 1;
 
-    if (this.frame > 4) this.isAlive = false;
+    if (this.frame > 4) this.alive = false;
   }
 }

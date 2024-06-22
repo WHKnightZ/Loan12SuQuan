@@ -103,3 +103,28 @@ export const resize = (image: HTMLImageElement, ratio: number = 1) => {
     image2.onload = () => res(image2);
   });
 };
+
+export const crop = (
+  image: HTMLImageElement,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number
+) => {
+  const canvas = document.createElement("canvas");
+  canvas.width = dw;
+  canvas.height = dh;
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D;
+  context.imageSmoothingEnabled = false;
+  context.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+  const image2 = new Image();
+  image2.src = canvas.toDataURL();
+
+  return new Promise<HTMLImageElement>((res) => {
+    image2.onload = () => res(image2);
+  });
+};

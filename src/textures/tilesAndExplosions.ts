@@ -1,5 +1,8 @@
-import { SCALE_RATIO, TILES, TILE_LENGTH, getKeys, mapTileInfo } from "@/configs/consts";
+import { SCALE_RATIO, TILES, getKeys, mapTileInfo } from "@/configs/consts";
+import { crop } from "@/utils/canvas";
 import { getImageSrc } from "@/utils/common";
+
+const TILE_LENGTH = 7;
 
 export const loadTilesAndExplosions = async () => {
   const loadImage = (key: number, src: string) => {
@@ -11,21 +14,10 @@ export const loadTilesAndExplosions = async () => {
           const getCropImage = (pos: number) => {
             const width = Math.floor((image.width / TILE_LENGTH) * SCALE_RATIO);
             const height = Math.floor(image.height * SCALE_RATIO);
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-            const context = canvas.getContext("2d") as CanvasRenderingContext2D;
-            context.imageSmoothingEnabled = false;
-
             const newPosition = (image.width / TILE_LENGTH) * pos;
             const newWidth = image.width / TILE_LENGTH;
 
-            context.drawImage(image, newPosition, 0, newWidth, image.height, 0, 0, width, height);
-
-            const image2 = new Image();
-            image2.src = canvas.toDataURL("image/png");
-
-            return new Promise<HTMLImageElement>((res) => (image2.onload = () => res(image2)));
+            return crop(image, newPosition, 0, newWidth, image.height, 0, 0, width, height);
           };
 
           mapTileInfo[key].texture = await getCropImage(0);

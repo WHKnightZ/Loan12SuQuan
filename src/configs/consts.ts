@@ -1,51 +1,140 @@
-import { ITileType } from "@/types";
+import { IBase, ITileType } from "@/types";
 
+/**
+ * Get danh sách các key của object
+ */
 export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;
-
+/**
+ * Số khung hình mỗi giây
+ */
 export const FPS = 60;
+/**
+ * Khoảng thời gian giữa mỗi khung hình
+ */
 export const INTERVAL = 1000 / FPS;
-
+/**
+ * Màu các ô trên bàn, xen kẽ 2 màu
+ */
 export const BOARD_COLORS = ["#3e3226", "#554933"];
+/**
+ * Màu nền, áp dụng cho loading
+ */
 export const BACKGROUND_COLOR = BOARD_COLORS[1];
-
+/**
+ * Số cell trên bàn
+ */
 export const MAP_WIDTH = 8;
+/**
+ * Số cell trên bàn - 1
+ */
 export const MAP_WIDTH_1 = MAP_WIDTH - 1;
+/**
+ * Tổng số tile
+ */
 export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
+/**
+ * Kích thước 1 cell
+ */
 export const CELL_SIZE = 60;
-export const CELL_SIZE_2 = CELL_SIZE / 2;
+/**
+ * Chính giữa cell
+ */
+export const CELL_SIZE_HALF = CELL_SIZE / 2;
+/**
+ * Kích thước bàn
+ */
 export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
+/**
+ * Chiều cao menu
+ */
 export const MENU_HEIGHT = 96;
-
+/**
+ * Chiều rộng màn hình
+ */
 export const SCREEN_WIDTH = BOARD_SIZE;
+/**
+ * Chiều cao màn hình
+ */
 export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
+/**
+ * Chính giữa ngang màn hình
+ */
 export const SCREEN_WIDTH_HALF = SCREEN_WIDTH / 2;
+/**
+ * Chính giữa dọc màn hình
+ */
 export const SCREEN_HEIGHT_HALF = SCREEN_HEIGHT / 2;
-
+/**
+ * Kích thước hiển thị của tile
+ */
 export const TILE_SIZE = 50;
+/**
+ * Kích thước tile trong spritesheet
+ */
 export const REAL_TILE_SIZE = 28;
-export const TILE_LENGTH = 7;
-
+/**
+ * Vẽ tile cách 1 khoảng offset để căn giữa tile
+ */
 export const TILE_OFFSET = Math.floor((CELL_SIZE - TILE_SIZE) / 2);
+/**
+ * Nếu ăn được 1 hàng nhiều hơn số này thì được thêm 1 lượt
+ */
 export const GAIN_TURN = 3;
-export const MATCH_4_POINT = 50;
+/**
+ * Điểm nhận được khi ăn 4 tile 1 hàng
+ */
+export const MATCH_4_SCORE = 50;
+/**
+ * Thời gian để swap 2 tile với nhau
+ */
 export const SWAP_DURATION = 10;
+/**
+ * Khoảng cách tile dịch chuyển khi swap mỗi khung hình
+ */
 export const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
+/**
+ * Tốc độ rơi khởi đầu
+ */
 export const VELOCITY_BASE = 3.5;
+/**
+ * Tốc độ rơi tăng thêm sau mỗi frame
+ */
 export const GRAVITY = 0.27;
+/**
+ * Tỉ lệ để phóng to tile lên
+ */
 export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
-export const CORNER_SELECTION_CYCLE = 30;
-export const HINT_ARROW_CYCLE = 30;
-
+/**
+ * Chỉ số tính xem gợi ý nước đi của người chơi tốt hay kém
+ */
 export const PLAYER_INTELLIGENCE = 20;
+/**
+ * Chỉ số thông minh của máy, quyết định nước đi tốt hay kém
+ */
+export const COMPUTER_INTELLIGENCE = 100;
+/**
+ * Mana khởi đầu
+ */
 export const DEFAULT_MANA = 72;
+/**
+ * Năng lượng khởi đầu
+ */
 export const DEFAULT_ENERGY = 100;
-
-export const OPACITY_ZERO = 0.0001;
-
+/**
+ * Sai số để xét xem 1 số bằng 0 hay chưa
+ */
+export const EPSILON = 0.0001;
+/**
+ * Khoảng thời gian người chơi bị mất năng lượng (tính bằng số frame)
+ */
 export const LOSE_ENERGY_INTERVAL = 300;
-
+/**
+ * Khoảng thời gian người chơi được gợi ý nếu không thao tác (tính bằng số frame)
+ */
 export const TIMER_HINT_DELAY_DEFAULT = 300;
-
+/**
+ * Code của các tile
+ */
 export const TILES: { [key in ITileType]: number } = {
   SWORD: 0,
   HEART: 1,
@@ -55,40 +144,43 @@ export const TILES: { [key in ITileType]: number } = {
   EXP: 5,
   SWORDRED: 6,
 };
-
+/**
+ *
+ */
+export const SWORDRED_ATTACK_MULTIPLIER = 2.5;
+/**
+ * Tổng số Tile
+ */
 export const COUNT_TILES = Object.keys(TILES).length;
-
+/**
+ * Lấy chi tiét tile từ tile code
+ */
 export const mapTileInfo: {
   [key: number]: {
     texture: HTMLImageElement;
     compatible: number[];
     probability: number;
-    point: number;
+    score: number;
     explosions: HTMLImageElement[];
   };
 } = {
-  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, point: 10, texture: null as any, explosions: [] },
-  [TILES.HEART]: { compatible: [], probability: 100, point: 9, texture: null as any, explosions: [] },
-  [TILES.GOLD]: { compatible: [], probability: 100, point: 6, texture: null as any, explosions: [] },
-  [TILES.ENERGY]: { compatible: [], probability: 100, point: 7, texture: null as any, explosions: [] },
-  [TILES.MANA]: { compatible: [], probability: 100, point: 8, texture: null as any, explosions: [] },
-  [TILES.EXP]: { compatible: [], probability: 100, point: 6, texture: null as any, explosions: [] },
-  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, point: 30, texture: null as any, explosions: [] },
+  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, score: 10, texture: null as any, explosions: [] },
+  [TILES.HEART]: { compatible: [], probability: 100, score: 9, texture: null as any, explosions: [] },
+  [TILES.GOLD]: { compatible: [], probability: 100, score: 6, texture: null as any, explosions: [] },
+  [TILES.ENERGY]: { compatible: [], probability: 100, score: 7, texture: null as any, explosions: [] },
+  [TILES.MANA]: { compatible: [], probability: 100, score: 8, texture: null as any, explosions: [] },
+  [TILES.EXP]: { compatible: [], probability: 100, score: 6, texture: null as any, explosions: [] },
+  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, score: 30, texture: null as any, explosions: [] },
 };
-
-export const base: {
-  canvas: HTMLCanvasElement;
-  context: CanvasRenderingContext2D;
-  map: number[][];
-} = {} as any;
-
-export const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, i) =>
-  Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
-);
-
-export const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
-  Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
-);
-
+/**
+ * Chứa các thành phần quan trọng của game
+ */
+export const base = {} as IBase;
+/**
+ * Offset X của avatar
+ */
 export const AVATAR_OFFSET_X = 62;
+/**
+ * Offset Y của avatar
+ */
 export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;

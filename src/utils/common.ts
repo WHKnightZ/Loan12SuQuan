@@ -127,7 +127,7 @@ export const combine = (arr: ITileInfo[][]) => {
       const key = getKey(newX, newY);
       if (has[key]) return;
       has[key] = true;
-      explodeList.push({ x: newX, y: newY, point: 0, value: base.map[newY][newX] });
+      explodeList.push({ x: newX, y: newY, score: 0, value: base.map[newY][newX] });
     });
   });
 

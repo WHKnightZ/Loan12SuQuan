@@ -18,6 +18,7 @@ export const loadCommonTextures = async () => {
         res(null);
       })
   );
+
   hintArrows.UP = {
     offset: { x: (CELL_SIZE - image.width) / 2, y: -6 },
     texture: image,

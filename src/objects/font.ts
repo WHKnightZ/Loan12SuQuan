@@ -12,6 +12,7 @@ export class Font {
     y = y || BOARD_SIZE / 2;
     const chars: IFontChar[] = [];
     let width = 0;
+
     for (let i = 0; i < text.length; i += 1) {
       const c = text.charAt(i).toUpperCase();
       const charTexture = mapFontChar[c];
@@ -23,6 +24,7 @@ export class Font {
     x = x - Math.floor(width / 2);
     y = y - 12;
     let offsetX = x;
+
     for (let i = 0; i < text.length; i += 1) {
       const c = text.charAt(i).toUpperCase();
       const charTexture = mapFontChar[c];
