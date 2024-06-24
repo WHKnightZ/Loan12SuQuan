@@ -1,7 +1,8 @@
 import { base } from "@/configs/consts";
 import { starTextures } from "@/textures";
+import { IRenderable } from "@/types";
 
-export class Star {
+export class Star implements IRenderable {
   x: number;
   y: number;
   vx: number;

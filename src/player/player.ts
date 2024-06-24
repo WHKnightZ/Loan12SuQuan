@@ -9,13 +9,12 @@ import {
   SCREEN_WIDTH,
 } from "@/configs/consts";
 import { IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
-import { Spin } from "./spin";
 import { avatarTextures, barTextures } from "@/textures";
-import { createSpringEffect } from "@/utils/physics";
 import { random } from "@/utils/math";
+import { BorderAnimation } from "./borderAnimation";
+import { Spring } from "./spring";
 
 const BAR_OFFSET_X = 132;
-const SPRING_OFFSETS = createSpringEffect(8);
 
 export class Player implements IPlayer {
   index: number;
@@ -29,10 +28,10 @@ export class Player implements IPlayer {
   bars: IPlayerAttributeExtra[];
   energyTimer: number;
 
-  private avatar: HTMLImageElement;
   private avatarOffset: { x: number; y: number };
-  private spins: Spin[];
-  private springIndex: number;
+  private avatarTexture: HTMLImageElement;
+  private borderAnimation: BorderAnimation;
+  private spring: Spring;
 
   constructor({
     index,
@@ -62,28 +61,14 @@ export class Player implements IPlayer {
     ];
 
     this.energyTimer = 0;
-    this.avatar = avatarTextures[avatar][index];
     this.avatarOffset = {
-      x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatar.width,
+      x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatarTexture.width,
       y: AVATAR_OFFSET_Y,
     };
-    const padding = 4;
-    this.spins = Array.from({ length: 2 }).map(
-      (_, i) =>
-        new Spin(
-          this.avatarOffset.x - padding,
-          this.avatarOffset.x + this.avatar.width + padding,
-          this.avatarOffset.y - padding,
-          this.avatarOffset.y + this.avatar.height + padding,
-          0.8,
-          "CW",
-          40,
-          3,
-          this.avatarOffset.x + (i === 0 ? 10 - padding : this.avatar.width + padding - 10),
-          this.avatarOffset.y + (i === 0 ? -padding : this.avatar.height + padding)
-        )
-    );
-    this.springIndex = -1;
+    this.avatarTexture = avatarTextures[avatar][index];
+
+    this.borderAnimation = new BorderAnimation(index, this.avatarOffset, this.avatarTexture);
+    this.spring = new Spring();
   }
 
   /**
@@ -131,7 +116,7 @@ export class Player implements IPlayer {
   }
 
   shock() {
-    this.springIndex = 0;
+    this.spring.beginSpring();
   }
 
   render() {
@@ -142,10 +127,10 @@ export class Player implements IPlayer {
       base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
     });
 
-    const offsetAvatar = this.springIndex > -1 ? SPRING_OFFSETS[this.springIndex] : 0;
-    base.context.drawImage(this.avatar, this.avatarOffset.x + offsetAvatar, this.avatarOffset.y);
+    const offsetAvatar = this.spring.getSpringOffet();
+    base.context.drawImage(this.avatarTexture, this.avatarOffset.x + offsetAvatar, this.avatarOffset.y);
 
-    this.spins.forEach((e) => e.render());
+    this.borderAnimation.render();
   }
 
   update() {
@@ -170,20 +155,7 @@ export class Player implements IPlayer {
       attribute.display = attribute.value + (attribute.display - attribute.value) * value;
     });
 
-    // TODO: Spin nên tách ra thành AvatarSpinner (hoặc AvatarSpin, bên này chỉ gọi)
-    this.spins.forEach((e) => {
-      if (this.index === base.game.playerTurn) e.activate();
-      else e.deactivate();
-
-      e.update();
-    });
-
-    // Spring tách ra thành plugin
-    // object.plugins.forEach(x=>x.update, render) ở super.update()
-    // plugin có parent: game object
-    if (this.springIndex > -1) {
-      this.springIndex += 1;
-      if (this.springIndex >= SPRING_OFFSETS.length) this.springIndex = -1;
-    }
+    this.borderAnimation.update();
+    this.spring.update();
   }
 }

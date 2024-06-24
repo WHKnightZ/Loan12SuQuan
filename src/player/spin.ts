@@ -1,4 +1,5 @@
 import { base } from "@/configs/consts";
+import { IRenderable } from "@/types";
 
 type Rotation = "CW" | "CCW"; // Clockwise, Counter Clockwise
 type IDirection = "HT" | "VR" | "HB" | "VL"; // Horizontal Top, Vertical Right, Horizontal Bottom, Vertical Left
@@ -79,7 +80,7 @@ const mapDirection: {
   },
 };
 
-export class Spin {
+export class Spin implements IRenderable {
   boundLeft: number;
   boundRight: number;
   boundTop: number;
