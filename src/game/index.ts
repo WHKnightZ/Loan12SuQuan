@@ -20,7 +20,7 @@ import { Effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
 import { FloatingText } from "@/effects/floatingText";
 import { StarExplosion } from "@/effects/starExplosion";
-import { Player } from "@/objects/player";
+import { Player } from "@/player/player";
 import {
   IGame,
   IAllMatchedPositions,
@@ -32,7 +32,7 @@ import {
   IPlayer,
   IPoint,
   IMatched4,
-  IWait,
+  IWaitProperties,
   IEffect,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
@@ -59,6 +59,7 @@ const mapFunction: {
 
 export class Game implements IGame {
   private effects: Effects;
+  private waitProperties: IWaitProperties;
 
   state: IGameState;
   selected: IPointExt | null;
@@ -87,8 +88,6 @@ export class Game implements IGame {
   isFadeIn: boolean;
   isFadeOut: boolean;
 
-  wait: IWait;
-
   matchedPositions: IAllMatchedPositions;
   hintIndex: number;
 
@@ -106,6 +105,7 @@ export class Game implements IGame {
 
   init() {
     this.effects.reset();
+    this.waitProperties = null;
 
     this.players = [
       new Player({ index: 0, attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
@@ -259,77 +259,13 @@ export class Game implements IGame {
     this.matchedPositions = allMatchedPositions;
   }
 
-  onClick(e: MouseEvent) {
-    if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
-
-    const canvas = base.canvas;
-
-    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
-    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
-
-    if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
-
-    const x = Math.floor(offsetX / CELL_SIZE);
-    const y = Math.floor(offsetY / CELL_SIZE);
-
-    this.tSwap = 0;
-
-    if (!this.selected) {
-      this.selected = { x, y, value: base.map[y][x] };
-      base.map[y][x] = -1;
-      this.state = "SELECT";
-      return;
-    }
-
-    if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
-      const { x, y, value } = this.selected;
-      base.map[y][x] = value;
-      this.selected = null;
-      this.idle();
-      return;
-    }
-
-    this.swapped = { x, y, value: base.map[y][x] };
-    base.map[y][x] = -1;
-  }
-
-  onKeyDown(e: KeyboardEvent) {
-    switch (e.key) {
-      case "Escape":
-        this.fadeOut();
-        break;
-    }
-  }
-
   changePlayer() {
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
   }
 
-  idle() {
-    this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
-    this.state = "IDLE";
-    this.combo = 0;
-
-    if (this.needUpdate) {
-      if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
-      else if (this.turnCount === 0) {
-        this.changePlayer();
-      }
-    }
-
-    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
-
-    if (this.playerTurn === 1) {
-      // Computer
-      this.computerTimer = 0;
-    }
-
-    this.needUpdate = false;
-  }
-
   explode() {
-    const callback = () => {
+    this.wait(this.combo === 0 ? 4 : 8, () => {
       this.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
 
       this.state = "EXPLODE";
@@ -352,27 +288,7 @@ export class Game implements IGame {
 
       this.createEffect(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
       this.createEffect(new StarExplosion(effectX, effectY));
-    };
-
-    this.wait = {
-      timer: 0,
-      maxTimer: this.combo === 0 ? 4 : 8,
-      callback,
-    };
-    this.state = "WAIT";
-  }
-
-  fadeIn() {
-    this.state = "FADE";
-    for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
-    this.tFadeIn = 0;
-    this.isFadeIn = true;
-  }
-
-  fadeOut() {
-    this.state = "FADE";
-    this.tFadeOut = 0;
-    this.isFadeOut = true;
+    });
   }
 
   gainTile({ value, x, y }: ITileInfo) {
@@ -435,8 +351,62 @@ export class Game implements IGame {
     }
   }
 
-  createEffect(effect: IEffect) {
-    this.effects.create(effect);
+  /**
+   * Chuyển qua state idle
+   */
+  idle() {
+    this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
+    this.state = "IDLE";
+    this.combo = 0;
+
+    if (this.needUpdate) {
+      if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+      else if (this.turnCount === 0) {
+        this.changePlayer();
+      }
+    }
+
+    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+
+    if (this.playerTurn === 1) {
+      // Computer
+      this.computerTimer = 0;
+    }
+
+    this.needUpdate = false;
+  }
+
+  /**
+   * Đợi một khoảng thời gian mới thực hiện callback
+   * @param maxTimer
+   * @param callback
+   */
+  wait(maxTimer: number, callback: () => void) {
+    this.waitProperties = {
+      timer: 0,
+      maxTimer,
+      callback,
+    };
+    this.state = "WAIT";
+  }
+
+  /**
+   * Chuyển qua state fade in
+   */
+  fadeIn() {
+    this.state = "FADE";
+    for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
+    this.tFadeIn = 0;
+    this.isFadeIn = true;
+  }
+
+  /**
+   * Chuyển qua state fade out
+   */
+  fadeOut() {
+    this.state = "FADE";
+    this.tFadeOut = 0;
+    this.isFadeOut = true;
   }
 
   render() {
@@ -468,5 +438,51 @@ export class Game implements IGame {
     this.effects.update();
 
     this.updateComputer();
+  }
+
+  createEffect(effect: IEffect) {
+    this.effects.create(effect);
+  }
+
+  onClick(e: MouseEvent) {
+    if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
+
+    const canvas = base.canvas;
+
+    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
+    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
+
+    if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
+
+    const x = Math.floor(offsetX / CELL_SIZE);
+    const y = Math.floor(offsetY / CELL_SIZE);
+
+    this.tSwap = 0;
+
+    if (!this.selected) {
+      this.selected = { x, y, value: base.map[y][x] };
+      base.map[y][x] = -1;
+      this.state = "SELECT";
+      return;
+    }
+
+    if (Math.abs(x - this.selected.x) + Math.abs(y - this.selected.y) !== 1) {
+      const { x, y, value } = this.selected;
+      base.map[y][x] = value;
+      this.selected = null;
+      this.idle();
+      return;
+    }
+
+    this.swapped = { x, y, value: base.map[y][x] };
+    base.map[y][x] = -1;
+  }
+
+  onKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case "Escape":
+        this.fadeOut();
+        break;
+    }
   }
 }

@@ -38,7 +38,7 @@ export type IMatched4 = {
   matchedList: { [key: string]: boolean };
 };
 
-export type IWait = IHasTimer & {
+export type IWaitProperties = IHasTimer & {
   maxTimer: number;
   callback: () => void;
 };
@@ -57,17 +57,18 @@ export type IPlayerAttributeExtra = {
 
 export type IPlayer = IRenderable & {
   index: number;
-  // game: IGame;
+  attack: number;
+  avatarTexture: HTMLImageElement;
+  avatarOffset: { x: number; y: number };
+
   // life: IPlayerAttribute;
   // mana: IPlayerAttribute;
   // energy: IPlayerAttribute;
-  // attack: number;
   // intelligence: number;
   // barOffsetX: number;
   // bars: IPlayerAttributeExtra[];
   // energyTimer: number;
-  avatar: HTMLImageElement;
-  avatarOffset: { x: number; y: number };
+
   // turn: number;
   // springIndex: number;
   // getHintIndex(matchedLength: number): number;
@@ -79,7 +80,8 @@ export type IPlayer = IRenderable & {
 };
 
 export type IGame = IRenderable & {
-  addEffect(effect: IEffect): void;
+  playerTurn: number;
+
   // state: IGameState;
   // selected: IPointExt | null;
   // swapped: IPointExt | null;
@@ -106,7 +108,7 @@ export type IGame = IRenderable & {
   // matchedPositions: IAllMatchedPositions;
   // hintIndex: number;
   // players: IPlayer[];
-  playerTurn: number;
+
   // turnCount: number;
   // needUpdate: boolean;
   // computerTimer: number;
@@ -123,8 +125,7 @@ export type IGame = IRenderable & {
   // swap(x0: number, y0: number, x1: number, y1: number): void;
   // addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
   // findAllMatchedPositions(): void;
-  // onClick(e: MouseEvent): void;
-  // onKeyDown(e: KeyboardEvent): void;
+
   // changePlayer(): void;
   // idle(): void;
   // explode(): void;
@@ -133,6 +134,9 @@ export type IGame = IRenderable & {
   // gainTile(tile: ITileInfo): void;
   // updateComputer(): void;
 
+  addEffect(effect: IEffect): void;
+  onClick(e: MouseEvent): void;
+  onKeyDown(e: KeyboardEvent): void;
   createTimeout(callback: () => void, frame: number): number;
   clearTimeout(timeoutId: number): void;
 };

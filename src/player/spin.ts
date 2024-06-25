@@ -81,16 +81,17 @@ const mapDirection: {
 };
 
 export class Spin implements IRenderable {
+  private rotation: Rotation;
+  private thickness: number;
+  private points: IPointExt[];
+  private active: boolean;
+  private opacity: number;
+
   boundLeft: number;
   boundRight: number;
   boundTop: number;
   boundBottom: number;
   speed: number;
-  rotation: Rotation;
-  thickness: number;
-  points: IPointExt[];
-  active: boolean;
-  opacity: number;
 
   constructor(
     boundLeft: number,
@@ -127,17 +128,6 @@ export class Spin implements IRenderable {
     this.active = false;
     this.opacity = 0;
   }
-
-  getMidPoint = () => {
-    const { direction } = this.points[0];
-    if ((direction === "HT" && this.rotation === "CW") || (direction === "VR" && this.rotation === "CCW"))
-      return { x: this.boundRight, y: this.boundTop };
-    if ((direction === "VR" && this.rotation === "CW") || (direction === "HB" && this.rotation === "CCW"))
-      return { x: this.boundRight, y: this.boundBottom };
-    if ((direction === "HB" && this.rotation === "CW") || (direction === "VL" && this.rotation === "CCW"))
-      return { x: this.boundLeft, y: this.boundBottom };
-    return { x: this.boundLeft, y: this.boundTop };
-  };
 
   activate() {
     if (this.active) return;
@@ -192,4 +182,15 @@ export class Spin implements IRenderable {
     ctx.stroke();
     ctx.globalAlpha = 1;
   }
+
+  private getMidPoint = () => {
+    const { direction } = this.points[0];
+    if ((direction === "HT" && this.rotation === "CW") || (direction === "VR" && this.rotation === "CCW"))
+      return { x: this.boundRight, y: this.boundTop };
+    if ((direction === "VR" && this.rotation === "CW") || (direction === "HB" && this.rotation === "CCW"))
+      return { x: this.boundRight, y: this.boundBottom };
+    if ((direction === "HB" && this.rotation === "CW") || (direction === "VL" && this.rotation === "CCW"))
+      return { x: this.boundLeft, y: this.boundBottom };
+    return { x: this.boundLeft, y: this.boundTop };
+  };
 }

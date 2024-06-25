@@ -17,21 +17,22 @@ import { Spring } from "./spring";
 const BAR_OFFSET_X = 132;
 
 export class Player implements IPlayer {
-  index: number;
-  attack: number;
-  intelligence: number;
-
-  life: IPlayerAttribute;
-  mana: IPlayerAttribute;
-  energy: IPlayerAttribute;
-  barOffsetX: number;
-  bars: IPlayerAttributeExtra[];
-  energyTimer: number;
-
-  private avatarOffset: { x: number; y: number };
-  private avatarTexture: HTMLImageElement;
   private borderAnimation: BorderAnimation;
   private spring: Spring;
+  private intelligence: number;
+
+  private life: IPlayerAttribute;
+  private mana: IPlayerAttribute;
+  private energy: IPlayerAttribute;
+
+  private barOffsetX: number;
+  private bars: IPlayerAttributeExtra[];
+  private energyTimer: number;
+
+  index: number;
+  attack: number;
+  avatarOffset: { x: number; y: number };
+  avatarTexture: HTMLImageElement;
 
   constructor({
     index,
@@ -134,12 +135,7 @@ export class Player implements IPlayer {
   }
 
   update() {
-    if (this.index === base.game.playerTurn) {
-      this.energyTimer += 1;
-      if (this.energyTimer % LOSE_ENERGY_INTERVAL === 0) {
-        this.energy.value -= 1;
-      }
-    }
+    this.loseEnergy();
 
     // TODO: Tách các hàm ra private function
     this.bars.forEach(({ attribute, maxTimer }) => {
@@ -157,5 +153,18 @@ export class Player implements IPlayer {
 
     this.borderAnimation.update();
     this.spring.update();
+  }
+
+  /**
+   * Người chơi mỗi LOSE_ENERGY_INTERVAL mà không tương tác sẽ mất năng lượng
+   * @returns
+   */
+  private loseEnergy() {
+    if (this.index !== base.game.playerTurn) return;
+
+    this.energyTimer += 1;
+    if (this.energyTimer % LOSE_ENERGY_INTERVAL !== 0) return;
+
+    this.energy.value -= 1;
   }
 }
