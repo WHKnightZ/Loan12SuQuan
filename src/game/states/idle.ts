@@ -8,7 +8,7 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
   Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
 );
 
-const idleStateFunction: IGameStateFunction = {
+export const idleStateFunction: IGameStateFunction = {
   render: (self) => {
     if (self.tHintDelay > 0) return;
 
@@ -41,5 +41,3 @@ const idleStateFunction: IGameStateFunction = {
     self.tIdle += 1;
   },
 };
-
-export default idleStateFunction;

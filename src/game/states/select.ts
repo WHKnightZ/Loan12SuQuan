@@ -9,7 +9,7 @@ const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).ma
   Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
 );
 
-const selectStateFunction: IGameStateFunction = {
+export const selectStateFunction: IGameStateFunction = {
   render: (self) => {
     const offset = self.tSwap * SWAP_OFFSET;
 
@@ -71,7 +71,6 @@ const selectStateFunction: IGameStateFunction = {
       if (m0 || m1) {
         // Hoán đổi oke thì giảm 1 lượt
         self.turnCount -= 1;
-        self.needUpdate = true;
 
         self.matched4Tiles = [].concat(m40, m41);
 
@@ -99,5 +98,3 @@ const selectStateFunction: IGameStateFunction = {
     }
   },
 };
-
-export default selectStateFunction;

@@ -18,7 +18,7 @@ let fadeInDone: {
   x: number;
   y: number;
   offset: number;
-  v: number;
+  velocity: number;
   value: number;
 }[] = [];
 
@@ -70,7 +70,7 @@ const fadeInUpdate = (self: IGame) => {
       fall[i].list.push({
         x: i,
         y: -1,
-        v: VELOCITY_BASE + 4,
+        velocity: VELOCITY_BASE + 4,
         offset: 0,
         value: base.map[MAP_WIDTH_1 - fall[i].pushCount][i],
       });
@@ -85,8 +85,8 @@ const fadeInUpdate = (self: IGame) => {
     let shift = false;
 
     colData.list.forEach((i, index) => {
-      i.v += GRAVITY * 1.4;
-      i.offset += i.v;
+      i.velocity += GRAVITY * 1.4;
+      i.offset += i.velocity;
       const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
 
       if (index === 0) {
@@ -96,7 +96,7 @@ const fadeInUpdate = (self: IGame) => {
         }
       } else {
         if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-          i.v = VELOCITY_BASE;
+          i.velocity = VELOCITY_BASE;
           i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
         }
       }
@@ -125,7 +125,7 @@ const fadeOutUpdate = (self: IGame) => {
   self.fadeIn();
 };
 
-const fadeStateFunction: IGameStateFunction = {
+export const fadeStateFunction: IGameStateFunction = {
   render: (self) => {
     if (self.isFadeIn) fadeInRender(self);
     if (self.isFadeOut) fadeOutRender(self);
@@ -135,5 +135,3 @@ const fadeStateFunction: IGameStateFunction = {
     if (self.isFadeOut) fadeOutUpdate(self);
   },
 };
-
-export default fadeStateFunction;

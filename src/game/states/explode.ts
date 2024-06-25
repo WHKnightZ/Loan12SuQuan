@@ -2,7 +2,7 @@ import { base, CELL_SIZE, getKeys, mapTileInfo, VELOCITY_BASE } from "@/configs/
 import { IGameStateFunction } from "@/types";
 import { findBelow, randomTile } from "@/utils/common";
 
-const explodeStateFunction: IGameStateFunction = {
+export const explodeStateFunction: IGameStateFunction = {
   render: (self) => {
     self.explosions.forEach(({ x, y, value }) => {
       const texture = mapTileInfo[value].explosions[self.tExplode];
@@ -31,8 +31,8 @@ const explodeStateFunction: IGameStateFunction = {
       base.map[y][x] = -1;
       if (self.fall[x]) {
         !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
-          fall[x].list.push({ x, y, v: 0, offset: 0, value: -1 });
-      } else fall[x] = { list: [{ x, y, v: 0, offset: 0, value: -1 }], below: -1 };
+          fall[x].list.push({ x, y, velocity: 0, offset: 0, value: -1 });
+      } else fall[x] = { list: [{ x, y, velocity: 0, offset: 0, value: -1 }], below: -1 };
     });
 
     getKeys(fall).forEach((key) => {
@@ -42,15 +42,13 @@ const explodeStateFunction: IGameStateFunction = {
       key = Number(key);
       for (let i = self.fall[key].below; i >= 0; i -= 1) {
         if (base.map[i][key] !== -1) {
-          fall[key].list.push({ x: key, y: i, v: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
+          fall[key].list.push({ x: key, y: i, velocity: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
           base.map[i][key] = -1;
         }
       }
       for (let i = 0; i < needAdd; i += 1) {
-        fall[key].list.push({ x: key, y: -1 - i, v: VELOCITY_BASE, offset: 0, value: randomTile() });
+        fall[key].list.push({ x: key, y: -1 - i, velocity: VELOCITY_BASE, offset: 0, value: randomTile() });
       }
     });
   },
 };
-
-export default explodeStateFunction;

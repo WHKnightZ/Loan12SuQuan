@@ -52,7 +52,6 @@ const main = async () => {
   await pause(500);
 
   game = new Game();
-  game.init();
   base.game = game;
 
   base.canvas.addEventListener("click", (e) => game.onClick(e));

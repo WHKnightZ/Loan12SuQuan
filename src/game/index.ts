@@ -20,7 +20,7 @@ import { Effects } from "@/effects";
 import { FlickeringText } from "@/effects/flickeringText";
 import { FloatingText } from "@/effects/floatingText";
 import { StarExplosion } from "@/effects/starExplosion";
-import { Player } from "@/player/player";
+import { Player } from "@/player";
 import {
   IGame,
   IAllMatchedPositions,
@@ -34,19 +34,23 @@ import {
   IMatched4,
   IWaitProperties,
   IEffect,
+  IComputer,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
-import explodeStateFunction from "./explode";
-import fadeStateFunction from "./fade";
-import fallStateFunction from "./fall";
-import idleStateFunction from "./idle";
-import selectStateFunction from "./select";
-import waitStateFunction from "./wait";
 import { GainTile } from "@/effects/gainTile";
 import { SwordAttack } from "@/effects/swordAttack";
 import { menuTexture } from "@/textures";
+import {
+  explodeStateFunction,
+  fadeStateFunction,
+  fallStateFunction,
+  idleStateFunction,
+  selectStateFunction,
+  waitStateFunction,
+} from "./states";
+import { Computer } from "./plugins";
 
-const mapFunction: {
+const mapStateFunction: {
   [key in IGameState]: IGameStateFunction;
 } = {
   IDLE: idleStateFunction,
@@ -57,25 +61,25 @@ const mapFunction: {
   WAIT: waitStateFunction,
 };
 
+type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
+
 export class Game implements IGame {
+  private timeouts: { currentId: number; list: ITimeout[] };
   private effects: Effects;
-  private waitProperties: IWaitProperties;
+  private computer: IComputer;
 
   state: IGameState;
+  players: IPlayer[];
+  waitProperties: IWaitProperties;
   selected: IPointExt | null;
   swapped: IPointExt | null;
   reswap: boolean;
-
-  fall: {
-    [key: number]: IFallItem;
-  };
-
+  fall: { [key: number]: IFallItem };
   combo: number;
   explosions: IPointExt[];
   explodedTiles: ITileInfo[];
   matched4Tiles: IPoint[];
   matched4: IMatched4;
-
   tIdle: number;
   tSelect: number;
   tSwap: number;
@@ -84,40 +88,35 @@ export class Game implements IGame {
   tFadeIn: number;
   tFadeOut: number;
   tHintDelay: number;
-
   isFadeIn: boolean;
   isFadeOut: boolean;
-
   matchedPositions: IAllMatchedPositions;
   hintIndex: number;
-
-  players: IPlayer[];
   playerTurn: number;
   turnCount: number;
 
-  needUpdate: boolean;
-
-  computerTimer: number;
-
   constructor() {
+    this.timeouts = { currentId: 0, list: [] };
     this.effects = new Effects();
+    this.computer = new Computer(this);
+    this.init();
   }
 
   init() {
     this.effects.reset();
-    this.waitProperties = null;
-
+    this.state = "IDLE";
     this.players = [
       new Player({ index: 0, attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
       new Player({ index: 1, attack: 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
+    this.waitProperties = null;
+
     this.matched4 = { turnCount: 0, matchedList: {} };
 
     base.map = generateMap();
     this.findAllMatchedPositions();
-    this.state = "IDLE";
     this.selected = null;
     this.swapped = null;
     this.reswap = false;
@@ -134,7 +133,6 @@ export class Game implements IGame {
     this.isFadeIn = false;
     this.isFadeOut = false;
     this.hintIndex = 0;
-    this.needUpdate = true;
 
     this.fadeIn();
   }
@@ -299,7 +297,7 @@ export class Game implements IGame {
           tile: value,
           startX: x * CELL_SIZE + CELL_SIZE_HALF,
           startY: y * CELL_SIZE + CELL_SIZE_HALF,
-          endX: currentPlayer.avatarOffset.x + currentPlayer.avatar.width / 2,
+          endX: currentPlayer.avatarOffset.x + currentPlayer.avatarTexture.width / 2,
           endY: currentPlayer.avatarOffset.y,
         })
       );
@@ -332,25 +330,6 @@ export class Game implements IGame {
     }
   }
 
-  updateComputer() {
-    if (this.playerTurn !== 1) return;
-
-    this.computerTimer += 1;
-
-    if (this.computerTimer === 70) {
-      this.tSwap = 0;
-      const { x0, y0 } = this.matchedPositions[this.hintIndex];
-
-      this.selected = { x: x0, y: y0, value: base.map[y0][x0] };
-      base.map[y0][x0] = -1;
-      this.state = "SELECT";
-    } else if (this.computerTimer === 100) {
-      const { x1, y1 } = this.matchedPositions[this.hintIndex];
-      this.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
-      base.map[y1][x1] = -1;
-    }
-  }
-
   /**
    * Chuyển qua state idle
    */
@@ -359,21 +338,17 @@ export class Game implements IGame {
     this.state = "IDLE";
     this.combo = 0;
 
-    if (this.needUpdate) {
-      if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
-      else if (this.turnCount === 0) {
-        this.changePlayer();
-      }
+    if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+    else if (this.turnCount === 0) {
+      this.changePlayer();
     }
 
     this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
 
     if (this.playerTurn === 1) {
       // Computer
-      this.computerTimer = 0;
+      this.computer.startTimer();
     }
-
-    this.needUpdate = false;
   }
 
   /**
@@ -409,6 +384,9 @@ export class Game implements IGame {
     this.isFadeOut = true;
   }
 
+  /**
+   * Hiển thị
+   */
   render() {
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
@@ -425,25 +403,38 @@ export class Game implements IGame {
     base.context.drawImage(menuTexture, 0, BOARD_SIZE);
     this.players.forEach((p) => p.render());
 
-    mapFunction[this.state].render(this);
+    mapStateFunction[this.state].render(this);
 
     this.effects.render();
   }
 
+  /**
+   * Cập nhật
+   */
   update() {
+    this.handleTimeouts();
+
     this.players.forEach((p) => p.update());
 
-    mapFunction[this.state].update(this);
+    mapStateFunction[this.state].update(this);
 
     this.effects.update();
-
-    this.updateComputer();
+    this.computer.update();
   }
 
+  /**
+   * Tạo effect
+   * @param effect
+   */
   createEffect(effect: IEffect) {
     this.effects.create(effect);
   }
 
+  /**
+   * Xử lý sự kiện click chuột
+   * @param e
+   * @returns
+   */
   onClick(e: MouseEvent) {
     if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
 
@@ -478,11 +469,53 @@ export class Game implements IGame {
     base.map[y][x] = -1;
   }
 
+  /**
+   * Xử lý sự kiện nhấn phím
+   * @param e
+   */
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
       case "Escape":
         this.fadeOut();
         break;
     }
+  }
+
+  /**
+   * Tạo timeout
+   * @param callback
+   * @param frame
+   * @returns
+   */
+  createTimeout(callback: () => void, frame: number): number {
+    const id = this.timeouts.currentId;
+    this.timeouts.currentId += 1;
+    this.timeouts.list.push({ id, callback, currentFrame: 0, maxFrame: frame });
+    return id;
+  }
+
+  /**
+   * Xoá timeout
+   * @param timeoutId
+   */
+  clearTimeout(timeoutId: number): void {
+    this.timeouts.list = this.timeouts.list.filter((x) => x.id !== timeoutId);
+  }
+
+  /**
+   * Xử lý danh sách các timeout
+   */
+  private handleTimeouts() {
+    const doneTimeouts: number[] = [];
+
+    this.timeouts.list.forEach((timeout) => {
+      const { id, callback, maxFrame } = timeout;
+      timeout.currentFrame += 1;
+      if (timeout.currentFrame < maxFrame) return;
+      callback();
+      doneTimeouts.push(id);
+    });
+
+    if (doneTimeouts.length > 0) this.timeouts.list = this.timeouts.list.filter((x) => !doneTimeouts.includes(x.id));
   }
 }

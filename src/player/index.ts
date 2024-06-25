@@ -62,11 +62,11 @@ export class Player implements IPlayer {
     ];
 
     this.energyTimer = 0;
+    this.avatarTexture = avatarTextures[avatar][index];
     this.avatarOffset = {
       x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatarTexture.width,
       y: AVATAR_OFFSET_Y,
     };
-    this.avatarTexture = avatarTextures[avatar][index];
 
     this.borderAnimation = new BorderAnimation(index, this.avatarOffset, this.avatarTexture);
     this.spring = new Spring();

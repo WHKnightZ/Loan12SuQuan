@@ -38,8 +38,8 @@ export class SwordAttack extends Effect {
     this.attackingPlayer = attackingPlayer;
     this.attackedPlayer = attackedPlayer;
     this.playerIndex = attackingPlayer.index;
-    const endX = attackedPlayer.avatarOffset.x + attackedPlayer.avatar.width / 2;
-    const endY = attackedPlayer.avatarOffset.y + attackedPlayer.avatar.height / 2;
+    const endX = attackedPlayer.avatarOffset.x + attackedPlayer.avatarTexture.width / 2;
+    const endY = attackedPlayer.avatarOffset.y + attackedPlayer.avatarTexture.height / 2;
     this.halfSize = swordCrystalTextures[0][2].width / 2;
     this.endX = endX;
     this.endY = endY;
@@ -97,7 +97,7 @@ export class SwordAttack extends Effect {
 
       if (this.countDead === COUNT) {
         this.alive = false;
-        base.game.addEffect(new CauseDamage(this.endX, this.endY - 10));
+        base.game.createEffect(new CauseDamage(this.endX, this.endY - 10));
       }
     });
   }

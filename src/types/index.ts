@@ -79,62 +79,55 @@ export type IPlayer = IRenderable & {
   shock(): void;
 };
 
+export type IComputer = IHasTimer & {
+  startTimer(): void;
+  update(): void;
+};
+
 export type IGame = IRenderable & {
+  state: IGameState;
+  players: IPlayer[];
+  waitProperties: IWaitProperties;
+  selected: IPointExt | null;
+  swapped: IPointExt | null;
+  reswap: boolean;
+  fall: { [key: number]: IFallItem };
+  combo: number;
+  explosions: IPointExt[];
+  explodedTiles: ITileInfo[];
+  matched4Tiles: IPoint[];
+  matched4: IMatched4;
+  tIdle: number;
+  tSelect: number;
+  tSwap: number;
+  tExplode: number;
+  tExplode2: number;
+  tFadeIn: number;
+  tFadeOut: number;
+  tHintDelay: number;
+  isFadeIn: boolean;
+  isFadeOut: boolean;
+  matchedPositions: IAllMatchedPositions;
+  hintIndex: number;
   playerTurn: number;
+  turnCount: number;
 
-  // state: IGameState;
-  // selected: IPointExt | null;
-  // swapped: IPointExt | null;
-  // reswap: boolean;
-  // fall: {
-  //   [key: number]: IFallItem;
-  // };
-  // combo: number;
-  // explosions: IPointExt[];
-  // explodedTiles: ITileInfo[];
-  // matched4Tiles: IPoint[];
-  // matched4: IMatched4;
-  // tIdle: number;
-  // tSelect: number;
-  // tSwap: number;
-  // tExplode: number;
-  // tExplode2: number;
-  // tFadeIn: number;
-  // tFadeOut: number;
-  // tHintDelay: number;
-  // isFadeIn: boolean;
-  // isFadeOut: boolean;
-  // wait: IWait;
-  // matchedPositions: IAllMatchedPositions;
-  // hintIndex: number;
-  // players: IPlayer[];
+  init(): void;
+  matchPosition(x: number, y: number): { matched: boolean; tiles: ITileInfo[]; score: number; matched4Tiles: IPoint[] };
+  swap(x0: number, y0: number, x1: number, y1: number): void;
+  addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
+  findAllMatchedPositions(): void;
+  changePlayer(): void;
+  explode(): void;
+  gainTile(tile: ITileInfo): void;
 
-  // turnCount: number;
-  // needUpdate: boolean;
-  // computerTimer: number;
-  // init(): void;
-  // matchPosition(
-  //   x: number,
-  //   y: number
-  // ): {
-  //   matched: boolean;
-  //   tiles: ITileInfo[];
-  //   score: number;
-  //   matched4Tiles: IPoint[];
-  // };
-  // swap(x0: number, y0: number, x1: number, y1: number): void;
-  // addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
-  // findAllMatchedPositions(): void;
+  idle(): void;
+  wait(maxTimer: number, callback: () => void): void;
+  explode(): void;
+  fadeIn(): void;
+  fadeOut(): void;
 
-  // changePlayer(): void;
-  // idle(): void;
-  // explode(): void;
-  // fadeIn(): void;
-  // fadeOut(): void;
-  // gainTile(tile: ITileInfo): void;
-  // updateComputer(): void;
-
-  addEffect(effect: IEffect): void;
+  createEffect(effect: IEffect): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;
   createTimeout(callback: () => void, frame: number): number;

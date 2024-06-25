@@ -11,7 +11,7 @@ import {
 import { IGameStateFunction, ITileInfo } from "@/types";
 import { combine } from "@/utils/common";
 
-const fallStateFunction: IGameStateFunction = {
+export const fallStateFunction: IGameStateFunction = {
   render: (self) => {
     const fall = self.fall;
     getKeys(fall).forEach((col) => {
@@ -34,8 +34,8 @@ const fallStateFunction: IGameStateFunction = {
       let shift = false;
 
       colData.list.forEach((i, index) => {
-        i.v += GRAVITY;
-        i.offset += i.v;
+        i.velocity += GRAVITY;
+        i.offset += i.velocity;
         const newY = i.y + Math.floor((i.offset + 6) / CELL_SIZE);
 
         if (index === 0) {
@@ -46,7 +46,7 @@ const fallStateFunction: IGameStateFunction = {
           }
         } else {
           if (i.offset >= colData.list[index - 1].offset - 6 || newY >= colData.below - index + 1) {
-            i.v = VELOCITY_BASE;
+            i.velocity = VELOCITY_BASE;
             i.offset = Math.floor(i.offset / CELL_SIZE) * CELL_SIZE;
           }
         }
@@ -84,5 +84,3 @@ const fallStateFunction: IGameStateFunction = {
     }
   },
 };
-
-export default fallStateFunction;
