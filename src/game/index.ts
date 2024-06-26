@@ -49,6 +49,7 @@ import {
   waitStateFunction,
 } from "./states";
 import { Computer } from "./plugins";
+import { randomBool } from "@/utils/math";
 
 const mapStateFunction: {
   [key in IGameState]: IGameStateFunction;
@@ -102,6 +103,9 @@ export class Game implements IGame {
     this.init();
   }
 
+  /**
+   * Khởi tạo
+   */
   init() {
     this.effects.reset();
     this.state = "IDLE";
@@ -137,6 +141,12 @@ export class Game implements IGame {
     this.fadeIn();
   }
 
+  /**
+   * Kiểm tra cách hoán đổi này ăn được những gì
+   * @param x
+   * @param y
+   * @returns
+   */
   matchPosition(x: number, y: number) {
     let h: ITileInfo[] = [];
     let v: ITileInfo[] = [];
@@ -224,22 +234,40 @@ export class Game implements IGame {
     };
   }
 
+  /**
+   * Hoán đổi 2 tile gần nhau
+   * @param x0
+   * @param y0
+   * @param x1
+   * @param y1
+   */
   swap(x0: number, y0: number, x1: number, y1: number) {
     const tmp = base.map[y0][x0];
     base.map[y0][x0] = base.map[y1][x1];
     base.map[y1][x1] = tmp;
   }
 
+  /**
+   * Thử xem cách hoán đổi này có khả thi không, nếu khả thi thì thêm vào danh sách
+   * @param allMatchedPositions
+   * @param x0
+   * @param y0
+   * @param x1
+   * @param y1
+   */
   addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number) {
     this.swap(x0, y0, x1, y1);
     const { matched: m0, score: p0 } = this.matchPosition(x0, y0);
     const { matched: m1, score: p1 } = this.matchPosition(x1, y1);
-    const swapDirection = Math.random() < 0.5;
+    const swapDirection = randomBool();
     const pos = swapDirection ? { x0: x1, y0: y1, x1: x0, y1: y0 } : { x0, y0, x1, y1 };
     if (m0 || m1) allMatchedPositions.push({ ...pos, score: p0 + p1 });
     this.swap(x0, y0, x1, y1);
   }
 
+  /**
+   * Tìm tất cả các cách hoán đổi khả thi
+   */
   findAllMatchedPositions() {
     const allMatchedPositions: IAllMatchedPositions = [];
     for (let i = 0; i < MAP_WIDTH_1; i += 1) {
@@ -257,11 +285,17 @@ export class Game implements IGame {
     this.matchedPositions = allMatchedPositions;
   }
 
+  /**
+   * Đổi lượt
+   */
   changePlayer() {
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
   }
 
+  /**
+   * Phát nổ mỗi khi ăn một cụm tile
+   */
   explode() {
     this.wait(this.combo === 0 ? 4 : 8, () => {
       this.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
@@ -270,7 +304,7 @@ export class Game implements IGame {
       const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
 
       if (this.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
-        const player = this.players[1 - this.playerTurn];
+        // const player = this.players[1 - this.playerTurn];
         this.createEffect(new SwordAttack(this.players[this.playerTurn], this.players[1 - this.playerTurn]));
       }
 
@@ -289,6 +323,10 @@ export class Game implements IGame {
     });
   }
 
+  /**
+   * Ăn tile
+   * @param param0
+   */
   gainTile({ value, x, y }: ITileInfo) {
     if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
       const currentPlayer = this.players[this.playerTurn];

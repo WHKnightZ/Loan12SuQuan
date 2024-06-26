@@ -92,34 +92,56 @@ export class Player implements IPlayer {
     return hintIndex;
   }
 
+  /**
+   * Nhận sát thương
+   * @param damage
+   */
   takeDamage(damage: number) {
     this.life.timer = 0;
     this.life.value = this.life.value - damage;
     if (this.life.value < 0) this.life.value = 0;
   }
 
+  /**
+   * Hồi máu
+   * @param value
+   */
   gainLife(value: number) {
     this.life.timer = 0;
     this.life.value = this.life.value + (value * this.life.maxValue) / 100;
     if (this.life.value > this.life.maxValue) this.life.value = this.life.maxValue;
   }
 
+  /**
+   * Hồi năng lượng
+   * @param value
+   */
   gainEnergy(value: number) {
     this.energy.timer = 0;
     this.energy.value = this.energy.value + value;
     if (this.energy.value > this.energy.maxValue) this.energy.value = this.energy.maxValue;
   }
 
+  /**
+   * Hồi mana
+   * @param value
+   */
   gainMana(value: number) {
     this.mana.timer = 0;
     this.mana.value = this.mana.value + value;
     if (this.mana.value > this.mana.maxValue) this.mana.value = this.mana.maxValue;
   }
 
+  /**
+   * Gây hiệu ứng rung avatar khi nhận sát thương
+   */
   shock() {
     this.spring.beginSpring();
   }
 
+  /**
+   * Hiển thị
+   */
   render() {
     this.bars.forEach(({ texture, attribute }, index) => {
       const amount = attribute.display / attribute.maxValue;
@@ -134,6 +156,9 @@ export class Player implements IPlayer {
     this.borderAnimation.render();
   }
 
+  /**
+   * Cập nhật
+   */
   update() {
     this.loseEnergy();
 

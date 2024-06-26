@@ -6,6 +6,7 @@ export const clamp = (value: number, min: number, max: number) => {
 
 export const random = (min: number, max: number) => Math.floor(Math.random() * (max - min)) + min; // Include min, exclude max
 export const randomFloat = (min: number, max: number) => Math.random() * (max - min) + min; // Include min, exclude max
+export const randomBool = () => Math.random() < 0.5;
 
 export const lerp = (v0: number, v1: number, t: number) => v0 + t * (v1 - v0);
 

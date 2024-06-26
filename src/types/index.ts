@@ -61,21 +61,11 @@ export type IPlayer = IRenderable & {
   avatarTexture: HTMLImageElement;
   avatarOffset: { x: number; y: number };
 
-  // life: IPlayerAttribute;
-  // mana: IPlayerAttribute;
-  // energy: IPlayerAttribute;
-  // intelligence: number;
-  // barOffsetX: number;
-  // bars: IPlayerAttributeExtra[];
-  // energyTimer: number;
-
-  // turn: number;
-  // springIndex: number;
-  // getHintIndex(matchedLength: number): number;
-  // takeDamage(damage: number): void;
-  // gainLife(value: number): void;
-  // gainEnergy(value: number): void;
-  // gainMana(value: number): void;
+  getHintIndex(matchedLength: number): number;
+  takeDamage(damage: number): void;
+  gainLife(value: number): void;
+  gainEnergy(value: number): void;
+  gainMana(value: number): void;
   shock(): void;
 };
 
