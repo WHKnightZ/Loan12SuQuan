@@ -1,7 +1,8 @@
 import { base, CELL_SIZE, mapTileInfo, SWAP_DURATION, SWAP_OFFSET, TILE_OFFSET } from "@/configs/consts";
 import { cornerSelections } from "@/textures";
-import { IGameStateFunction } from "@/types";
+import { IGame } from "@/types";
 import { combine } from "@/utils/common";
+import { GameState } from "./gameState";
 
 const CORNER_SELECTION_CYCLE = 30;
 
@@ -9,14 +10,31 @@ const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).ma
   Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
 );
 
-export const selectStateFunction: IGameStateFunction = {
-  render: (self) => {
-    const offset = self.tSwap * SWAP_OFFSET;
+/**
+ * State khi chọn một tile
+ */
+export class SelectGameState extends GameState {
+  private selectTimer: number;
+  private swapTimer: number;
 
-    const { x: x0, y: y0, value: v0 } = self.selected;
-    const { x: x1, y: y1, value: v1 } = self.swapped || self.selected;
+  constructor(game: IGame) {
+    super("SELECT", game);
+  }
 
-    if (self.swapped)
+  invoke() {
+    this.selectTimer = 0;
+    this.swapTimer = 0;
+  }
+
+  render() {
+    const game = this.game;
+
+    const offset = this.swapTimer * SWAP_OFFSET;
+
+    const { x: x0, y: y0, value: v0 } = game.selected;
+    const { x: x1, y: y1, value: v1 } = game.swapped || game.selected;
+
+    if (game.swapped)
       base.context.drawImage(
         mapTileInfo[v1].texture,
         x1 * CELL_SIZE + TILE_OFFSET + (x0 - x1) * offset,
@@ -29,72 +47,78 @@ export const selectStateFunction: IGameStateFunction = {
       y0 * CELL_SIZE + TILE_OFFSET + (y1 - y0) * offset
     );
 
-    if (!self.swapped) {
-      const offset = cornerSelectionOffsets[self.tSelect % CORNER_SELECTION_CYCLE];
+    if (!game.swapped) {
+      const offset = cornerSelectionOffsets[this.selectTimer % CORNER_SELECTION_CYCLE];
 
       cornerSelections.forEach(({ texture, offset: o, position }) =>
         base.context.drawImage(
           texture,
-          self.selected.x * CELL_SIZE + position.x + o.x * offset,
-          self.selected.y * CELL_SIZE + position.y + o.y * offset
+          game.selected.x * CELL_SIZE + position.x + o.x * offset,
+          game.selected.y * CELL_SIZE + position.y + o.y * offset
         )
       );
     }
-  },
-  update: (self) => {
-    if (!self.swapped) {
-      self.tSelect += 1;
+  }
+
+  update() {
+    const game = this.game;
+
+    if (!game.swapped) {
+      this.selectTimer += 1;
       return;
     }
 
-    self.tSwap += 1;
-    if (self.tSwap <= SWAP_DURATION) return;
+    this.swapTimer += 1;
+    if (this.swapTimer <= SWAP_DURATION) return;
 
-    self.tSwap = SWAP_DURATION;
+    this.swapTimer = SWAP_DURATION;
 
-    const { x: x0, y: y0, value: v0 } = self.selected;
-    const { x: x1, y: y1, value: v1 } = self.swapped;
+    const { x: x0, y: y0, value: v0 } = game.selected;
+    const { x: x1, y: y1, value: v1 } = game.swapped;
 
     base.map[y0][x0] = v0;
     base.map[y1][x1] = v1;
 
-    self.swap(x0, y0, x1, y1);
+    game.swap(x0, y0, x1, y1);
 
-    if (self.reswap) {
-      self.reswap = false;
-      self.selected = self.swapped = null;
-      self.idle();
+    if (game.reswap) {
+      game.reswap = false;
+      game.selected = game.swapped = null;
+      game.changeState("IDLE");
     } else {
-      self.matched4 = { turnCount: 0, matchedList: {} };
-      const { matched: m0, tiles: t0, matched4Tiles: m40 } = self.matchPosition(x0, y0);
-      const { matched: m1, tiles: t1, matched4Tiles: m41 } = self.matchPosition(x1, y1);
+      game.matched4 = { turnCount: 0, matchedList: {} };
+      const { matched: m0, tiles: t0, matched4Tiles: m40 } = game.matchPosition(x0, y0);
+      const { matched: m1, tiles: t1, matched4Tiles: m41 } = game.matchPosition(x1, y1);
+
       if (m0 || m1) {
         // Hoán đổi oke thì giảm 1 lượt
-        self.turnCount -= 1;
+        game.turnCount -= 1;
 
-        self.matched4Tiles = [].concat(m40, m41);
+        game.matched4Tiles = [].concat(m40, m41);
 
-        self.selected = self.swapped = null;
-        self.explodedTiles = combine([t0, t1]);
-        self.explosions = [];
-        self.explodedTiles.forEach((tile) => {
+        game.selected = game.swapped = null;
+        game.explodedTiles = combine([t0, t1]);
+        game.explosions = [];
+
+        game.explodedTiles.forEach((tile) => {
           const { x, y } = tile;
-          self.gainTile(tile);
-          self.explosions.push({ x, y, value: base.map[y][x] });
+          game.gainTile(tile);
+          game.explosions.push({ x, y, value: base.map[y][x] });
         });
-        self.explode();
+
+        game.explode();
       } else {
         base.map[y0][x0] = -1;
         base.map[y1][x1] = -1;
-        const tmpX = self.selected.x;
-        const tmpY = self.selected.y;
-        self.selected.x = self.swapped.x;
-        self.selected.y = self.swapped.y;
-        self.swapped.x = tmpX;
-        self.swapped.y = tmpY;
-        self.reswap = true;
-        self.tSwap = 0;
+        const tmpX = game.selected.x;
+        const tmpY = game.selected.y;
+        game.selected.x = game.swapped.x;
+        game.selected.y = game.swapped.y;
+        game.swapped.x = tmpX;
+        game.swapped.y = tmpY;
+        game.reswap = true;
+        this.swapTimer = 0;
       }
     }
-  },
-};
+  }
+}

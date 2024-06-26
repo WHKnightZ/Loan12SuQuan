@@ -11,7 +11,13 @@ export type ITileInfo = IPointExt & { score: number };
 export type IDirection = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
 export type IRenderable = {
+  /**
+   * Hiển thị
+   */
   render(): void;
+  /**
+   * Cập nhật
+   */
   update(): void;
 };
 
@@ -78,13 +84,21 @@ export type IGameState = IRenderable & {
   type: IGameStateType;
   game: IGame;
 
+  /**
+   * Hàm sẽ được thực thi khi vừa chuyển game state
+   */
   invoke(): void;
+  /**
+   * Hàm check xem game state này có giống với tham số truyền vào không
+   * @param type
+   */
   is(type: IGameStateType): boolean;
 };
 
 export type IGame = IRenderable & {
   state: IGameState;
   players: IPlayer[];
+  computer: IComputer;
   waitProperties: IWaitProperties;
   selected: IPointExt | null;
   swapped: IPointExt | null;
@@ -95,14 +109,10 @@ export type IGame = IRenderable & {
   explodedTiles: ITileInfo[];
   matched4Tiles: IPoint[];
   matched4: IMatched4;
-  tIdle: number;
-  tSelect: number;
-  tSwap: number;
   tExplode: number;
   tExplode2: number;
   tFadeIn: number;
   tFadeOut: number;
-  tHintDelay: number;
   isFadeIn: boolean;
   isFadeOut: boolean;
   matchedPositions: IAllMatchedPositions;

@@ -2,6 +2,7 @@ import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
 import { hintArrows } from "@/textures";
 import { IDirection, IGame } from "@/types";
 import { GameState } from "./gameState";
+import { FlickeringText } from "@/effects";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -9,6 +10,9 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
   Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
 );
 
+/**
+ * State nghỉ, khi người chơi không làm gì cả
+ */
 export class IdleGameState extends GameState {
   idleTimer: number;
   hintDelayTimer: number;
@@ -18,20 +22,21 @@ export class IdleGameState extends GameState {
   }
 
   invoke() {
+    const game = this.game;
     this.idleTimer = 0;
     this.hintDelayTimer = TIMER_HINT_DELAY_DEFAULT;
     this.game.combo = 0;
 
-    if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
-    else if (this.turnCount === 0) {
-      this.changePlayer();
+    if (game.turnCount > 1) game.createEffect(new FlickeringText({ text: `Còn ${game.turnCount} lượt` }));
+    else if (game.turnCount === 0) {
+      game.changePlayer();
     }
 
-    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+    game.hintIndex = game.players[game.playerTurn].getHintIndex(game.matchedPositions.length);
 
-    if (this.playerTurn === 1) {
+    if (game.playerTurn === 1) {
       // Computer
-      this.computer.startTimer();
+      game.computer.startTimer();
     }
   }
 

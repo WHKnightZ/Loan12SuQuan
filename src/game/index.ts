@@ -17,9 +17,6 @@ import {
   SWORDRED_ATTACK_MULTIPLIER,
 } from "@/configs/consts";
 import { Effects } from "@/effects";
-import { FlickeringText } from "@/effects/flickeringText";
-import { FloatingText } from "@/effects/floatingText";
-import { StarExplosion } from "@/effects/starExplosion";
 import { Player } from "@/player";
 import {
   IGame,
@@ -27,7 +24,6 @@ import {
   IGameState,
   IPointExt,
   ITileInfo,
-  IGameStateFunction,
   IFallItem,
   IPlayer,
   IPoint,
@@ -37,8 +33,6 @@ import {
   IComputer,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
-import { GainTile } from "@/effects/gainTile";
-import { SwordAttack } from "@/effects/swordAttack";
 import { menuTexture } from "@/textures";
 import {
   explodeStateFunction,
@@ -67,10 +61,10 @@ type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFra
 export class Game implements IGame {
   private timeouts: { currentId: number; list: ITimeout[] };
   private effects: Effects;
-  private computer: IComputer;
 
   state: IGameState;
   players: IPlayer[];
+  computer: IComputer;
   waitProperties: IWaitProperties;
   selected: IPointExt | null;
   swapped: IPointExt | null;
@@ -81,14 +75,10 @@ export class Game implements IGame {
   explodedTiles: ITileInfo[];
   matched4Tiles: IPoint[];
   matched4: IMatched4;
-  tIdle: number;
-  tSelect: number;
-  tSwap: number;
   tExplode: number;
   tExplode2: number;
   tFadeIn: number;
   tFadeOut: number;
-  tHintDelay: number;
   isFadeIn: boolean;
   isFadeOut: boolean;
   matchedPositions: IAllMatchedPositions;
@@ -127,16 +117,12 @@ export class Game implements IGame {
     this.fall = {};
     this.combo = 0;
     this.explosions = [];
-    this.tIdle = 0;
-    this.tSelect = 0;
-    this.tSwap = 0;
     this.tExplode = 0;
     this.tExplode2 = 0;
     this.tFadeIn = 0;
     this.tFadeOut = 0;
     this.isFadeIn = false;
     this.isFadeOut = false;
-    this.hintIndex = 0;
 
     this.fadeIn();
   }
@@ -296,32 +282,7 @@ export class Game implements IGame {
   /**
    * Phát nổ mỗi khi ăn một cụm tile
    */
-  explode() {
-    this.wait(this.combo === 0 ? 4 : 8, () => {
-      this.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
-
-      this.state = "EXPLODE";
-      const center = this.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
-
-      if (this.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
-        // const player = this.players[1 - this.playerTurn];
-        this.createEffect(new SwordAttack(this.players[this.playerTurn], this.players[1 - this.playerTurn]));
-      }
-
-      this.turnCount += this.matched4.turnCount;
-
-      const x = center.x / this.explosions.length;
-      const y = center.y / this.explosions.length;
-      this.combo += 1;
-      const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
-      const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
-
-      if (this.combo < 2) return;
-
-      this.createEffect(new FloatingText({ text: `x${this.combo}`, x: effectX, y: effectY + 8 }));
-      this.createEffect(new StarExplosion(effectX, effectY));
-    });
-  }
+  explode() {}
 
   /**
    * Ăn tile

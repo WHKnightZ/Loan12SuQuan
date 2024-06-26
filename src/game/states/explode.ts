@@ -1,35 +1,61 @@
-import { base, CELL_SIZE, getKeys, mapTileInfo, VELOCITY_BASE } from "@/configs/consts";
-import { IGameStateFunction } from "@/types";
+import { base, CELL_SIZE, CELL_SIZE_HALF, getKeys, mapTileInfo, TILES, VELOCITY_BASE } from "@/configs/consts";
 import { findBelow, randomTile } from "@/utils/common";
+import { GameState } from "./gameState";
+import { IGame } from "@/types";
+import { FloatingText, StarExplosion, SwordAttack } from "@/effects";
 
-export const explodeStateFunction: IGameStateFunction = {
-  render: (self) => {
-    self.explosions.forEach(({ x, y, value }) => {
-      const texture = mapTileInfo[value].explosions[self.tExplode];
+/**
+ * State phát nổ khi ăn được 3 trên một hàng
+ */
+export class ExplodeGameState extends GameState {
+  private explodeTimer: number;
+  private frame: number;
+
+  constructor(game: IGame) {
+    super("EXPLODE", game);
+  }
+
+  invoke() {
+    const game = this.game;
+
+    this.explodeTimer = 0;
+    this.frame = 0;
+    game.wait(game.combo === 0 ? 4 : 8, this.startExplode);
+  }
+
+  render() {
+    const game = this.game;
+
+    game.explosions.forEach(({ x, y, value }) => {
+      const texture = mapTileInfo[value].explosions[this.frame];
       base.context.drawImage(
         texture,
         x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
         y * CELL_SIZE + Math.floor((CELL_SIZE - texture.height) / 2)
       );
     });
-  },
-  update: (self) => {
-    self.tExplode2 += 1;
-    if (self.tExplode2 % 2 !== 0) return;
+  }
 
-    self.tExplode += 1;
-    if (self.tExplode !== 4) return;
+  update() {
+    const game = this.game;
 
-    self.tExplode = 0;
-    self.state = "FALL";
+    this.explodeTimer += 1;
+    if (this.explodeTimer % 2) return;
 
-    self.fall = {};
+    this.frame += 1;
+    if (this.frame !== 4) return;
 
-    const fall = self.fall;
+    this.frame = 0;
+    game.changeState("FALL");
+    // game.state = "FALL";
 
-    self.explodedTiles.forEach(({ x, y }) => {
+    game.fall = {};
+
+    const fall = game.fall;
+
+    game.explodedTiles.forEach(({ x, y }) => {
       base.map[y][x] = -1;
-      if (self.fall[x]) {
+      if (game.fall[x]) {
         !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
           fall[x].list.push({ x, y, velocity: 0, offset: 0, value: -1 });
       } else fall[x] = { list: [{ x, y, velocity: 0, offset: 0, value: -1 }], below: -1 };
@@ -40,15 +66,43 @@ export const explodeStateFunction: IGameStateFunction = {
       const needAdd = fall[key].list.length;
       fall[key].list = [];
       key = Number(key);
-      for (let i = self.fall[key].below; i >= 0; i -= 1) {
+
+      for (let i = game.fall[key].below; i >= 0; i -= 1) {
         if (base.map[i][key] !== -1) {
           fall[key].list.push({ x: key, y: i, velocity: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
           base.map[i][key] = -1;
         }
       }
+
       for (let i = 0; i < needAdd; i += 1) {
         fall[key].list.push({ x: key, y: -1 - i, velocity: VELOCITY_BASE, offset: 0, value: randomTile() });
       }
     });
-  },
-};
+  }
+
+  private startExplode() {
+    const game = this.game;
+
+    game.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
+
+    const center = game.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+
+    if (game.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
+      // const player = game.players[1 - game.playerTurn];
+      game.createEffect(new SwordAttack(game.players[game.playerTurn], game.players[1 - game.playerTurn]));
+    }
+
+    game.turnCount += game.matched4.turnCount;
+
+    const x = center.x / game.explosions.length;
+    const y = center.y / game.explosions.length;
+    game.combo += 1;
+    const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
+    const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
+
+    if (game.combo < 2) return;
+
+    game.createEffect(new FloatingText({ text: `x${game.combo}`, x: effectX, y: effectY + 8 }));
+    game.createEffect(new StarExplosion(effectX, effectY));
+  }
+}

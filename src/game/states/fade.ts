@@ -11,8 +11,9 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { IGameStateFunction, IGame } from "@/types";
+import { IGame } from "@/types";
 import { clamp } from "@/utils/math";
+import { GameState } from "./gameState";
 
 let fadeInDone: {
   x: number;
@@ -22,10 +23,11 @@ let fadeInDone: {
   value: number;
 }[] = [];
 
-const getScale = (x: number, y: number, tFade: number) => clamp((x + y + 1) * 3 + 7 - tFade, 0, 10) / 10;
+const getScale = (x: number, y: number, fadeTimer: number) => clamp((x + y + 1) * 3 + 7 - fadeTimer, 0, 10) / 10;
 
 const fadeInRender = (self: IGame) => {
   const fall = self.fall;
+
   getKeys(fall).forEach((col) => {
     fall[col].list.forEach(({ x, y, value, offset }) => {
       base.context.drawImage(
@@ -35,6 +37,7 @@ const fadeInRender = (self: IGame) => {
       );
     });
   });
+
   fadeInDone.forEach(({ x, y, value }) =>
     base.context.drawImage(mapTileInfo[value].texture, x * CELL_SIZE + TILE_OFFSET, y * CELL_SIZE + TILE_OFFSET)
   );
@@ -106,6 +109,7 @@ const fadeInUpdate = (self: IGame) => {
       const i = colData.list.shift();
       i.y = colData.below + 1;
       fadeInDone.push(i);
+
       if (fadeInDone.length === TOTAL_TILES) {
         self.idle();
         fadeInDone = [];
@@ -125,13 +129,25 @@ const fadeOutUpdate = (self: IGame) => {
   self.fadeIn();
 };
 
-export const fadeStateFunction: IGameStateFunction = {
-  render: (self) => {
-    if (self.isFadeIn) fadeInRender(self);
-    if (self.isFadeOut) fadeOutRender(self);
-  },
-  update: (self) => {
-    if (self.isFadeIn) fadeInUpdate(self);
-    if (self.isFadeOut) fadeOutUpdate(self);
-  },
-};
+export class FadeGameState extends GameState {
+  fadeInTimer: number;
+  fadeOutTimer: number;
+
+  constructor(game: IGame) {
+    super("FADE", game);
+  }
+
+  invoke() {}
+
+  render() {
+    const game = this.game;
+    if (game.isFadeIn) fadeInRender(game);
+    if (game.isFadeOut) fadeOutRender(game);
+  }
+
+  update() {
+    const game = this.game;
+    if (game.isFadeIn) fadeInUpdate(game);
+    if (game.isFadeOut) fadeOutUpdate(game);
+  }
+}
