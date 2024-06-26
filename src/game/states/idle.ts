@@ -1,6 +1,7 @@
-import { base, CELL_SIZE } from "@/configs/consts";
+import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
 import { hintArrows } from "@/textures";
-import { IDirection, IGameStateFunction } from "@/types";
+import { IDirection, IGame } from "@/types";
+import { GameState } from "./gameState";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -8,11 +9,36 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
   Math.floor(3 * Math.sin((2 * Math.PI * i) / HINT_ARROW_CYCLE))
 );
 
-export const idleStateFunction: IGameStateFunction = {
-  render: (self) => {
-    if (self.tHintDelay > 0) return;
+export class IdleGameState extends GameState {
+  idleTimer: number;
+  hintDelayTimer: number;
 
-    const hint = self.matchedPositions[self.hintIndex];
+  constructor(game: IGame) {
+    super("IDLE", game);
+  }
+
+  invoke() {
+    this.idleTimer = 0;
+    this.hintDelayTimer = TIMER_HINT_DELAY_DEFAULT;
+    this.game.combo = 0;
+
+    if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
+    else if (this.turnCount === 0) {
+      this.changePlayer();
+    }
+
+    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
+
+    if (this.playerTurn === 1) {
+      // Computer
+      this.computer.startTimer();
+    }
+  }
+
+  render() {
+    if (this.hintDelayTimer > 0) return;
+
+    const hint = this.game.matchedPositions[this.game.hintIndex];
 
     if (!hint) return;
 
@@ -25,19 +51,20 @@ export const idleStateFunction: IGameStateFunction = {
 
     const { texture, offset, drt } = hintArrows[direction];
 
-    const offsetDrt = hintArrowOffsets[self.tIdle % HINT_ARROW_CYCLE];
+    const offsetDrt = hintArrowOffsets[this.idleTimer % HINT_ARROW_CYCLE];
 
     base.context.drawImage(
       texture,
       x0 * CELL_SIZE + offset.x + drt.x * offsetDrt,
       y0 * CELL_SIZE + offset.y + drt.y * offsetDrt
     );
-  },
-  update: (self) => {
-    if (self.tHintDelay > 0) {
-      self.tHintDelay -= 1;
+  }
+
+  update() {
+    if (this.hintDelayTimer > 0) {
+      this.hintDelayTimer -= 1;
       return;
     }
-    self.tIdle += 1;
-  },
-};
+    this.idleTimer += 1;
+  }
+}

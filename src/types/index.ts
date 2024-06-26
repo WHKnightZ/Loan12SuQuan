@@ -10,8 +10,6 @@ export type ITileInfo = IPointExt & { score: number };
 
 export type IDirection = "UP" | "RIGHT" | "DOWN" | "LEFT";
 
-export type IGameState = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
-
 export type IRenderable = {
   render(): void;
   update(): void;
@@ -74,6 +72,16 @@ export type IComputer = IHasTimer & {
   update(): void;
 };
 
+export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
+
+export type IGameState = IRenderable & {
+  type: IGameStateType;
+  game: IGame;
+
+  invoke(): void;
+  is(type: IGameStateType): boolean;
+};
+
 export type IGame = IRenderable & {
   state: IGameState;
   players: IPlayer[];
@@ -113,9 +121,9 @@ export type IGame = IRenderable & {
 
   idle(): void;
   wait(maxTimer: number, callback: () => void): void;
-  explode(): void;
   fadeIn(): void;
   fadeOut(): void;
+  changeState(state: IGameStateType): IGameState; // this.changeState("IDLE") trong hàm changeState sẽ auto call .invoke();
 
   createEffect(effect: IEffect): void;
   onClick(e: MouseEvent): void;
@@ -129,11 +137,6 @@ export type IBase = {
   context: CanvasRenderingContext2D;
   game: IGame;
   map: number[][];
-};
-
-export type IGameStateFunction = {
-  render: (self: IGame) => void;
-  update: (self: IGame) => void;
 };
 
 export type IHintArrow = {
