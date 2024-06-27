@@ -22,12 +22,11 @@ export class Computer implements IComputer {
 
     if (this.timer === 70) {
       // Đợi để click lần 1: select
-      game.tSwap = 0;
       const { x0, y0 } = game.matchedPositions[game.hintIndex];
 
       game.selected = { x: x0, y: y0, value: base.map[y0][x0] };
       base.map[y0][x0] = -1;
-      game.state = "SELECT";
+      game.changeState("SELECT");
     } else if (this.timer === 100) {
       // Đợi để click lần 2: swap
       const { x1, y1 } = game.matchedPositions[game.hintIndex];

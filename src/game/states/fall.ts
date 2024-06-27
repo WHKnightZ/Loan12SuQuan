@@ -8,12 +8,23 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { IGameStateFunction, ITileInfo } from "@/types";
+import { IFallGameState, IGame, ITileInfo } from "@/types";
 import { combine } from "@/utils/common";
+import { GameState } from "./gameState";
 
-export const fallStateFunction: IGameStateFunction = {
-  render: (self) => {
-    const fall = self.fall;
+/**
+ * State tile rơi xuống sau khi phát nổ
+ */
+export class FallGameState extends GameState implements IFallGameState {
+  constructor(game: IGame) {
+    super("FALL", game);
+  }
+
+  invoke() {}
+
+  render() {
+    const game = this.game;
+    const fall = game.fall;
     getKeys(fall).forEach((col) => {
       fall[col].list.forEach(({ x, y, value, offset }) => {
         base.context.drawImage(
@@ -23,10 +34,12 @@ export const fallStateFunction: IGameStateFunction = {
         );
       });
     });
-  },
-  update: (self) => {
+  }
+
+  update() {
+    const game = this.game;
     let newFalling = false;
-    const fall = self.fall;
+    const fall = game.fall;
     getKeys(fall).forEach((col) => {
       const colData = fall[col];
       col = Number(col);
@@ -58,29 +71,29 @@ export const fallStateFunction: IGameStateFunction = {
 
     if (newFalling) return;
 
-    self.matched4 = { turnCount: 0, matchedList: {} };
-    self.matched4Tiles = [];
+    game.matched4 = { turnCount: 0, matchedList: {} };
+    game.matched4Tiles = [];
     const tt: ITileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
-        const { matched: m0, tiles: t0, matched4Tiles: m40 } = self.matchPosition(j, i);
+        const { matched: m0, tiles: t0, matched4Tiles: m40 } = game.matchPosition(j, i);
         if (m0) tt.push(t0);
-        if (m40.length) self.matched4Tiles = self.matched4Tiles.concat(m40);
+        if (m40.length) game.matched4Tiles = game.matched4Tiles.concat(m40);
       }
     }
 
     if (tt.length) {
-      self.explodedTiles = combine(tt);
-      self.explosions = [];
-      self.explodedTiles.forEach((tile) => {
+      game.explodedTiles = combine(tt);
+      game.explosions = [];
+      game.explodedTiles.forEach((tile) => {
         const { x, y } = tile;
-        self.gainTile(tile);
-        self.explosions.push({ x, y, value: base.map[y][x] });
+        game.gainTile(tile);
+        game.explosions.push({ x, y, value: base.map[y][x] });
       });
-      self.explode();
+      game.changeState("EXPLODE");
     } else {
-      self.findAllMatchedPositions();
-      self.idle();
+      game.findAllMatchedPositions();
+      game.changeState("IDLE");
     }
-  },
-};
+  }
+}

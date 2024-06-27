@@ -1,10 +1,10 @@
-import { IGame } from "@/types";
+import { IGame, IWaitGameState } from "@/types";
 import { GameState } from "./gameState";
 
 /**
  * State đợi, không làm gì cả, chờ 1 khoảng thời gian rồi thực hiện 1 action gì đó
  */
-export class WaitGameState extends GameState {
+export class WaitGameState extends GameState implements IWaitGameState {
   constructor(game: IGame) {
     super("WAIT", game);
   }

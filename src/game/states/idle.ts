@@ -13,9 +13,10 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
 /**
  * State nghỉ, khi người chơi không làm gì cả
  */
-export class IdleGameState extends GameState {
+export class IdleGameState extends GameState implements IdleGameState {
   idleTimer: number;
   hintDelayTimer: number;
+  a: number;
 
   constructor(game: IGame) {
     super("IDLE", game);

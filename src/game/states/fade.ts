@@ -11,7 +11,7 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { IGame } from "@/types";
+import { IFadeGameState, IGame } from "@/types";
 import { clamp } from "@/utils/math";
 import { GameState } from "./gameState";
 
@@ -25,8 +25,8 @@ let fadeInDone: {
 
 const getScale = (x: number, y: number, fadeTimer: number) => clamp((x + y + 1) * 3 + 7 - fadeTimer, 0, 10) / 10;
 
-const fadeInRender = (self: IGame) => {
-  const fall = self.fall;
+const fadeInRender = (self: IFadeGameState) => {
+  const fall = self.game.fall;
 
   getKeys(fall).forEach((col) => {
     fall[col].list.forEach(({ x, y, value, offset }) => {
@@ -43,13 +43,13 @@ const fadeInRender = (self: IGame) => {
   );
 };
 
-const fadeOutRender = (self: IGame) => {
+const fadeOutRender = (self: IFadeGameState) => {
   for (let i = 0; i < MAP_WIDTH; i += 1) {
     for (let j = 0; j < MAP_WIDTH; j += 1) {
       const x = j * CELL_SIZE;
       const y = i * CELL_SIZE;
 
-      const scale = getScale(j, i, self.tFadeOut);
+      const scale = getScale(j, i, self.fadeInTimer);
       const size = Math.floor(TILE_SIZE * scale);
       const offset = Math.floor((CELL_SIZE - size) / 2);
 
@@ -60,16 +60,16 @@ const fadeOutRender = (self: IGame) => {
   }
 };
 
-const fadeInUpdate = (self: IGame) => {
-  self.tFadeIn += 1;
+const fadeInUpdate = (self: IFadeGameState) => {
+  self.fadeInTimer += 1;
 
-  const fall = self.fall;
+  const fall = self.game.fall;
 
   for (let i = 0; i < MAP_WIDTH; i += 1) {
-    let newTFade = self.tFadeIn - i * 3;
+    let newTFade = self.fadeInTimer - i * 3;
     if (newTFade < 1) newTFade = 1;
 
-    if (newTFade % 6 === 0 && fall[i].pushCount! < MAP_WIDTH) {
+    if (newTFade % 6 === 0 && fall[i].pushCount < MAP_WIDTH) {
       fall[i].list.push({
         x: i,
         y: -1,
@@ -111,7 +111,7 @@ const fadeInUpdate = (self: IGame) => {
       fadeInDone.push(i);
 
       if (fadeInDone.length === TOTAL_TILES) {
-        self.idle();
+        self.game.changeState("IDLE");
         fadeInDone = [];
         self.isFadeIn = self.isFadeOut = false;
       }
@@ -119,35 +119,49 @@ const fadeInUpdate = (self: IGame) => {
   });
 };
 
-const fadeOutUpdate = (self: IGame) => {
-  self.tFadeOut += 1;
+const fadeOutUpdate = (self: IFadeGameState) => {
+  self.fadeOutTimer += 1;
 
-  if (getScale(2, 2, self.tFadeOut) !== 0) return;
+  if (getScale(2, 2, self.fadeOutTimer) !== 0) return;
 
   if (self.isFadeIn) return;
 
   self.fadeIn();
 };
 
-export class FadeGameState extends GameState {
+/**
+ * State tile dần rơi xuống (fadeIn) và dần biến mất (fadeOut)
+ */
+export class FadeGameState extends GameState implements IFadeGameState {
+  isFadeIn: boolean;
+  isFadeOut: boolean;
   fadeInTimer: number;
   fadeOutTimer: number;
 
   constructor(game: IGame) {
     super("FADE", game);
+    this.isFadeIn = this.isFadeOut = false;
   }
 
-  invoke() {}
+  fadeIn() {
+    this.isFadeIn = true;
+  }
+
+  fadeOut() {
+    this.isFadeOut = true;
+  }
+
+  invoke() {
+    this.fadeInTimer = this.fadeOutTimer = 0;
+  }
 
   render() {
-    const game = this.game;
-    if (game.isFadeIn) fadeInRender(game);
-    if (game.isFadeOut) fadeOutRender(game);
+    if (this.isFadeIn) fadeInRender(this);
+    if (this.isFadeOut) fadeOutRender(this);
   }
 
   update() {
-    const game = this.game;
-    if (game.isFadeIn) fadeInUpdate(game);
-    if (game.isFadeOut) fadeOutUpdate(game);
+    if (this.isFadeIn) fadeInUpdate(this);
+    if (this.isFadeOut) fadeOutUpdate(this);
   }
 }

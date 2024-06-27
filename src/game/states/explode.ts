@@ -1,13 +1,13 @@
 import { base, CELL_SIZE, CELL_SIZE_HALF, getKeys, mapTileInfo, TILES, VELOCITY_BASE } from "@/configs/consts";
 import { findBelow, randomTile } from "@/utils/common";
 import { GameState } from "./gameState";
-import { IGame } from "@/types";
+import { IExplodeGameState, IGame } from "@/types";
 import { FloatingText, StarExplosion, SwordAttack } from "@/effects";
 
 /**
  * State phát nổ khi ăn được 3 trên một hàng
  */
-export class ExplodeGameState extends GameState {
+export class ExplodeGameState extends GameState implements IExplodeGameState {
   private explodeTimer: number;
   private frame: number;
 
@@ -20,6 +20,7 @@ export class ExplodeGameState extends GameState {
 
     this.explodeTimer = 0;
     this.frame = 0;
+    return;
     game.wait(game.combo === 0 ? 4 : 8, this.startExplode);
   }
 
@@ -47,7 +48,6 @@ export class ExplodeGameState extends GameState {
 
     this.frame = 0;
     game.changeState("FALL");
-    // game.state = "FALL";
 
     game.fall = {};
 

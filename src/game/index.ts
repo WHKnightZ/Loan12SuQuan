@@ -16,7 +16,7 @@ import {
   COMPUTER_INTELLIGENCE,
   SWORDRED_ATTACK_MULTIPLIER,
 } from "@/configs/consts";
-import { Effects } from "@/effects";
+import { Effects, GainTile } from "@/effects";
 import { Player } from "@/player";
 import {
   IGame,
@@ -31,36 +31,40 @@ import {
   IWaitProperties,
   IEffect,
   IComputer,
+  IGameStateType,
+  MapGameState,
+  IIdleGameState,
+  ISelectGameState,
+  IExplodeGameState,
+  IFallGameState,
+  IWaitGameState,
+  IFadeGameState,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import { menuTexture } from "@/textures";
 import {
-  explodeStateFunction,
-  fadeStateFunction,
-  fallStateFunction,
-  idleStateFunction,
-  selectStateFunction,
-  waitStateFunction,
+  ExplodeGameState,
+  FadeGameState,
+  FallGameState,
+  IdleGameState,
+  SelectGameState,
+  WaitGameState,
 } from "./states";
 import { Computer } from "./plugins";
 import { randomBool } from "@/utils/math";
-
-const mapStateFunction: {
-  [key in IGameState]: IGameStateFunction;
-} = {
-  IDLE: idleStateFunction,
-  SELECT: selectStateFunction,
-  EXPLODE: explodeStateFunction,
-  FALL: fallStateFunction,
-  FADE: fadeStateFunction,
-  WAIT: waitStateFunction,
-};
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
 export class Game implements IGame {
   private timeouts: { currentId: number; list: ITimeout[] };
   private effects: Effects;
+  private mapGameState: { [key in IGameStateType]: MapGameState[key] };
+  private idleGameState: IIdleGameState;
+  private selectGameState: ISelectGameState;
+  private explodeGameState: IExplodeGameState;
+  private fallGameState: IFallGameState;
+  private fadeGameState: IFadeGameState;
+  private waitGameState: IWaitGameState;
 
   state: IGameState;
   players: IPlayer[];
@@ -75,12 +79,6 @@ export class Game implements IGame {
   explodedTiles: ITileInfo[];
   matched4Tiles: IPoint[];
   matched4: IMatched4;
-  tExplode: number;
-  tExplode2: number;
-  tFadeIn: number;
-  tFadeOut: number;
-  isFadeIn: boolean;
-  isFadeOut: boolean;
   matchedPositions: IAllMatchedPositions;
   hintIndex: number;
   playerTurn: number;
@@ -90,6 +88,22 @@ export class Game implements IGame {
     this.timeouts = { currentId: 0, list: [] };
     this.effects = new Effects();
     this.computer = new Computer(this);
+
+    this.idleGameState = new IdleGameState(this);
+    this.selectGameState = new SelectGameState(this);
+    this.explodeGameState = new ExplodeGameState(this);
+    this.fallGameState = new FallGameState(this);
+    this.fadeGameState = new FadeGameState(this);
+    this.waitGameState = new WaitGameState(this);
+    this.mapGameState = {
+      IDLE: this.idleGameState,
+      SELECT: this.selectGameState,
+      EXPLODE: this.explodeGameState,
+      FALL: this.fallGameState,
+      FADE: this.fadeGameState,
+      WAIT: this.waitGameState,
+    };
+
     this.init();
   }
 
@@ -98,7 +112,7 @@ export class Game implements IGame {
    */
   init() {
     this.effects.reset();
-    this.state = "IDLE";
+    this.state = this.idleGameState;
     this.players = [
       new Player({ index: 0, attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
       new Player({ index: 1, attack: 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
@@ -117,12 +131,6 @@ export class Game implements IGame {
     this.fall = {};
     this.combo = 0;
     this.explosions = [];
-    this.tExplode = 0;
-    this.tExplode2 = 0;
-    this.tFadeIn = 0;
-    this.tFadeOut = 0;
-    this.isFadeIn = false;
-    this.isFadeOut = false;
 
     this.fadeIn();
   }
@@ -280,11 +288,6 @@ export class Game implements IGame {
   }
 
   /**
-   * Phát nổ mỗi khi ăn một cụm tile
-   */
-  explode() {}
-
-  /**
    * Ăn tile
    * @param param0
    */
@@ -330,27 +333,6 @@ export class Game implements IGame {
   }
 
   /**
-   * Chuyển qua state idle
-   */
-  idle() {
-    this.tHintDelay = TIMER_HINT_DELAY_DEFAULT;
-    this.state = "IDLE";
-    this.combo = 0;
-
-    if (this.turnCount > 1) this.createEffect(new FlickeringText({ text: `Còn ${this.turnCount} lượt` }));
-    else if (this.turnCount === 0) {
-      this.changePlayer();
-    }
-
-    this.hintIndex = this.players[this.playerTurn].getHintIndex(this.matchedPositions.length);
-
-    if (this.playerTurn === 1) {
-      // Computer
-      this.computer.startTimer();
-    }
-  }
-
-  /**
    * Đợi một khoảng thời gian mới thực hiện callback
    * @param maxTimer
    * @param callback
@@ -361,26 +343,35 @@ export class Game implements IGame {
       maxTimer,
       callback,
     };
-    this.state = "WAIT";
+    this.changeState("WAIT");
   }
 
   /**
    * Chuyển qua state fade in
    */
   fadeIn() {
-    this.state = "FADE";
     for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
-    this.tFadeIn = 0;
-    this.isFadeIn = true;
+    this.changeState("FADE").fadeIn();
   }
 
   /**
    * Chuyển qua state fade out
    */
   fadeOut() {
-    this.state = "FADE";
-    this.tFadeOut = 0;
-    this.isFadeOut = true;
+    this.changeState("FADE").fadeOut();
+  }
+
+  /**
+   * Chuyển state đồng thời gọi hàm invoke() của state đó
+   * @param state
+   */
+  changeState<T extends IGameStateType>(state: T) {
+    const newState = this.mapGameState[state];
+
+    newState.invoke();
+    this.state = newState;
+
+    return newState;
   }
 
   /**
@@ -393,7 +384,7 @@ export class Game implements IGame {
         const x = j * CELL_SIZE;
         const y = i * CELL_SIZE;
         base.context.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-        if (base.map[i][j] === -1 || this.state === "FADE") continue;
+        if (base.map[i][j] === -1 || this.state.is("FADE")) continue;
 
         base.context.drawImage(mapTileInfo[base.map[i][j]].texture, x + TILE_OFFSET, y + TILE_OFFSET);
       }
@@ -401,9 +392,7 @@ export class Game implements IGame {
 
     base.context.drawImage(menuTexture, 0, BOARD_SIZE);
     this.players.forEach((p) => p.render());
-
-    mapStateFunction[this.state].render(this);
-
+    this.state.render();
     this.effects.render();
   }
 
@@ -414,9 +403,7 @@ export class Game implements IGame {
     this.handleTimeouts();
 
     this.players.forEach((p) => p.update());
-
-    mapStateFunction[this.state].update(this);
-
+    this.state.update();
     this.effects.update();
     this.computer.update();
   }
@@ -435,7 +422,7 @@ export class Game implements IGame {
    * @returns
    */
   onClick(e: MouseEvent) {
-    if ((this.state !== "IDLE" && this.state !== "SELECT") || this.playerTurn !== 0) return;
+    if ((!this.state.is("IDLE") && !this.state.is("SELECT")) || this.playerTurn !== 0) return;
 
     const canvas = base.canvas;
 
@@ -447,12 +434,10 @@ export class Game implements IGame {
     const x = Math.floor(offsetX / CELL_SIZE);
     const y = Math.floor(offsetY / CELL_SIZE);
 
-    this.tSwap = 0;
-
     if (!this.selected) {
       this.selected = { x, y, value: base.map[y][x] };
       base.map[y][x] = -1;
-      this.state = "SELECT";
+      this.changeState("SELECT");
       return;
     }
 
@@ -460,7 +445,7 @@ export class Game implements IGame {
       const { x, y, value } = this.selected;
       base.map[y][x] = value;
       this.selected = null;
-      this.idle();
+      this.changeState("IDLE");
       return;
     }
 

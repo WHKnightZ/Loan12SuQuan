@@ -95,6 +95,30 @@ export type IGameState = IRenderable & {
   is(type: IGameStateType): boolean;
 };
 
+export type IIdleGameState = IGameState;
+export type ISelectGameState = IGameState;
+export type IExplodeGameState = IGameState;
+export type IFallGameState = IGameState;
+export type IFadeGameState = IGameState & {
+  isFadeIn: boolean;
+  isFadeOut: boolean;
+  fadeInTimer: number;
+  fadeOutTimer: number;
+
+  fadeIn(): void;
+  fadeOut(): void;
+};
+export type IWaitGameState = IGameState;
+
+export type MapGameState = {
+  IDLE: IIdleGameState;
+  SELECT: ISelectGameState;
+  EXPLODE: IExplodeGameState;
+  FALL: IFallGameState;
+  FADE: IFadeGameState;
+  WAIT: IWaitGameState;
+};
+
 export type IGame = IRenderable & {
   state: IGameState;
   players: IPlayer[];
@@ -109,12 +133,6 @@ export type IGame = IRenderable & {
   explodedTiles: ITileInfo[];
   matched4Tiles: IPoint[];
   matched4: IMatched4;
-  tExplode: number;
-  tExplode2: number;
-  tFadeIn: number;
-  tFadeOut: number;
-  isFadeIn: boolean;
-  isFadeOut: boolean;
   matchedPositions: IAllMatchedPositions;
   hintIndex: number;
   playerTurn: number;
@@ -126,15 +144,20 @@ export type IGame = IRenderable & {
   addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
   findAllMatchedPositions(): void;
   changePlayer(): void;
-  explode(): void;
   gainTile(tile: ITileInfo): void;
 
-  idle(): void;
   wait(maxTimer: number, callback: () => void): void;
   fadeIn(): void;
   fadeOut(): void;
-  changeState(state: IGameStateType): IGameState; // this.changeState("IDLE") trong hàm changeState sẽ auto call .invoke();
-
+  /**
+   * Chuyển state đồng thời gọi hàm invoke() của state đó
+   * @param state
+   */
+  changeState<T extends IGameStateType>(state: T): MapGameState[T];
+  /**
+   * Tạo 1 effect
+   * @param effect
+   */
   createEffect(effect: IEffect): void;
   onClick(e: MouseEvent): void;
   onKeyDown(e: KeyboardEvent): void;

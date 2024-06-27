@@ -1,6 +1,6 @@
 import { base, CELL_SIZE, mapTileInfo, SWAP_DURATION, SWAP_OFFSET, TILE_OFFSET } from "@/configs/consts";
 import { cornerSelections } from "@/textures";
-import { IGame } from "@/types";
+import { IGame, ISelectGameState } from "@/types";
 import { combine } from "@/utils/common";
 import { GameState } from "./gameState";
 
@@ -13,7 +13,7 @@ const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).ma
 /**
  * State khi chọn một tile
  */
-export class SelectGameState extends GameState {
+export class SelectGameState extends GameState implements ISelectGameState {
   private selectTimer: number;
   private swapTimer: number;
 
@@ -106,7 +106,7 @@ export class SelectGameState extends GameState {
           game.explosions.push({ x, y, value: base.map[y][x] });
         });
 
-        game.explode();
+        game.changeState("EXPLODE");
       } else {
         base.map[y0][x0] = -1;
         base.map[y1][x1] = -1;
