@@ -71,6 +71,7 @@ export class IdleGameState extends GameState implements IdleGameState {
       this.hintDelayTimer -= 1;
       return;
     }
+
     this.idleTimer += 1;
   }
 }

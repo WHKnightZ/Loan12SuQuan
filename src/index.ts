@@ -51,6 +51,8 @@ const main = async () => {
   await loadTextures();
   await pause(500);
 
+  loading.end();
+
   game = new Game();
   base.game = game;
 

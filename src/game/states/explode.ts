@@ -9,7 +9,7 @@ import { FloatingText, StarExplosion, SwordAttack } from "@/effects";
  */
 export class ExplodeGameState extends GameState implements IExplodeGameState {
   private explodeTimer: number;
-  private frame: number;
+  private explodeFrame: number;
 
   constructor(game: IGame) {
     super("EXPLODE", game);
@@ -19,16 +19,37 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
     const game = this.game;
 
     this.explodeTimer = 0;
-    this.frame = 0;
-    return;
-    game.wait(game.combo === 0 ? 4 : 8, this.startExplode);
+    this.explodeFrame = 0;
+
+    game.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
+
+    const center = game.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+
+    if (game.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
+      // Tạo hiệu ứng kiếm cắm xuống người chơi bị tấn công
+      game.createEffect(new SwordAttack(game.players[game.playerTurn], game.players[1 - game.playerTurn]));
+    }
+
+    game.turnCount += game.matched4.turnCount;
+
+    const x = center.x / game.explosions.length;
+    const y = center.y / game.explosions.length;
+    game.combo += 1;
+    const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
+    const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
+
+    if (game.combo < 2) return;
+
+    // Tạo hiệu ứng toả sao khi được combo x2 trở lên
+    game.createEffect(new FloatingText({ text: `x${game.combo}`, x: effectX, y: effectY + 8 }));
+    game.createEffect(new StarExplosion(effectX, effectY));
   }
 
   render() {
     const game = this.game;
 
     game.explosions.forEach(({ x, y, value }) => {
-      const texture = mapTileInfo[value].explosions[this.frame];
+      const texture = mapTileInfo[value].explosions[this.explodeFrame];
       base.context.drawImage(
         texture,
         x * CELL_SIZE + Math.floor((CELL_SIZE - texture.width) / 2),
@@ -43,10 +64,10 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
     this.explodeTimer += 1;
     if (this.explodeTimer % 2) return;
 
-    this.frame += 1;
-    if (this.frame !== 4) return;
+    this.explodeFrame += 1;
+    if (this.explodeFrame !== 4) return;
 
-    this.frame = 0;
+    this.explodeFrame = 0;
     game.changeState("FALL");
 
     game.fall = {};
@@ -78,31 +99,5 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
         fall[key].list.push({ x: key, y: -1 - i, velocity: VELOCITY_BASE, offset: 0, value: randomTile() });
       }
     });
-  }
-
-  private startExplode() {
-    const game = this.game;
-
-    game.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
-
-    const center = game.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
-
-    if (game.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
-      // const player = game.players[1 - game.playerTurn];
-      game.createEffect(new SwordAttack(game.players[game.playerTurn], game.players[1 - game.playerTurn]));
-    }
-
-    game.turnCount += game.matched4.turnCount;
-
-    const x = center.x / game.explosions.length;
-    const y = center.y / game.explosions.length;
-    game.combo += 1;
-    const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
-    const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
-
-    if (game.combo < 2) return;
-
-    game.createEffect(new FloatingText({ text: `x${game.combo}`, x: effectX, y: effectY + 8 }));
-    game.createEffect(new StarExplosion(effectX, effectY));
   }
 }

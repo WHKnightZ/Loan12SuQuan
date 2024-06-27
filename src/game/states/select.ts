@@ -106,7 +106,7 @@ export class SelectGameState extends GameState implements ISelectGameState {
           game.explosions.push({ x, y, value: base.map[y][x] });
         });
 
-        game.changeState("EXPLODE");
+        game.explode();
       } else {
         base.map[y0][x0] = -1;
         base.map[y1][x1] = -1;

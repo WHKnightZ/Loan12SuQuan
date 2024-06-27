@@ -49,7 +49,7 @@ const fadeOutRender = (self: IFadeGameState) => {
       const x = j * CELL_SIZE;
       const y = i * CELL_SIZE;
 
-      const scale = getScale(j, i, self.fadeInTimer);
+      const scale = getScale(j, i, self.fadeOutTimer);
       const size = Math.floor(TILE_SIZE * scale);
       const offset = Math.floor((CELL_SIZE - size) / 2);
 
@@ -66,18 +66,20 @@ const fadeInUpdate = (self: IFadeGameState) => {
   const fall = self.game.fall;
 
   for (let i = 0; i < MAP_WIDTH; i += 1) {
-    let newTFade = self.fadeInTimer - i * 3;
-    if (newTFade < 1) newTFade = 1;
+    let newFadeInTimer = self.fadeInTimer - i * 3;
+    if (newFadeInTimer < 1) newFadeInTimer = 1;
 
-    if (newTFade % 6 === 0 && fall[i].pushCount < MAP_WIDTH) {
-      fall[i].list.push({
+    const fallItem = fall[i];
+
+    if (newFadeInTimer % 6 === 0 && fallItem.pushCount < MAP_WIDTH) {
+      fallItem.list.push({
         x: i,
         y: -1,
         velocity: VELOCITY_BASE + 4,
         offset: 0,
-        value: base.map[MAP_WIDTH_1 - fall[i].pushCount][i],
+        value: base.map[MAP_WIDTH_1 - fallItem.pushCount][i],
       });
-      fall[i].pushCount += 1;
+      fallItem.pushCount += 1;
     }
   }
 
@@ -144,6 +146,7 @@ export class FadeGameState extends GameState implements IFadeGameState {
   }
 
   fadeIn() {
+    for (let i = 0; i < MAP_WIDTH; i += 1) this.game.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
     this.isFadeIn = true;
   }
 

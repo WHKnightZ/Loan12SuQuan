@@ -34,7 +34,7 @@ export type IEffect = ILivable & IRenderable;
 export type IFallItem = {
   list: (IPointExt & { offset: number; velocity: number })[];
   below: number;
-  pushCount?: number;
+  pushCount: number;
 };
 
 export type IMatched4 = {
@@ -48,9 +48,9 @@ export type IWaitProperties = IHasTimer & {
 };
 
 export type IPlayerAttribute = IHasTimer & {
-  value: number;
+  realValue: number;
   maxValue: number;
-  display: number;
+  displayValue: number;
 };
 
 export type IPlayerAttributeExtra = {
@@ -65,11 +65,30 @@ export type IPlayer = IRenderable & {
   avatarTexture: HTMLImageElement;
   avatarOffset: { x: number; y: number };
 
+  /**
+   * Mục đích: lấy ngẫu nhiên một nước đi dựa theo chỉ số trí tuệ
+   * Trí tuệ càng cao => tỉ lệ ngẫu nhiên ra 100 càng lớn => nước đi càng tốt
+   */
   getHintIndex(matchedLength: number): number;
+  /**
+   * Nhận sát thương
+   */
   takeDamage(damage: number): void;
+  /**
+   * Hồi máu
+   */
   gainLife(value: number): void;
+  /**
+   * Hồi năng lượng
+   */
   gainEnergy(value: number): void;
+  /**
+   * Hồi mana
+   */
   gainMana(value: number): void;
+  /**
+   * Gây hiệu ứng rung avatar khi nhận sát thương
+   */
   shock(): void;
 };
 
@@ -90,7 +109,6 @@ export type IGameState = IRenderable & {
   invoke(): void;
   /**
    * Hàm check xem game state này có giống với tham số truyền vào không
-   * @param type
    */
   is(type: IGameStateType): boolean;
 };
@@ -105,7 +123,13 @@ export type IFadeGameState = IGameState & {
   fadeInTimer: number;
   fadeOutTimer: number;
 
+  /**
+   * Fade in
+   */
   fadeIn(): void;
+  /**
+   * Fade out
+   */
   fadeOut(): void;
 };
 export type IWaitGameState = IGameState;
@@ -138,30 +162,73 @@ export type IGame = IRenderable & {
   playerTurn: number;
   turnCount: number;
 
+  /**
+   * Khởi tạo
+   */
   init(): void;
+  /**
+   * Kiểm tra cách hoán đổi này ăn được những gì
+   */
   matchPosition(x: number, y: number): { matched: boolean; tiles: ITileInfo[]; score: number; matched4Tiles: IPoint[] };
+  /**
+   * Hoán đổi 2 tile gần nhau
+   */
   swap(x0: number, y0: number, x1: number, y1: number): void;
+  /**
+   * Thử xem cách hoán đổi này có khả thi không, nếu khả thi thì thêm vào danh sách
+   */
   addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number): void;
+  /**
+   * Tìm tất cả các cách hoán đổi khả thi
+   */
   findAllMatchedPositions(): void;
-  changePlayer(): void;
+  /**
+   * Ăn tile
+   */
   gainTile(tile: ITileInfo): void;
-
+  /**
+   * Đổi lượt
+   */
+  changePlayer(): void;
+  /**
+   * Chuyển qua state nổ sau khi đợi một khoảng thời gian
+   */
+  explode(): void;
+  /**
+   * Đợi một khoảng thời gian mới thực hiện callback
+   */
   wait(maxTimer: number, callback: () => void): void;
+  /**
+   * Chuyển qua state fade in
+   */
   fadeIn(): void;
+  /**
+   * Chuyển qua state fade out
+   */
   fadeOut(): void;
   /**
    * Chuyển state đồng thời gọi hàm invoke() của state đó
-   * @param state
    */
   changeState<T extends IGameStateType>(state: T): MapGameState[T];
   /**
    * Tạo 1 effect
-   * @param effect
    */
   createEffect(effect: IEffect): void;
+  /**
+   * Xử lý sự kiện click chuột
+   */
   onClick(e: MouseEvent): void;
+  /**
+   * Xử lý sự kiện nhấn phím
+   */
   onKeyDown(e: KeyboardEvent): void;
+  /**
+   * Tạo timeout
+   */
   createTimeout(callback: () => void, frame: number): number;
+  /**
+   * Xoá timeout
+   */
   clearTimeout(timeoutId: number): void;
 };
 

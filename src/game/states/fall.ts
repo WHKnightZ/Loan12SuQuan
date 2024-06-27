@@ -25,6 +25,7 @@ export class FallGameState extends GameState implements IFallGameState {
   render() {
     const game = this.game;
     const fall = game.fall;
+
     getKeys(fall).forEach((col) => {
       fall[col].list.forEach(({ x, y, value, offset }) => {
         base.context.drawImage(
@@ -40,6 +41,7 @@ export class FallGameState extends GameState implements IFallGameState {
     const game = this.game;
     let newFalling = false;
     const fall = game.fall;
+
     getKeys(fall).forEach((col) => {
       const colData = fall[col];
       col = Number(col);
@@ -73,24 +75,24 @@ export class FallGameState extends GameState implements IFallGameState {
 
     game.matched4 = { turnCount: 0, matchedList: {} };
     game.matched4Tiles = [];
-    const tt: ITileInfo[][] = [];
+    const tileInfos: ITileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
         const { matched: m0, tiles: t0, matched4Tiles: m40 } = game.matchPosition(j, i);
-        if (m0) tt.push(t0);
+        if (m0) tileInfos.push(t0);
         if (m40.length) game.matched4Tiles = game.matched4Tiles.concat(m40);
       }
     }
 
-    if (tt.length) {
-      game.explodedTiles = combine(tt);
+    if (tileInfos.length) {
+      game.explodedTiles = combine(tileInfos);
       game.explosions = [];
       game.explodedTiles.forEach((tile) => {
         const { x, y } = tile;
         game.gainTile(tile);
         game.explosions.push({ x, y, value: base.map[y][x] });
       });
-      game.changeState("EXPLODE");
+      game.explode();
     } else {
       game.findAllMatchedPositions();
       game.changeState("IDLE");

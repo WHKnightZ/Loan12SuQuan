@@ -51,9 +51,9 @@ export class Player implements IPlayer {
     this.attack = attack;
     this.intelligence = intelligence;
 
-    this.life = { maxValue: life, value: life, display: life, timer: 0 };
-    this.energy = { maxValue: DEFAULT_ENERGY, value: DEFAULT_ENERGY, display: DEFAULT_ENERGY, timer: 0 };
-    this.mana = { maxValue: DEFAULT_MANA, value: DEFAULT_MANA, display: DEFAULT_MANA, timer: 0 };
+    this.life = { maxValue: life, realValue: life, displayValue: life, timer: 0 };
+    this.energy = { maxValue: DEFAULT_ENERGY, realValue: DEFAULT_ENERGY, displayValue: DEFAULT_ENERGY, timer: 0 };
+    this.mana = { maxValue: DEFAULT_MANA, realValue: DEFAULT_MANA, displayValue: DEFAULT_MANA, timer: 0 };
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
@@ -75,8 +75,6 @@ export class Player implements IPlayer {
   /**
    * Mục đích: lấy ngẫu nhiên một nước đi dựa theo chỉ số trí tuệ
    * Trí tuệ càng cao => tỉ lệ ngẫu nhiên ra 100 càng lớn => nước đi càng tốt
-   * @param matchedLength
-   * @returns
    */
   getHintIndex(matchedLength: number) {
     // Ngẫu nhiên một số trong khoảng intel => 100
@@ -94,42 +92,38 @@ export class Player implements IPlayer {
 
   /**
    * Nhận sát thương
-   * @param damage
    */
   takeDamage(damage: number) {
     this.life.timer = 0;
-    this.life.value = this.life.value - damage;
-    if (this.life.value < 0) this.life.value = 0;
+    this.life.realValue = this.life.realValue - damage;
+    if (this.life.realValue < 0) this.life.realValue = 0;
   }
 
   /**
    * Hồi máu
-   * @param value
    */
   gainLife(value: number) {
     this.life.timer = 0;
-    this.life.value = this.life.value + (value * this.life.maxValue) / 100;
-    if (this.life.value > this.life.maxValue) this.life.value = this.life.maxValue;
+    this.life.realValue = this.life.realValue + (value * this.life.maxValue) / 100;
+    if (this.life.realValue > this.life.maxValue) this.life.realValue = this.life.maxValue;
   }
 
   /**
    * Hồi năng lượng
-   * @param value
    */
   gainEnergy(value: number) {
     this.energy.timer = 0;
-    this.energy.value = this.energy.value + value;
-    if (this.energy.value > this.energy.maxValue) this.energy.value = this.energy.maxValue;
+    this.energy.realValue = this.energy.realValue + value;
+    if (this.energy.realValue > this.energy.maxValue) this.energy.realValue = this.energy.maxValue;
   }
 
   /**
    * Hồi mana
-   * @param value
    */
   gainMana(value: number) {
     this.mana.timer = 0;
-    this.mana.value = this.mana.value + value;
-    if (this.mana.value > this.mana.maxValue) this.mana.value = this.mana.maxValue;
+    this.mana.realValue = this.mana.realValue + value;
+    if (this.mana.realValue > this.mana.maxValue) this.mana.realValue = this.mana.maxValue;
   }
 
   /**
@@ -144,7 +138,7 @@ export class Player implements IPlayer {
    */
   render() {
     this.bars.forEach(({ texture, attribute }, index) => {
-      const amount = attribute.display / attribute.maxValue;
+      const amount = attribute.displayValue / attribute.maxValue;
       const width = 84 * amount;
       if (width < 1) return;
       base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
@@ -164,7 +158,7 @@ export class Player implements IPlayer {
 
     // TODO: Tách các hàm ra private function
     this.bars.forEach(({ attribute, maxTimer }) => {
-      if (Math.abs(attribute.display - attribute.value) < 0.1) return;
+      if (Math.abs(attribute.displayValue - attribute.realValue) < 0.1) return;
 
       attribute.timer += 1;
 
@@ -173,7 +167,7 @@ export class Player implements IPlayer {
       let value = -attribute.timer / maxTimer + 1;
       value = value * 2 - 1;
       value = (Math.cbrt(value) + 1) / 2;
-      attribute.display = attribute.value + (attribute.display - attribute.value) * value;
+      attribute.displayValue = attribute.realValue + (attribute.displayValue - attribute.realValue) * value;
     });
 
     this.borderAnimation.update();
@@ -182,7 +176,6 @@ export class Player implements IPlayer {
 
   /**
    * Người chơi mỗi LOSE_ENERGY_INTERVAL mà không tương tác sẽ mất năng lượng
-   * @returns
    */
   private loseEnergy() {
     if (this.index !== base.game.playerTurn) return;
@@ -190,6 +183,6 @@ export class Player implements IPlayer {
     this.energyTimer += 1;
     if (this.energyTimer % LOSE_ENERGY_INTERVAL !== 0) return;
 
-    this.energy.value -= 1;
+    this.energy.realValue -= 1;
   }
 }

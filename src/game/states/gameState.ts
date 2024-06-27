@@ -1,5 +1,8 @@
 import { IGame, IGameState, IGameStateType } from "@/types";
 
+/**
+ * State base
+ */
 export class GameState implements IGameState {
   type: IGameStateType;
   game: IGame;

@@ -137,9 +137,6 @@ export class Game implements IGame {
 
   /**
    * Kiểm tra cách hoán đổi này ăn được những gì
-   * @param x
-   * @param y
-   * @returns
    */
   matchPosition(x: number, y: number) {
     let h: ITileInfo[] = [];
@@ -230,10 +227,6 @@ export class Game implements IGame {
 
   /**
    * Hoán đổi 2 tile gần nhau
-   * @param x0
-   * @param y0
-   * @param x1
-   * @param y1
    */
   swap(x0: number, y0: number, x1: number, y1: number) {
     const tmp = base.map[y0][x0];
@@ -243,11 +236,6 @@ export class Game implements IGame {
 
   /**
    * Thử xem cách hoán đổi này có khả thi không, nếu khả thi thì thêm vào danh sách
-   * @param allMatchedPositions
-   * @param x0
-   * @param y0
-   * @param x1
-   * @param y1
    */
   addMatchedPosition(allMatchedPositions: IAllMatchedPositions, x0: number, y0: number, x1: number, y1: number) {
     this.swap(x0, y0, x1, y1);
@@ -280,16 +268,7 @@ export class Game implements IGame {
   }
 
   /**
-   * Đổi lượt
-   */
-  changePlayer() {
-    this.playerTurn = 1 - this.playerTurn;
-    this.turnCount = 1;
-  }
-
-  /**
    * Ăn tile
-   * @param param0
    */
   gainTile({ value, x, y }: ITileInfo) {
     if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
@@ -309,7 +288,11 @@ export class Game implements IGame {
       case TILES.SWORD:
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
-        this.players[1 - this.playerTurn].takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
+        const attackedPlayer = this.players[1 - this.playerTurn];
+        this.createTimeout(
+          () => attackedPlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1)),
+          40 // Gây sát thương sau 40 frame (đúng lúc kiếm chém sẽ đẹp hơn)
+        );
         break;
 
       case TILES.HEART:
@@ -333,9 +316,22 @@ export class Game implements IGame {
   }
 
   /**
+   * Đổi lượt
+   */
+  changePlayer() {
+    this.playerTurn = 1 - this.playerTurn;
+    this.turnCount = 1;
+  }
+
+  /**
+   * Chuyển qua state nổ sau khi đợi một khoảng thời gian
+   */
+  explode() {
+    this.wait(this.combo === 0 ? 4 : 8, () => this.changeState("EXPLODE"));
+  }
+
+  /**
    * Đợi một khoảng thời gian mới thực hiện callback
-   * @param maxTimer
-   * @param callback
    */
   wait(maxTimer: number, callback: () => void) {
     this.waitProperties = {
@@ -350,7 +346,6 @@ export class Game implements IGame {
    * Chuyển qua state fade in
    */
   fadeIn() {
-    for (let i = 0; i < MAP_WIDTH; i += 1) this.fall[i] = { list: [], below: MAP_WIDTH_1, pushCount: 0 };
     this.changeState("FADE").fadeIn();
   }
 
@@ -363,7 +358,6 @@ export class Game implements IGame {
 
   /**
    * Chuyển state đồng thời gọi hàm invoke() của state đó
-   * @param state
    */
   changeState<T extends IGameStateType>(state: T) {
     const newState = this.mapGameState[state];
@@ -410,7 +404,6 @@ export class Game implements IGame {
 
   /**
    * Tạo effect
-   * @param effect
    */
   createEffect(effect: IEffect) {
     this.effects.create(effect);
@@ -418,8 +411,6 @@ export class Game implements IGame {
 
   /**
    * Xử lý sự kiện click chuột
-   * @param e
-   * @returns
    */
   onClick(e: MouseEvent) {
     if ((!this.state.is("IDLE") && !this.state.is("SELECT")) || this.playerTurn !== 0) return;
@@ -455,7 +446,6 @@ export class Game implements IGame {
 
   /**
    * Xử lý sự kiện nhấn phím
-   * @param e
    */
   onKeyDown(e: KeyboardEvent) {
     switch (e.key) {
@@ -467,9 +457,6 @@ export class Game implements IGame {
 
   /**
    * Tạo timeout
-   * @param callback
-   * @param frame
-   * @returns
    */
   createTimeout(callback: () => void, frame: number): number {
     const id = this.timeouts.currentId;
@@ -480,7 +467,6 @@ export class Game implements IGame {
 
   /**
    * Xoá timeout
-   * @param timeoutId
    */
   clearTimeout(timeoutId: number): void {
     this.timeouts.list = this.timeouts.list.filter((x) => x.id !== timeoutId);
