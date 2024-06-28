@@ -10,23 +10,48 @@ import {
 } from "@/configs/consts";
 import { IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
 import { avatarTextures, barTextures } from "@/textures";
-import { random } from "@/utils/math";
+import { easeInOutCubic, lerp, random } from "@/utils/math";
 import { BorderAnimation } from "./borderAnimation";
 import { Spring } from "./spring";
 
 const BAR_OFFSET_X = 132;
 
 export class Player implements IPlayer {
+  /**
+   * Animation chạy vòng tròn quanh avatar player
+   */
   private borderAnimation: BorderAnimation;
+  /**
+   * Hiệu ứng rung khi nhận sát thương
+   */
   private spring: Spring;
+  /**
+   * Độ thông minh khi tìm nước đi
+   */
   private intelligence: number;
-
+  /**
+   * Máu: Hết máu sẽ thua
+   */
   private life: IPlayerAttribute;
+  /**
+   * Mana: Để dùng kỹ năng
+   */
   private mana: IPlayerAttribute;
+  /**
+   * Năng lượng: Mất liên tục, hết năng lượng cũng sẽ thua
+   */
   private energy: IPlayerAttribute;
-
+  /**
+   * Offset x của bar
+   */
   private barOffsetX: number;
+  /**
+   * Danh sách các bars
+   */
   private bars: IPlayerAttributeExtra[];
+  /**
+   * Bộ đếm thời gian, khi đếm đủ một chu kỳ sẽ mất năng lượng
+   */
   private energyTimer: number;
 
   index: number;
@@ -91,12 +116,15 @@ export class Player implements IPlayer {
   }
 
   /**
-   * Nhận sát thương
+   * Nhận sát thương sau một khoảng thời gian
    */
-  takeDamage(damage: number) {
-    this.life.timer = 0;
-    this.life.realValue = this.life.realValue - damage;
-    if (this.life.realValue < 0) this.life.realValue = 0;
+  takeDamage(damage: number, duration: number = 40) {
+    base.game.createTimeout(() => {
+      // Gây sát thương sau 40 frame (đúng lúc kiếm chém sẽ đẹp hơn)
+      this.life.timer = 0;
+      this.life.realValue = this.life.realValue - damage;
+      this.life.realValue = Math.max(this.life.realValue, 0);
+    }, duration);
   }
 
   /**
@@ -105,7 +133,7 @@ export class Player implements IPlayer {
   gainLife(value: number) {
     this.life.timer = 0;
     this.life.realValue = this.life.realValue + (value * this.life.maxValue) / 100;
-    if (this.life.realValue > this.life.maxValue) this.life.realValue = this.life.maxValue;
+    this.life.realValue = Math.min(this.life.realValue, this.life.maxValue);
   }
 
   /**
@@ -114,7 +142,7 @@ export class Player implements IPlayer {
   gainEnergy(value: number) {
     this.energy.timer = 0;
     this.energy.realValue = this.energy.realValue + value;
-    if (this.energy.realValue > this.energy.maxValue) this.energy.realValue = this.energy.maxValue;
+    this.energy.realValue = Math.min(this.energy.realValue, this.energy.maxValue);
   }
 
   /**
@@ -123,7 +151,7 @@ export class Player implements IPlayer {
   gainMana(value: number) {
     this.mana.timer = 0;
     this.mana.realValue = this.mana.realValue + value;
-    if (this.mana.realValue > this.mana.maxValue) this.mana.realValue = this.mana.maxValue;
+    this.mana.realValue = Math.min(this.mana.realValue, this.mana.maxValue);
   }
 
   /**
@@ -137,6 +165,7 @@ export class Player implements IPlayer {
    * Hiển thị
    */
   render() {
+    // Hiển thị các bars
     this.bars.forEach(({ texture, attribute }, index) => {
       const amount = attribute.displayValue / attribute.maxValue;
       const width = 84 * amount;
@@ -144,9 +173,11 @@ export class Player implements IPlayer {
       base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
     });
 
+    // Hiển thị avatar
     const offsetAvatar = this.spring.getSpringOffet();
     base.context.drawImage(this.avatarTexture, this.avatarOffset.x + offsetAvatar, this.avatarOffset.y);
 
+    // Hiển thị border animation
     this.borderAnimation.render();
   }
 
@@ -156,7 +187,7 @@ export class Player implements IPlayer {
   update() {
     this.loseEnergy();
 
-    // TODO: Tách các hàm ra private function
+    // Update các bars
     this.bars.forEach(({ attribute, maxTimer }) => {
       if (Math.abs(attribute.displayValue - attribute.realValue) < 0.1) return;
 
@@ -164,12 +195,13 @@ export class Player implements IPlayer {
 
       if (attribute.timer > maxTimer) attribute.timer = maxTimer;
 
-      let value = -attribute.timer / maxTimer + 1;
-      value = value * 2 - 1;
-      value = (Math.cbrt(value) + 1) / 2;
-      attribute.displayValue = attribute.realValue + (attribute.displayValue - attribute.realValue) * value;
+      let value = 1 - attribute.timer / maxTimer; // Convert từ khoảng 0, 1 về khoảng 1, 0
+      value = easeInOutCubic(value);
+
+      attribute.displayValue = lerp(attribute.realValue, attribute.displayValue, value);
     });
 
+    // Update animation border và spring
     this.borderAnimation.update();
     this.spring.update();
   }

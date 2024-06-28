@@ -1,5 +1,5 @@
 import { base, EPSILON } from "@/configs/consts";
-import { Star } from "@/objects/star";
+import { Star } from "@/elements/star";
 import { Effect } from "./effect";
 
 const COUNT_STARS = 20;

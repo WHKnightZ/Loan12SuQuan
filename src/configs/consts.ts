@@ -81,10 +81,6 @@ export const TILE_OFFSET = Math.floor((CELL_SIZE - TILE_SIZE) / 2);
  */
 export const GAIN_TURN = 3;
 /**
- * Điểm nhận được khi ăn 4 tile 1 hàng
- */
-export const MATCH_4_SCORE = 50;
-/**
  * Thời gian để swap 2 tile với nhau
  */
 export const SWAP_DURATION = 10;
@@ -127,7 +123,7 @@ export const EPSILON = 0.0001;
 /**
  * Khoảng thời gian người chơi bị mất năng lượng (tính bằng số frame)
  */
-export const LOSE_ENERGY_INTERVAL = 300;
+export const LOSE_ENERGY_INTERVAL = 200;
 /**
  * Khoảng thời gian người chơi được gợi ý nếu không thao tác (tính bằng số frame)
  */
@@ -153,7 +149,15 @@ export const SWORDRED_ATTACK_MULTIPLIER = 2.5;
  */
 export const COUNT_TILES = Object.keys(TILES).length;
 /**
- * Lấy chi tiét tile từ tile code
+ * Điểm nhận được khi ăn 4 tile 1 hàng
+ */
+export const MATCH_4_SCORE = 100;
+/**
+ * Empty texture
+ */
+const none = null as any;
+/**
+ * Lấy chi tiết tile từ tile code
  */
 export const mapTileInfo: {
   [key: number]: {
@@ -164,13 +168,13 @@ export const mapTileInfo: {
     explosions: HTMLImageElement[];
   };
 } = {
-  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, score: 10, texture: null as any, explosions: [] },
-  [TILES.HEART]: { compatible: [], probability: 100, score: 9, texture: null as any, explosions: [] },
-  [TILES.GOLD]: { compatible: [], probability: 100, score: 6, texture: null as any, explosions: [] },
-  [TILES.ENERGY]: { compatible: [], probability: 100, score: 7, texture: null as any, explosions: [] },
-  [TILES.MANA]: { compatible: [], probability: 100, score: 8, texture: null as any, explosions: [] },
-  [TILES.EXP]: { compatible: [], probability: 100, score: 6, texture: null as any, explosions: [] },
-  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, score: 30, texture: null as any, explosions: [] },
+  [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, score: 18, texture: none, explosions: [] },
+  [TILES.HEART]: { compatible: [], probability: 100, score: 9, texture: none, explosions: [] },
+  [TILES.GOLD]: { compatible: [], probability: 100, score: 6, texture: none, explosions: [] },
+  [TILES.ENERGY]: { compatible: [], probability: 100, score: 7, texture: none, explosions: [] },
+  [TILES.MANA]: { compatible: [], probability: 100, score: 8, texture: none, explosions: [] },
+  [TILES.EXP]: { compatible: [], probability: 100, score: 6, texture: none, explosions: [] },
+  [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, score: 36, texture: none, explosions: [] },
 };
 /**
  * Chứa các thành phần quan trọng của game

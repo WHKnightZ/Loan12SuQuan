@@ -79,7 +79,7 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
       if (game.fall[x]) {
         !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
           fall[x].list.push({ x, y, velocity: 0, offset: 0, value: -1 });
-      } else fall[x] = { list: [{ x, y, velocity: 0, offset: 0, value: -1 }], below: -1 };
+      } else fall[x] = { list: [{ x, y, velocity: 0, offset: 0, value: -1 }], below: -1, pushCount: 0 };
     });
 
     getKeys(fall).forEach((key) => {

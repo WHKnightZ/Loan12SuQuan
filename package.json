@@ -5,7 +5,7 @@
   "scripts": {
     "checktype": "tsc --noEmit",
     "dev": "node esbuild.dev.mjs",
-    "build": "node esbuild.prd.mjs && node updateVersion"
+    "build": "yarn checktype && node esbuild.prd.mjs && node updateVersion"
   },
   "devDependencies": {
     "esbuild": "^0.21.5",

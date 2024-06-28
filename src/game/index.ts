@@ -11,7 +11,6 @@ import {
   PLAYER_INTELLIGENCE,
   TILES,
   TILE_OFFSET,
-  TIMER_HINT_DELAY_DEFAULT,
   CELL_SIZE_HALF,
   COMPUTER_INTELLIGENCE,
   SWORDRED_ATTACK_MULTIPLIER,
@@ -83,6 +82,7 @@ export class Game implements IGame {
   hintIndex: number;
   playerTurn: number;
   turnCount: number;
+  isUpdateTurnCount: boolean;
 
   constructor() {
     this.timeouts = { currentId: 0, list: [] };
@@ -118,7 +118,8 @@ export class Game implements IGame {
       new Player({ index: 1, attack: 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
     ];
     this.playerTurn = 0;
-    this.turnCount = 1;
+    this.turnCount = 10;
+    this.isUpdateTurnCount = true;
     this.waitProperties = null;
 
     this.matched4 = { turnCount: 0, matchedList: {} };
@@ -289,10 +290,7 @@ export class Game implements IGame {
       case TILES.SWORDRED:
         const dmg = this.players[this.playerTurn].attack / 4;
         const attackedPlayer = this.players[1 - this.playerTurn];
-        this.createTimeout(
-          () => attackedPlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1)),
-          40 // Gây sát thương sau 40 frame (đúng lúc kiếm chém sẽ đẹp hơn)
-        );
+        attackedPlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
         break;
 
       case TILES.HEART:

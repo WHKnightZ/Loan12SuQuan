@@ -19,9 +19,13 @@ export const cube = (x: number) => x * x * x;
 
 // Animations
 
-// // EaseInOutCubic
-// const t1 = t - 1;
-// return t < 0.5 ? 4 * t * t * t : 4 * t1 * t1 * t1 + 1;
+export const easeInOutCubic = (t: number) => {
+  return t < 0.5 ? 4 * cube(t) : 1 - 4 * cube(1 - t);
+};
+
+export const easeInOutCbrt = (t: number) => {
+  return (Math.cbrt(t * 2 - 1) + 1) / 2;
+};
 
 // // EaseInBack
 // const c1 = 1.70158;
@@ -35,6 +39,6 @@ export const animateGainTile = (t: number) => {
 };
 
 export const animateSword = (t: number) => {
-  // // EaseInQuad
+  // EaseInQuad
   return t * t;
 };

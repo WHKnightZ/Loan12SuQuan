@@ -71,9 +71,9 @@ export type IPlayer = IRenderable & {
    */
   getHintIndex(matchedLength: number): number;
   /**
-   * Nhận sát thương
+   * Nhận sát thương sau một khoảng thời gian
    */
-  takeDamage(damage: number): void;
+  takeDamage(damage: number, duration?: number): void;
   /**
    * Hồi máu
    */
@@ -161,6 +161,7 @@ export type IGame = IRenderable & {
   hintIndex: number;
   playerTurn: number;
   turnCount: number;
+  isUpdateTurnCount: boolean;
 
   /**
    * Khởi tạo

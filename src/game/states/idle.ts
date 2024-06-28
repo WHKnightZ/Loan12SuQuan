@@ -1,6 +1,6 @@
 import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
 import { hintArrows } from "@/textures";
-import { IDirection, IGame } from "@/types";
+import { IDirection, IGame, IIdleGameState } from "@/types";
 import { GameState } from "./gameState";
 import { FlickeringText } from "@/effects";
 
@@ -13,10 +13,9 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
 /**
  * State nghỉ, khi người chơi không làm gì cả
  */
-export class IdleGameState extends GameState implements IdleGameState {
+export class IdleGameState extends GameState implements IIdleGameState {
   idleTimer: number;
   hintDelayTimer: number;
-  a: number;
 
   constructor(game: IGame) {
     super("IDLE", game);
@@ -28,10 +27,15 @@ export class IdleGameState extends GameState implements IdleGameState {
     this.hintDelayTimer = TIMER_HINT_DELAY_DEFAULT;
     this.game.combo = 0;
 
-    if (game.turnCount > 1) game.createEffect(new FlickeringText({ text: `Còn ${game.turnCount} lượt` }));
-    else if (game.turnCount === 0) {
-      game.changePlayer();
+    // Chỉ show text, chuyển lượt chơi khi turn count update
+    // Có trường hợp người chơi click xong huỷ, state chuyển về idle mà không có update gì
+    if (game.isUpdateTurnCount) {
+      if (game.turnCount > 1) game.createEffect(new FlickeringText({ text: `Còn ${game.turnCount} lượt` }));
+      else if (game.turnCount === 0) {
+        game.changePlayer();
+      }
     }
+    game.isUpdateTurnCount = false;
 
     game.hintIndex = game.players[game.playerTurn].getHintIndex(game.matchedPositions.length);
 

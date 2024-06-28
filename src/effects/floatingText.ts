@@ -1,5 +1,5 @@
 import { base, EPSILON } from "@/configs/consts";
-import { font } from "@/objects/font";
+import { font } from "@/elements/font";
 import { Effect } from "./effect";
 
 export class FloatingText extends Effect {
