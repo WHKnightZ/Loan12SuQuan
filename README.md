@@ -1,6 +1,6 @@
 # Loạn 12 Sứ Quân
 
-### Chức năng bố sung:
+### Chức năng bổ sung:
 
 - [x] Hiệu ứng khi select 1 tile
 - [x] Ăn kiếm đỏ nổ khu vực xung quanh
@@ -14,13 +14,13 @@
 - [x] Đổi lượt người chơi
 - [x] Đếm số lượng 4 như thế nào?
 - [x] Làm chức năng test combo 4 được cộng bao nhiêu turn
-- [x] Sau khi ăn 4 mà số lượt >=2 sẽ show text còn bao nhiêu lượt
+- [x] Sau khi ăn 4 mà số lượt >= 2 sẽ show text còn bao nhiêu lượt
 - [x] Tile giọt nước là gì? Ở phần 2 có 8 tile thay vì 6, check lại => cũng là kinh nghiệm nhưng mà ít hơn
 - [x] Hiệu ứng kiếm (sau khi kiếm đến nơi sẽ tan dần + xuất hiện hiệu ứng gây sát thương)
 - [x] Hiệu ứng máu, mana, năng lượng bay từ chỗ ăn tile vào
 - [ ] ~~Hiệu ứng máu hồi + mana ... (bay lên từ avatar)~~
 - [ ] Thiếu chức năng check xem hết nước đi chưa => Hiệu ứng xoá map cũ, generate map mới
-- [ ] Hiệu ứng rơi xuống núng nính của loạn 12 android (https://youtu.be/4Tr4awGTUck?t=18)
+- [ ] Hiệu ứng rơi xuống núng nính của loạn 12 sq android (https://youtu.be/4Tr4awGTUck?t=18)
 - [ ] Server + nâng cấp
 - [ ] Ải, chương như DVKN
 - [ ] Vật phẩm, skill theo hero
@@ -34,9 +34,10 @@
 - [x] Hiệu ứng rung avatar khi bị tấn công
 - [x] Loading
 - [x] Thay màu các bar cho giống vật phẩm + giảm bar height nhỏ đi, tăng padding bar lên 2px
-- [ ] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt
+- [x] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt, đã chuyển thành delay 40 frame
 - [ ] Duration animation gain (lose) máu sẽ phụ thuộc theo chênh lệch, chênh lệch càng lớn thì duration càng lâu
 - [ ] Thêm comment đầy đủ
+- [ ] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn
 
 ### Bug:
 
