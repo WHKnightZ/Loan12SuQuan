@@ -12,8 +12,8 @@ import {
   TILES,
   TILE_OFFSET,
   CELL_SIZE_HALF,
-  COMPUTER_INTELLIGENCE,
   SWORDRED_ATTACK_MULTIPLIER,
+  HEROES,
 } from "@/configs/consts";
 import { Effects, GainTile } from "@/effects";
 import { Player } from "@/player";
@@ -38,6 +38,7 @@ import {
   IFallGameState,
   IWaitGameState,
   IFadeGameState,
+  IFinishGameState,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import { menuTexture } from "@/textures";
@@ -51,6 +52,7 @@ import {
 } from "./states";
 import { Computer } from "./plugins";
 import { randomBool } from "@/utils/math";
+import { FinishGameState } from "./states/finish";
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
@@ -64,6 +66,7 @@ export class Game implements IGame {
   private fallGameState: IFallGameState;
   private fadeGameState: IFadeGameState;
   private waitGameState: IWaitGameState;
+  private finishGameState: IFinishGameState;
 
   state: IGameState;
   players: IPlayer[];
@@ -82,7 +85,8 @@ export class Game implements IGame {
   hintIndex: number;
   playerTurn: number;
   turnCount: number;
-  isUpdateTurnCount: boolean;
+  isUpdatedTurnCount: boolean;
+  isFinished: boolean;
 
   constructor() {
     this.timeouts = { currentId: 0, list: [] };
@@ -95,6 +99,7 @@ export class Game implements IGame {
     this.fallGameState = new FallGameState(this);
     this.fadeGameState = new FadeGameState(this);
     this.waitGameState = new WaitGameState(this);
+    this.finishGameState = new FinishGameState(this);
     this.mapGameState = {
       IDLE: this.idleGameState,
       SELECT: this.selectGameState,
@@ -102,6 +107,7 @@ export class Game implements IGame {
       FALL: this.fallGameState,
       FADE: this.fadeGameState,
       WAIT: this.waitGameState,
+      FINISH: this.finishGameState,
     };
 
     this.init();
@@ -114,12 +120,12 @@ export class Game implements IGame {
     this.effects.reset();
     this.state = this.idleGameState;
     this.players = [
-      new Player({ index: 0, attributes:{} attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
-      new Player({ index: 1, attributes:{} 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
+      new Player({ index: 0, attributes: { ...HEROES.TRANG_SI, intelligence: PLAYER_INTELLIGENCE } }),
+      new Player({ index: 1, attributes: HEROES.KIEU_CONG_HAN }),
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
-    this.isUpdateTurnCount = true;
+    this.isUpdatedTurnCount = true;
     this.waitProperties = null;
 
     this.matched4 = { turnCount: 0, matchedList: {} };
@@ -132,6 +138,7 @@ export class Game implements IGame {
     this.fall = {};
     this.combo = 0;
     this.explosions = [];
+    this.isFinished = false;
 
     this.fadeIn();
   }
@@ -358,6 +365,8 @@ export class Game implements IGame {
    * Chuyển state đồng thời gọi hàm invoke() của state đó
    */
   changeState<T extends IGameStateType>(state: T) {
+    if (this.isFinished) return;
+
     const newState = this.mapGameState[state];
 
     newState.invoke();

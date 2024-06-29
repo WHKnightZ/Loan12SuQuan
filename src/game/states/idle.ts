@@ -29,13 +29,13 @@ export class IdleGameState extends GameState implements IIdleGameState {
 
     // Chỉ show text, chuyển lượt chơi khi turn count update
     // Có trường hợp người chơi click xong huỷ, state chuyển về idle mà không có update gì
-    if (game.isUpdateTurnCount) {
+    if (game.isUpdatedTurnCount) {
       if (game.turnCount > 1) game.createEffect(new FlickeringText({ text: `Còn ${game.turnCount} lượt` }));
       else if (game.turnCount === 0) {
         game.changePlayer();
       }
     }
-    game.isUpdateTurnCount = false;
+    game.isUpdatedTurnCount = false;
 
     game.hintIndex = game.players[game.playerTurn].getHintIndex(game.matchedPositions.length);
 

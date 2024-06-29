@@ -97,7 +97,7 @@ export type IComputer = IHasTimer & {
   update(): void;
 };
 
-export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
+export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT" | "FINISH";
 
 export type IGameState = IRenderable & {
   type: IGameStateType;
@@ -133,6 +133,10 @@ export type IFadeGameState = IGameState & {
   fadeOut(): void;
 };
 export type IWaitGameState = IGameState;
+export type IFinishGameState = IGameState & {
+  win(): void;
+  lose(): void;
+};
 
 export type MapGameState = {
   IDLE: IIdleGameState;
@@ -141,6 +145,7 @@ export type MapGameState = {
   FALL: IFallGameState;
   FADE: IFadeGameState;
   WAIT: IWaitGameState;
+  FINISH: IFinishGameState;
 };
 
 export type IGame = IRenderable & {
@@ -161,7 +166,8 @@ export type IGame = IRenderable & {
   hintIndex: number;
   playerTurn: number;
   turnCount: number;
-  isUpdateTurnCount: boolean;
+  isUpdatedTurnCount: boolean;
+  isFinished: boolean;
 
   /**
    * Khởi tạo

@@ -6,6 +6,7 @@ import { loadFont, mapFontChar } from "./fonts";
 import { loadMenu, menuTexture, barTextures } from "./menu";
 import { loadStars, starTextures } from "./stars";
 import { loadTilesAndExplosions } from "./tilesAndExplosions";
+import { loadWinLoseTextures, winTextures, loseTextures } from "./winLose";
 
 export {
   avatarTextures,
@@ -18,6 +19,8 @@ export {
   menuTexture,
   barTextures,
   starTextures,
+  winTextures,
+  loseTextures,
 };
 
 export const loadTextures = () => {
@@ -30,5 +33,6 @@ export const loadTextures = () => {
     loadFont(),
     loadStars(),
     loadCrystals(),
+    loadWinLoseTextures(),
   ]);
 };

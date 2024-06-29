@@ -45,6 +45,10 @@ export const CELL_SIZE_HALF = CELL_SIZE / 2;
  */
 export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
 /**
+ * Chính giữa bàn
+ */
+export const BOARD_CENTER = BOARD_SIZE / 2;
+/**
  * Chiều cao menu
  */
 export const MENU_HEIGHT = 96;
@@ -104,10 +108,6 @@ export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
  * Chỉ số tính xem gợi ý nước đi của người chơi tốt hay kém
  */
 export const PLAYER_INTELLIGENCE = 20;
-/**
- * Chỉ số thông minh của máy, quyết định nước đi tốt hay kém
- */
-export const COMPUTER_INTELLIGENCE = 100;
 /**
  * Mana khởi đầu
  */
@@ -188,5 +188,13 @@ export const AVATAR_OFFSET_X = 62;
  * Offset Y của avatar
  */
 export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
-
-export const HEROES: { [key in IHeroId]: IHeroAttributes } = [{ name: "Tráng sĩ" }];
+/**
+ * Danh sách các nhân vật
+ */
+export const HEROES: { [key in IHeroId]: IHeroAttributes } = {
+  TRANG_SI: { name: "Tráng sĩ", attack: 420, life: 100, intelligence: 60, avatar: 0 },
+  LINH_QUEN: { name: "Lính Quèn", attack: 4, life: 80, intelligence: 10, avatar: 1 },
+  ANH_HUNG: { name: "Anh Hùng", attack: 12, life: 120, intelligence: 70, avatar: 2 },
+  QUAI_VAT: { name: "Quái Vật", attack: 18, life: 160, intelligence: 50, avatar: 3 },
+  KIEU_CONG_HAN: { name: "Kiều Công Hãn", attack: 200, life: 200, intelligence: 100, avatar: 4 },
+};

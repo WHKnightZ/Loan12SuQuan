@@ -93,7 +93,7 @@ export class SelectGameState extends GameState implements ISelectGameState {
       if (m0 || m1) {
         // Hoán đổi oke thì giảm 1 lượt
         game.turnCount -= 1;
-        game.isUpdateTurnCount = true;
+        game.isUpdatedTurnCount = true;
 
         game.matched4Tiles = [].concat(m40, m41);
 

@@ -113,6 +113,12 @@ export class Player implements IPlayer {
       this.life.timer = 0;
       this.life.realValue = this.life.realValue - damage;
       this.life.realValue = Math.max(this.life.realValue, 0);
+
+      if (this.life.realValue > 0.1) return;
+
+      const newState = base.game.changeState("FINISH");
+      if (this.index === 0) newState.lose();
+      else newState.win();
     }, duration);
   }
 
