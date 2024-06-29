@@ -1,7 +1,7 @@
 import { flipHorizontal, resize } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
-const COUNT_AVATARS = 2;
+const COUNT_AVATARS = 5;
 
 export const avatarTextures = Array.from({ length: COUNT_AVATARS }).map(() => [null, null]) as HTMLImageElement[][];
 

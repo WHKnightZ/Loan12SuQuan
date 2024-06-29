@@ -1,4 +1,4 @@
-import { IBase, ITileType } from "@/types";
+import { IBase, IHeroAttributes, IHeroId, ITileType } from "@/types";
 
 /**
  * Get danh sách các key của object
@@ -188,3 +188,5 @@ export const AVATAR_OFFSET_X = 62;
  * Offset Y của avatar
  */
 export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
+
+export const HEROES: { [key in IHeroId]: IHeroAttributes } = [{ name: "Tráng sĩ" }];

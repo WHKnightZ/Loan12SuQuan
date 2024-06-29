@@ -247,3 +247,13 @@ export type IHintArrow = {
 };
 
 export type IFontChar = { texture: HTMLImageElement; offsetY: number };
+
+export type IHeroId = "TRANG_SI" | "LINH_QUEN" | "ANH_HUNG" | "QUAI_VAT" | "KIEU_CONG_HAN";
+
+export type IHeroAttributes = {
+  name: string;
+  attack: number;
+  intelligence: number;
+  life: number;
+  avatar: number;
+};

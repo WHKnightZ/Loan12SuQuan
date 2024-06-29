@@ -8,7 +8,7 @@ import {
   LOSE_ENERGY_INTERVAL,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
+import { IHeroAttributes, IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
 import { avatarTextures, barTextures } from "@/textures";
 import { easeInOutCubic, lerp, random } from "@/utils/math";
 import { BorderAnimation } from "./borderAnimation";
@@ -59,19 +59,8 @@ export class Player implements IPlayer {
   avatarOffset: { x: number; y: number };
   avatarTexture: HTMLImageElement;
 
-  constructor({
-    index,
-    attack,
-    intelligence,
-    life,
-    avatar,
-  }: {
-    index: number;
-    attack: number;
-    intelligence: number;
-    life: number;
-    avatar: number;
-  }) {
+  constructor({ index, attributes }: { index: number; attributes: IHeroAttributes }) {
+    const { attack, intelligence, life, avatar } = attributes;
     this.index = index;
     this.attack = attack;
     this.intelligence = intelligence;

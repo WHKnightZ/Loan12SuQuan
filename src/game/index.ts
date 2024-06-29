@@ -114,11 +114,11 @@ export class Game implements IGame {
     this.effects.reset();
     this.state = this.idleGameState;
     this.players = [
-      new Player({ index: 0, attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
-      new Player({ index: 1, attack: 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
+      new Player({ index: 0, attributes:{} attack: 7, intelligence: PLAYER_INTELLIGENCE, life: 100, avatar: 0 }),
+      new Player({ index: 1, attributes:{} 9, intelligence: COMPUTER_INTELLIGENCE, life: 100, avatar: 1 }),
     ];
     this.playerTurn = 0;
-    this.turnCount = 10;
+    this.turnCount = 1;
     this.isUpdateTurnCount = true;
     this.waitProperties = null;
 
