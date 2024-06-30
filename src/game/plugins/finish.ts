@@ -1,34 +1,33 @@
-import { IFinishGameState, IGame } from "@/types";
-import { GameState } from "./gameState";
+import { IGame } from "@/types";
 import { loseTextures, winTextures } from "@/textures";
 import { BOARD_CENTER, base } from "@/configs/consts";
+import { GamePlugin } from "./plugin";
 
 const MAX_FRAME = 3;
-const FINISH_DELAY = 80;
+const FINISH_DELAY = 120;
 
 /**
- * State kết thúc game, hiển thị text Thắng hoặc Thua
+ * Kết thúc game, hiển thị text Thắng hoặc Thua
  */
-export class FinishGameState extends GameState implements IFinishGameState {
+export class FinishPlugin extends GamePlugin<IGame> {
   private finishDelay: number;
-  private finishTimer: number;
   private finishFrame: number;
   private textures: HTMLImageElement[];
   private state: number;
 
   constructor(game: IGame) {
-    super("FINISH", game);
+    super(game);
     this.textures = [winTextures, loseTextures];
   }
 
-  invoke() {
-    this.game.isFinished = true;
-    this.state = this.game.winner;
-    this.finishDelay = this.finishTimer = this.finishFrame = 0;
+  start() {
+    this.parent.isFinished = true;
+    this.state = this.parent.winner;
+    this.timer = this.finishDelay = this.finishFrame = 0;
   }
 
   render() {
-    if (this.finishDelay < FINISH_DELAY) return;
+    if (!this.parent.isFinished || this.finishDelay < FINISH_DELAY) return;
 
     const texture = this.textures[this.state];
     const width = texture.width / MAX_FRAME;
@@ -48,13 +47,15 @@ export class FinishGameState extends GameState implements IFinishGameState {
   }
 
   update() {
+    if (!this.parent.isFinished) return;
+
     if (this.finishDelay < FINISH_DELAY) {
       this.finishDelay += 1;
       return;
     }
 
-    this.finishTimer += 1;
-    if (this.finishTimer % 3 != 0) return;
+    this.timer += 1;
+    if (this.timer % 3 != 0) return;
 
     this.finishFrame += 1;
     if (this.finishFrame === MAX_FRAME) this.finishFrame = MAX_FRAME - 1;

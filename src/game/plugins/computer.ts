@@ -1,13 +1,13 @@
 import { base } from "@/configs/consts";
-import { IComputer, IGame } from "@/types";
+import { IGame } from "@/types";
+import { GamePlugin } from "./plugin";
 
-export class Computer implements IComputer {
-  private game: IGame;
-
-  timer: number;
-
+/**
+ * Điều khiển máy khi trạng thái game là IDLE
+ */
+export class ComputerPlugin extends GamePlugin<IGame> {
   constructor(game: IGame) {
-    this.game = game;
+    super(game);
   }
 
   start() {
@@ -15,7 +15,7 @@ export class Computer implements IComputer {
   }
 
   update() {
-    const game = this.game;
+    const game = this.parent;
     if (game.playerTurn !== 1) return; // Người chơi có turn là 0, máy có turn là 1, không phải máy thì dừng
     if (!(game.state.is("IDLE") || game.state.is("SELECT"))) return;
 

@@ -29,7 +29,6 @@ import {
   IMatched4,
   IWaitProperties,
   IEffect,
-  IComputer,
   IGameStateType,
   MapGameState,
   IIdleGameState,
@@ -38,7 +37,7 @@ import {
   IFallGameState,
   IWaitGameState,
   IFadeGameState,
-  IFinishGameState,
+  IGamePlugin,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import { menuTexture } from "@/textures";
@@ -50,27 +49,28 @@ import {
   SelectGameState,
   WaitGameState,
 } from "./states";
-import { Computer } from "./plugins";
 import { randomBool } from "@/utils/math";
-import { FinishGameState } from "./states/finish";
+import { ComputerPlugin, FinishPlugin } from "./plugins";
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
 export class Game implements IGame {
   private timeouts: { currentId: number; list: ITimeout[] };
   private effects: Effects;
-  private mapGameState: { [key in IGameStateType]: MapGameState[key] };
+
   private idleGameState: IIdleGameState;
   private selectGameState: ISelectGameState;
   private explodeGameState: IExplodeGameState;
   private fallGameState: IFallGameState;
   private fadeGameState: IFadeGameState;
   private waitGameState: IWaitGameState;
-  private finishGameState: IFinishGameState;
+  private mapGameState: { [key in IGameStateType]: MapGameState[key] };
+
+  private finishPlugin: IGamePlugin<IGame>;
 
   state: IGameState;
   players: IPlayer[];
-  computer: IComputer;
+  computerPlugin: IGamePlugin<IGame>;
   waitProperties: IWaitProperties;
   selected: IPointExt | null;
   swapped: IPointExt | null;
@@ -90,9 +90,10 @@ export class Game implements IGame {
   winner: number;
 
   constructor() {
-    this.timeouts = { currentId: 0, list: [] };
+    this.timeouts = { currentId: 1, list: [] };
     this.effects = new Effects();
-    this.computer = new Computer(this);
+    this.computerPlugin = new ComputerPlugin(this);
+    this.finishPlugin = new FinishPlugin(this);
 
     this.idleGameState = new IdleGameState(this);
     this.selectGameState = new SelectGameState(this);
@@ -100,7 +101,7 @@ export class Game implements IGame {
     this.fallGameState = new FallGameState(this);
     this.fadeGameState = new FadeGameState(this);
     this.waitGameState = new WaitGameState(this);
-    this.finishGameState = new FinishGameState(this);
+
     this.mapGameState = {
       IDLE: this.idleGameState,
       SELECT: this.selectGameState,
@@ -108,7 +109,6 @@ export class Game implements IGame {
       FALL: this.fallGameState,
       FADE: this.fadeGameState,
       WAIT: this.waitGameState,
-      FINISH: this.finishGameState,
     };
 
     this.init();
@@ -122,7 +122,7 @@ export class Game implements IGame {
     this.state = this.idleGameState;
     this.players = [
       new Player({ index: 0, attributes: { ...HEROES.TRANG_SI, intelligence: PLAYER_INTELLIGENCE } }),
-      new Player({ index: 1, attributes: HEROES.KIEU_CONG_HAN }),
+      new Player({ index: 1, attributes: HEROES.LINH_QUEN }),
     ];
     this.playerTurn = 0;
     this.turnCount = 1;
@@ -296,7 +296,7 @@ export class Game implements IGame {
     switch (value) {
       case TILES.SWORD:
       case TILES.SWORDRED:
-        const dmg = this.players[this.playerTurn].attack / 4;
+        const dmg = this.players[this.playerTurn].attack;
         const attackedPlayer = this.players[1 - this.playerTurn];
         attackedPlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
         break;
@@ -327,6 +327,14 @@ export class Game implements IGame {
   changePlayer() {
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
+  }
+
+  /**
+   * Kết thúc trò chơi: 0: Thắng hoặc 1: Thua
+   */
+  finish(state: number) {
+    this.winner = state;
+    this.finishPlugin.start();
   }
 
   /**
@@ -366,8 +374,6 @@ export class Game implements IGame {
    * Chuyển state đồng thời gọi hàm invoke() của state đó
    */
   changeState<T extends IGameStateType>(state: T) {
-    if (this.isFinished) return this.state as MapGameState[T];
-
     const newState = this.mapGameState[state];
 
     newState.invoke();
@@ -396,6 +402,7 @@ export class Game implements IGame {
     this.players.forEach((p) => p.render());
     this.state.render();
     this.effects.render();
+    this.finishPlugin.render();
   }
 
   /**
@@ -407,7 +414,8 @@ export class Game implements IGame {
     this.players.forEach((p) => p.update());
     this.state.update();
     this.effects.update();
-    this.computer.update();
+    this.computerPlugin.update();
+    this.finishPlugin.update();
   }
 
   /**

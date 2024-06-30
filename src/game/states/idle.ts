@@ -41,7 +41,7 @@ export class IdleGameState extends GameState implements IIdleGameState {
 
     if (game.playerTurn === 1) {
       // Computer
-      game.computer.start();
+      game.computerPlugin.start();
     }
   }
 

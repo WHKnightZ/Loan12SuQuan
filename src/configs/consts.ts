@@ -192,9 +192,9 @@ export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
  * Danh sách các nhân vật
  */
 export const HEROES: { [key in IHeroId]: IHeroAttributes } = {
-  TRANG_SI: { name: "Tráng sĩ", attack: 420, life: 100, intelligence: 60, avatar: 0 },
-  LINH_QUEN: { name: "Lính Quèn", attack: 4, life: 80, intelligence: 10, avatar: 1 },
-  ANH_HUNG: { name: "Anh Hùng", attack: 12, life: 120, intelligence: 70, avatar: 2 },
-  QUAI_VAT: { name: "Quái Vật", attack: 18, life: 160, intelligence: 50, avatar: 3 },
-  KIEU_CONG_HAN: { name: "Kiều Công Hãn", attack: 200, life: 200, intelligence: 100, avatar: 4 },
+  TRANG_SI: { name: "Tráng sĩ", attack: 2, life: 100, intelligence: 60, avatar: 0 },
+  LINH_QUEN: { name: "Lính Quèn", attack: 1, life: 80, intelligence: 10, avatar: 1 },
+  ANH_HUNG: { name: "Anh Hùng", attack: 3, life: 120, intelligence: 70, avatar: 2 },
+  QUAI_VAT: { name: "Quái Vật", attack: 4.5, life: 160, intelligence: 50, avatar: 3 },
+  KIEU_CONG_HAN: { name: "Kiều Công Hãn", attack: 5, life: 200, intelligence: 100, avatar: 4 },
 };

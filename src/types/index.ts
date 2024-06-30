@@ -51,6 +51,8 @@ export type IPlayerAttribute = IHasTimer & {
   realValue: number;
   maxValue: number;
   displayValue: number;
+  currentDisplayValue: number;
+  timeoutId: number;
 };
 
 export type IPlayerAttributeExtra = {
@@ -92,12 +94,17 @@ export type IPlayer = IRenderable & {
   shock(): void;
 };
 
-export type IComputer = IHasTimer & {
-  start(): void;
-  update(): void;
-};
+export type IGamePlugin<T> = IRenderable &
+  IHasTimer & {
+    parent: T;
 
-export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT" | "FINISH";
+    /**
+     * Bắt đầu khởi chạy plugin
+     */
+    start(): void;
+  };
+
+export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
 
 export type IGameState = IRenderable & {
   type: IGameStateType;
@@ -133,7 +140,6 @@ export type IFadeGameState = IGameState & {
   fadeOut(): void;
 };
 export type IWaitGameState = IGameState;
-export type IFinishGameState = IGameState;
 
 export type MapGameState = {
   IDLE: IIdleGameState;
@@ -142,13 +148,12 @@ export type MapGameState = {
   FALL: IFallGameState;
   FADE: IFadeGameState;
   WAIT: IWaitGameState;
-  FINISH: IFinishGameState;
 };
 
 export type IGame = IRenderable & {
   state: IGameState;
   players: IPlayer[];
-  computer: IComputer;
+  computerPlugin: IGamePlugin<IGame>;
   waitProperties: IWaitProperties;
   selected: IPointExt | null;
   swapped: IPointExt | null;
@@ -195,6 +200,10 @@ export type IGame = IRenderable & {
    * Đổi lượt
    */
   changePlayer(): void;
+  /**
+   * Kết thúc trò chơi: 0: Thắng hoặc 1: Thua
+   */
+  finish(state: number): void;
   /**
    * Chuyển qua state nổ sau khi đợi một khoảng thời gian
    */

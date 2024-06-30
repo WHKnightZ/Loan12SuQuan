@@ -39,11 +39,11 @@ export class FallGameState extends GameState implements IFallGameState {
 
   update() {
     const game = this.game;
-    let newFalling = false;
+    let stillFalling = false; // Rơi đến khi nào fill toàn bộ các ô thì dừng
     const fall = game.fall;
 
     getKeys(fall).forEach((col) => {
-      const colData = fall[col];
+      const colData = fall[col]; // Danh sách các cell cần rơi của cột đang xét
       col = Number(col);
 
       let shift = false;
@@ -67,11 +67,19 @@ export class FallGameState extends GameState implements IFallGameState {
         }
       });
 
-      if (shift) colData.list.shift();
-      if (colData.list.length) newFalling = true;
+      if (shift) colData.list.shift(); // Nếu có cell đã rơi xuống đúng vị trí thì ko xét cell này nữa
+      if (colData.list.length) stillFalling = true; // Nếu còn ít nhất một cell chưa rơi xong thì lặp lại chu trình
     });
 
-    if (newFalling) return;
+    if (stillFalling) return;
+
+    // Nếu game đã kết thúc thì bỏ qua bước check bên dưới
+    if (game.isFinished) {
+      game.wait(0, () => {});
+      return;
+    }
+
+    // Nếu các cell đã được lấp đầy thì xuống bước check xem có ăn được tiếp combo x2, x3 ... không
 
     game.matched4 = { turnCount: 0, matchedList: {} };
     game.matched4Tiles = [];
