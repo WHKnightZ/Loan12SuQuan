@@ -38,6 +38,7 @@
 - [ ] Duration animation gain (lose) máu sẽ phụ thuộc theo chênh lệch, chênh lệch càng lớn thì duration càng lâu
 - [ ] Thêm comment đầy đủ
 - [ ] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn
+- [x] Điều kiện Thắng/Thua
 
 ### Bug:
 

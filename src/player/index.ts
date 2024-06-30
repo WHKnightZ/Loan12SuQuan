@@ -96,10 +96,10 @@ export class Player implements IPlayer {
 
     const hintIndex = Math.floor(((1 - matchedLength) * chance) / 100) + matchedLength - 1;
 
-    console.log("Intelligence: ", this.intelligence);
-    console.log("Chance: ", chance);
-    console.log("Length: ", matchedLength);
-    console.log("Hint Index: ", hintIndex);
+    // console.log("Intelligence: ", this.intelligence);
+    // console.log("Chance: ", chance);
+    // console.log("Length: ", matchedLength);
+    // console.log("Hint Index: ", hintIndex);
 
     return hintIndex;
   }
