@@ -87,6 +87,7 @@ export class Game implements IGame {
   turnCount: number;
   isUpdatedTurnCount: boolean;
   isFinished: boolean;
+  winner: number;
 
   constructor() {
     this.timeouts = { currentId: 0, list: [] };

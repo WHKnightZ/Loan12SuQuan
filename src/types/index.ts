@@ -133,10 +133,7 @@ export type IFadeGameState = IGameState & {
   fadeOut(): void;
 };
 export type IWaitGameState = IGameState;
-export type IFinishGameState = IGameState & {
-  win(): void;
-  lose(): void;
-};
+export type IFinishGameState = IGameState;
 
 export type MapGameState = {
   IDLE: IIdleGameState;
@@ -168,6 +165,7 @@ export type IGame = IRenderable & {
   turnCount: number;
   isUpdatedTurnCount: boolean;
   isFinished: boolean;
+  winner: number;
 
   /**
    * Khởi tạo

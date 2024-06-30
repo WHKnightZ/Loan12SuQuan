@@ -23,15 +23,8 @@ export class FinishGameState extends GameState implements IFinishGameState {
 
   invoke() {
     this.game.isFinished = true;
+    this.state = this.game.winner;
     this.finishDelay = this.finishTimer = this.finishFrame = 0;
-  }
-
-  win() {
-    this.state = 0;
-  }
-
-  lose() {
-    this.state = 1;
   }
 
   render() {

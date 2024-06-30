@@ -116,9 +116,8 @@ export class Player implements IPlayer {
 
       if (this.life.realValue > 0.1) return;
 
-      const newState = base.game.changeState("FINISH");
-      if (this.index === 0) newState.lose();
-      else newState.win();
+      base.game.winner = 1 - this.index;
+      base.game.changeState("FINISH");
     }, duration);
   }
 
