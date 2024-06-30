@@ -93,7 +93,7 @@ export type IPlayer = IRenderable & {
 };
 
 export type IComputer = IHasTimer & {
-  startTimer(): void;
+  start(): void;
   update(): void;
 };
 

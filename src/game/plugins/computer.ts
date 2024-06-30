@@ -10,13 +10,14 @@ export class Computer implements IComputer {
     this.game = game;
   }
 
-  startTimer() {
+  start() {
     this.timer = 0;
   }
 
   update() {
     const game = this.game;
     if (game.playerTurn !== 1) return; // Người chơi có turn là 0, máy có turn là 1, không phải máy thì dừng
+    if (!(game.state.is("IDLE") || game.state.is("SELECT"))) return;
 
     this.timer += 1;
 

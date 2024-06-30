@@ -365,7 +365,7 @@ export class Game implements IGame {
    * Chuyển state đồng thời gọi hàm invoke() của state đó
    */
   changeState<T extends IGameStateType>(state: T) {
-    if (this.isFinished) return;
+    if (this.isFinished) return this.state as MapGameState[T];
 
     const newState = this.mapGameState[state];
 

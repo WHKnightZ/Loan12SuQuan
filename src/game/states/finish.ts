@@ -4,7 +4,7 @@ import { loseTextures, winTextures } from "@/textures";
 import { BOARD_CENTER, base } from "@/configs/consts";
 
 const MAX_FRAME = 3;
-const FINISH_DELAY = 60;
+const FINISH_DELAY = 80;
 
 /**
  * State kết thúc game, hiển thị text Thắng hoặc Thua
@@ -22,6 +22,7 @@ export class FinishGameState extends GameState implements IFinishGameState {
   }
 
   invoke() {
+    this.game.isFinished = true;
     this.finishDelay = this.finishTimer = this.finishFrame = 0;
   }
 
