@@ -5,5 +5,5 @@ export let powerAttackTextures: HTMLImageElement;
 
 export const loadPowerAttackTextures = async () => {
   const textures: HTMLImageElement = await loadTexture("common/power-attack");
-  powerAttackTextures = await resize(textures, 2);
+  powerAttackTextures = await resize(textures, 1.8);
 };

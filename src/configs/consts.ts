@@ -121,6 +121,10 @@ export const DEFAULT_ENERGY = 100;
  */
 export const EPSILON = 0.0001;
 /**
+ * Sai số để xét xem 1 số bằng 0 hay chưa
+ */
+export const EPSILON_2 = 0.01;
+/**
  * Khoảng thời gian người chơi được gợi ý nếu không thao tác (tính bằng số frame)
  */
 export const TIMER_HINT_DELAY_DEFAULT = 300;
@@ -137,7 +141,7 @@ export const TILES: { [key in ITileType]: number } = {
   SWORDRED: 6,
 };
 /**
- * Sát thương của kiếm đỏ
+ * Sát thương tăng thêm của kiếm đỏ
  */
 export const SWORDRED_ATTACK_MULTIPLIER = 2.5;
 /**
@@ -148,6 +152,10 @@ export const COUNT_TILES = Object.keys(TILES).length;
  * Điểm nhận được khi ăn 4 tile 1 hàng
  */
 export const MATCH_4_SCORE = 100;
+/**
+ * Sát thương tăng thêm khi được cuồng nộ
+ */
+export const POWER_ATTACK_MULTIPLIER = 2;
 /**
  * Empty texture
  */

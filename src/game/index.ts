@@ -280,15 +280,17 @@ export class Game implements IGame {
    * Ăn tile
    */
   gainTile({ value, x, y }: ITileInfo) {
+    const activePlayer = this.getActivePlayer();
+    const passivePlayer = this.getPassivePlayer();
+
     if (value !== TILES.SWORD && value !== TILES.SWORDRED) {
-      const currentPlayer = this.players[this.playerTurn];
       this.createEffect(
         new GainTile({
           tile: value,
           startX: x * CELL_SIZE + CELL_SIZE_HALF,
           startY: y * CELL_SIZE + CELL_SIZE_HALF,
-          endX: currentPlayer.avatarOffset.x + currentPlayer.avatarTexture.width / 2,
-          endY: currentPlayer.avatarOffset.y,
+          endX: activePlayer.avatarOffset.x + activePlayer.avatarTexture.width / 2,
+          endY: activePlayer.avatarOffset.y,
         })
       );
     }
@@ -296,24 +298,23 @@ export class Game implements IGame {
     switch (value) {
       case TILES.SWORD:
       case TILES.SWORDRED:
-        const dmg = this.players[this.playerTurn].attack;
-        const attackedPlayer = this.players[1 - this.playerTurn];
-        attackedPlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
+        const dmg = activePlayer.attack;
+        passivePlayer.takeDamage(dmg * (value === TILES.SWORDRED ? SWORDRED_ATTACK_MULTIPLIER : 1));
         break;
 
       case TILES.HEART:
-        this.players[this.playerTurn].gainLife(1.5);
+        activePlayer.gainLife(1.5);
         break;
 
       case TILES.GOLD:
         break;
 
       case TILES.ENERGY:
-        this.players[this.playerTurn].gainEnergy(2);
+        activePlayer.gainEnergy(60);
         break;
 
       case TILES.MANA:
-        this.players[this.playerTurn].gainMana(5);
+        activePlayer.gainMana(5);
         break;
 
       case TILES.EXP:
@@ -327,6 +328,20 @@ export class Game implements IGame {
   changePlayer() {
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
+  }
+
+  /**
+   * Lấy ra người chơi ở lượt này
+   */
+  getActivePlayer() {
+    return this.players[this.playerTurn];
+  }
+
+  /**
+   * Lấy ra người chơi còn lại
+   */
+  getPassivePlayer() {
+    return this.players[1 - this.playerTurn];
   }
 
   /**

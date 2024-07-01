@@ -23,6 +23,7 @@ export class IdleGameState extends GameState implements IIdleGameState {
 
   invoke() {
     const game = this.game;
+
     this.idleTimer = 0;
     this.hintDelayTimer = TIMER_HINT_DELAY_DEFAULT;
     this.game.combo = 0;
@@ -37,7 +38,11 @@ export class IdleGameState extends GameState implements IIdleGameState {
     }
     game.isUpdatedTurnCount = false;
 
-    game.hintIndex = game.players[game.playerTurn].getHintIndex(game.matchedPositions.length);
+    const activePlayer = game.getActivePlayer();
+    const activePlayerPowerAttack = activePlayer.powerAttackPlugin;
+    if (activePlayerPowerAttack.active) activePlayerPowerAttack.allow = true; // Cho phép cuồng nộ hoạt động sau khi qua một lượt
+
+    game.hintIndex = activePlayer.getHintIndex(game.matchedPositions.length);
 
     if (game.playerTurn === 1) {
       // Computer

@@ -102,6 +102,15 @@ export class FallGameState extends GameState implements IFallGameState {
       });
       game.explode();
     } else {
+      const activePlayer = game.getActivePlayer();
+      const activePlayerPowerAttack = activePlayer.powerAttackPlugin;
+
+      // Nếu đang ở trạng thái cuồng nộ mà gây sát thương thì reset trạng thái
+      if (activePlayerPowerAttack.active && activePlayerPowerAttack.hasCausedDamage) {
+        activePlayer.resetEnergy();
+        game.createTimeout(() => activePlayerPowerAttack.stop(), 15);
+      }
+
       game.findAllMatchedPositions();
       game.changeState("IDLE");
     }

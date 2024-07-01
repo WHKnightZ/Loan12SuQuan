@@ -62,10 +62,26 @@ export type IPlayerAttributeExtra = {
 };
 
 export type IPlayer = IRenderable & {
+  /**
+   * Index của player
+   */
   index: number;
+  /**
+   * Sức tấn công của player
+   */
   attack: number;
-  avatarTexture: HTMLImageElement;
+  /**
+   * Offset của avatar
+   */
   avatarOffset: { x: number; y: number };
+  /**
+   * Texture của avatar
+   */
+  avatarTexture: HTMLImageElement;
+  /**
+   * Hiệu ứng sức mạnh
+   */
+  powerAttackPlugin: IPowerAttackPlugin;
 
   /**
    * Mục đích: lấy ngẫu nhiên một nước đi dựa theo chỉ số trí tuệ
@@ -92,11 +108,16 @@ export type IPlayer = IRenderable & {
    * Gây hiệu ứng rung avatar khi nhận sát thương
    */
   shock(): void;
+  /**
+   * Đưa năng lượng về 0
+   */
+  resetEnergy(): void;
 };
 
 export type IGamePlugin<T> = IRenderable &
   IHasTimer & {
     parent: T;
+    active: boolean;
 
     /**
      * Bắt đầu khởi chạy plugin
@@ -107,6 +128,17 @@ export type IGamePlugin<T> = IRenderable &
      */
     stop(): void;
   };
+
+export type IPowerAttackPlugin = IGamePlugin<IPlayer> & {
+  /**
+   * Cho phép gây thêm sát thương chưa
+   */
+  allow: boolean;
+  /**
+   * Khi cho phép rồi thì đã gây sát thương chưa
+   */
+  hasCausedDamage: boolean;
+};
 
 export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
 
@@ -204,6 +236,14 @@ export type IGame = IRenderable & {
    * Đổi lượt
    */
   changePlayer(): void;
+  /**
+   * Lấy ra người chơi ở lượt này
+   */
+  getActivePlayer(): IPlayer;
+  /**
+   * Lấy ra người chơi còn lại
+   */
+  getPassivePlayer(): IPlayer;
   /**
    * Kết thúc trò chơi: 0: Thắng hoặc 1: Thua
    */

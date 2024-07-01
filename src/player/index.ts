@@ -5,13 +5,16 @@ import {
   BOARD_SIZE,
   DEFAULT_ENERGY,
   DEFAULT_MANA,
+  EPSILON_2,
+  POWER_ATTACK_MULTIPLIER,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IHeroAttributes, IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
+import { IHeroAttributes, IPlayer, IPlayerAttribute, IPlayerAttributeExtra, IPowerAttackPlugin } from "@/types";
 import { avatarTextures, barTextures } from "@/textures";
 import { clamp, easeInOutCubic, lerp, random } from "@/utils/math";
 import { BorderAnimation } from "./borderAnimation";
 import { Spring } from "./spring";
+import { PowerAttackPlugin } from "./plugins";
 
 const BAR_OFFSET_X = 132;
 
@@ -48,15 +51,27 @@ export class Player implements IPlayer {
    * Danh sách các bars
    */
   private bars: IPlayerAttributeExtra[];
-  /**
-   * Bộ đếm thời gian, khi đếm đủ một chu kỳ sẽ mất năng lượng
-   */
-  private energyTimer: number;
 
+  /**
+   * Index của player
+   */
   index: number;
+  /**
+   * Sức tấn công của player
+   */
   attack: number;
+  /**
+   * Offset của avatar
+   */
   avatarOffset: { x: number; y: number };
+  /**
+   * Texture của avatar
+   */
   avatarTexture: HTMLImageElement;
+  /**
+   * Hiệu ứng sức mạnh
+   */
+  powerAttackPlugin: IPowerAttackPlugin;
 
   constructor({ index, attributes }: { index: number; attributes: IHeroAttributes }) {
     const { attack, intelligence, life, avatar } = attributes;
@@ -69,12 +84,11 @@ export class Player implements IPlayer {
     this.mana = this.initBarValue(DEFAULT_MANA, DEFAULT_MANA);
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
-      { attribute: this.energy, maxTimer: 20, texture: barTextures.energy },
+      { attribute: this.energy, maxTimer: 50, texture: barTextures.energy },
       { attribute: this.mana, maxTimer: 25, texture: barTextures.mana },
     ];
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
 
-    this.energyTimer = 0;
     this.avatarTexture = avatarTextures[avatar][index];
     this.avatarOffset = {
       x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatarTexture.width,
@@ -83,6 +97,8 @@ export class Player implements IPlayer {
 
     this.borderAnimation = new BorderAnimation(index, this.avatarOffset, this.avatarTexture);
     this.spring = new Spring();
+
+    this.powerAttackPlugin = new PowerAttackPlugin(this);
   }
 
   /**
@@ -107,10 +123,17 @@ export class Player implements IPlayer {
    * Nhận sát thương sau một khoảng thời gian
    */
   takeDamage(damage: number, duration: number = 40) {
+    const activePlayerPowerAttack = base.game.getActivePlayer().powerAttackPlugin;
+
+    if (activePlayerPowerAttack.active && activePlayerPowerAttack.allow) {
+      damage *= POWER_ATTACK_MULTIPLIER; // Nếu người tấn công đang có cuồng nộ thì mọi sát thương gây ra được tăng thêm
+      activePlayerPowerAttack.hasCausedDamage = true; // Đánh dấu đã gây sát thương
+    }
+
     // Gây sát thương sau 40 frame (đúng lúc kiếm chém sẽ đẹp hơn)
     this.updateAttribute(this.life, -damage, duration);
 
-    if (this.life.realValue > 0.1) return; // Nếu máu nhỏ hơn 0.1 là thua
+    if (this.life.realValue > EPSILON_2) return; // Nếu máu nhỏ hơn EPSILON là thua
 
     base.game.finish(1 - this.index);
   }
@@ -127,6 +150,11 @@ export class Player implements IPlayer {
    */
   gainEnergy(value: number, duration: number = 20) {
     this.updateAttribute(this.energy, value, duration);
+
+    // Full sức mạnh thì show effect
+    if (this.energy.realValue > this.energy.maxValue - EPSILON_2) {
+      this.powerAttackPlugin.start();
+    }
   }
 
   /**
@@ -141,6 +169,13 @@ export class Player implements IPlayer {
    */
   shock() {
     this.spring.beginSpring();
+  }
+
+  /**
+   * Đưa năng lượng về 0
+   */
+  resetEnergy() {
+    this.gainEnergy(-this.energy.realValue, 1);
   }
 
   /**
@@ -161,6 +196,7 @@ export class Player implements IPlayer {
 
     // Hiển thị border animation
     this.borderAnimation.render();
+    this.powerAttackPlugin.render();
   }
 
   /**
@@ -169,7 +205,7 @@ export class Player implements IPlayer {
   update() {
     // Update các bars
     this.bars.forEach(({ attribute, maxTimer }) => {
-      if (Math.abs(attribute.currentDisplayValue - attribute.displayValue) < 0.1) return;
+      if (Math.abs(attribute.currentDisplayValue - attribute.displayValue) < EPSILON_2) return;
 
       attribute.timer += 1;
 
@@ -184,6 +220,7 @@ export class Player implements IPlayer {
     // Update animation border và spring
     this.borderAnimation.update();
     this.spring.update();
+    this.powerAttackPlugin.update();
   }
 
   /**

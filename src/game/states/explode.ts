@@ -27,7 +27,7 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
 
     if (game.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
       // Tạo hiệu ứng kiếm cắm xuống người chơi bị tấn công
-      game.createEffect(new SwordAttack(game.players[game.playerTurn], game.players[1 - game.playerTurn]));
+      game.createEffect(new SwordAttack(game.getActivePlayer(), game.getPassivePlayer()));
     }
 
     game.turnCount += game.matched4.turnCount;

@@ -1,36 +1,37 @@
 import { base } from "@/configs/consts";
 import { GamePlugin } from "@/plugins/plugin";
 import { powerAttackTextures } from "@/textures";
-import { IPlayer } from "@/types";
+import { IPlayer, IPowerAttackPlugin } from "@/types";
 
 const MAX_FRAME = 3;
+const MAX_DELAY = 50;
 
 /**
  * Hiển thị hiệu ứng cuồng nộ
  */
-export class PowerAttackPlugin extends GamePlugin<IPlayer> {
-  private running: boolean;
+export class PowerAttackPlugin extends GamePlugin<IPlayer> implements IPowerAttackPlugin {
   private frame: number;
+  private delay: number;
+
+  allow: boolean;
+  hasCausedDamage: boolean;
 
   constructor(parent: IPlayer) {
     super(parent);
-
-    this.running = false;
   }
 
   start() {
-    this.running = true;
-    this.timer = 0;
-  }
-
-  stop() {
-    this.running = false;
+    super.start();
+    this.frame = this.delay = 0;
+    this.allow = this.hasCausedDamage = false;
   }
 
   render() {
-    if (!this.running) return;
+    if (!this.active || this.delay < MAX_DELAY) return;
 
-    const texture = powerAttackTextures[this.frame];
+    const player = this.parent;
+
+    const texture = powerAttackTextures;
     const width = texture.width / MAX_FRAME;
     const height = texture.height;
 
@@ -40,14 +41,23 @@ export class PowerAttackPlugin extends GamePlugin<IPlayer> {
       0,
       width,
       height,
-      this.parent.avatarOffset.x,
-      this.parent.avatarOffset.y,
+      player.avatarOffset.x + (player.avatarTexture.width - width) / 2,
+      player.avatarOffset.y + player.avatarTexture.height - height + 1,
       width,
       height
     );
   }
 
   update() {
-    if (!this.running) return;
+    if (!this.active) return;
+
+    this.delay += 1;
+    if (this.delay < MAX_DELAY) return;
+
+    this.timer += 1;
+    if (this.timer % 4 !== 0) return;
+
+    this.frame += 1;
+    if (this.frame === MAX_FRAME) this.frame = 0;
   }
 }

@@ -10,14 +10,12 @@ export class ComputerPlugin extends GamePlugin<IGame> {
     super(parent);
   }
 
-  start() {
-    this.timer = 0;
-  }
-
   update() {
+    if (!this.active) return;
+
     const game = this.parent;
-    if (game.playerTurn !== 1) return; // Người chơi có turn là 0, máy có turn là 1, không phải máy thì dừng
-    if (!(game.state.is("IDLE") || game.state.is("SELECT"))) return;
+    // if (game.playerTurn !== 1) return; // Người chơi có turn là 0, máy có turn là 1, không phải máy thì dừng
+    // if (!(game.state.is("IDLE") || game.state.is("SELECT"))) return;
 
     this.timer += 1;
 
@@ -33,6 +31,8 @@ export class ComputerPlugin extends GamePlugin<IGame> {
       const { x1, y1 } = game.matchedPositions[game.hintIndex];
       game.swapped = { x: x1, y: y1, value: base.map[y1][x1] };
       base.map[y1][x1] = -1;
+
+      this.stop();
     }
   }
 }
