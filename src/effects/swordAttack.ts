@@ -1,6 +1,6 @@
 import { SCREEN_WIDTH, base } from "@/configs/consts";
 import { Effect } from "./effect";
-import { animateSword } from "@/utils/math";
+import { easeInQuad } from "@/utils/math";
 import { CauseDamage } from "./causeDamage";
 import { swordCrystalTextures } from "@/textures";
 import { IPlayer } from "@/types";
@@ -83,7 +83,7 @@ export class SwordAttack extends Effect {
       if (item.timer < 0) return;
       if (item.timer === 0) item.alive = true;
 
-      const t = animateSword(item.timer / MAX_TIMER);
+      const t = easeInQuad(item.timer / MAX_TIMER);
 
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;

@@ -1,6 +1,6 @@
 import { base } from "@/configs/consts";
 import { Effect } from "./effect";
-import { animateGainTile, random } from "@/utils/math";
+import { linear, random } from "@/utils/math";
 import { crystalTextures } from "@/textures";
 
 const COUNT = 3;
@@ -87,7 +87,7 @@ export class GainTile extends Effect {
       if (item.timer < 0) return;
       if (item.timer === 0) item.alive = true;
 
-      const t = animateGainTile(item.timer / this.maxTimer);
+      const t = linear(item.timer / this.maxTimer);
 
       item.x = item.startX + t * item.distanceX;
       item.y = item.startY + t * item.distanceY;

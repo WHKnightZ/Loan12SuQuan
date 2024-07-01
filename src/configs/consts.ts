@@ -121,10 +121,6 @@ export const DEFAULT_ENERGY = 100;
  */
 export const EPSILON = 0.0001;
 /**
- * Khoảng thời gian người chơi bị mất năng lượng (tính bằng số frame)
- */
-export const LOSE_ENERGY_INTERVAL = 200;
-/**
  * Khoảng thời gian người chơi được gợi ý nếu không thao tác (tính bằng số frame)
  */
 export const TIMER_HINT_DELAY_DEFAULT = 300;
@@ -141,7 +137,7 @@ export const TILES: { [key in ITileType]: number } = {
   SWORDRED: 6,
 };
 /**
- *
+ * Sát thương của kiếm đỏ
  */
 export const SWORDRED_ATTACK_MULTIPLIER = 2.5;
 /**
@@ -171,8 +167,8 @@ export const mapTileInfo: {
   [TILES.SWORD]: { compatible: [TILES.SWORDRED], probability: 90, score: 18, texture: none, explosions: [] },
   [TILES.HEART]: { compatible: [], probability: 100, score: 9, texture: none, explosions: [] },
   [TILES.GOLD]: { compatible: [], probability: 100, score: 6, texture: none, explosions: [] },
-  [TILES.ENERGY]: { compatible: [], probability: 100, score: 7, texture: none, explosions: [] },
-  [TILES.MANA]: { compatible: [], probability: 100, score: 8, texture: none, explosions: [] },
+  [TILES.ENERGY]: { compatible: [], probability: 100, score: 8, texture: none, explosions: [] },
+  [TILES.MANA]: { compatible: [], probability: 100, score: 7, texture: none, explosions: [] },
   [TILES.EXP]: { compatible: [], probability: 100, score: 6, texture: none, explosions: [] },
   [TILES.SWORDRED]: { compatible: [TILES.SWORD], probability: 10, score: 36, texture: none, explosions: [] },
 };

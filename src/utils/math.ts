@@ -19,26 +19,30 @@ export const cube = (x: number) => x * x * x;
 
 // Animations
 
+/**
+ * Linear animation
+ */
+export const linear = (t: number) => {
+  return t;
+};
+
+/**
+ * EaseInQuad animation
+ */
+export const easeInQuad = (t: number) => {
+  return t * t;
+};
+
+/**
+ * EaseInOutCubic animation
+ */
 export const easeInOutCubic = (t: number) => {
   return t < 0.5 ? 4 * cube(t) : 1 - 4 * cube(1 - t);
 };
 
+/**
+ * EaseInOutCbrt animation
+ */
 export const easeInOutCbrt = (t: number) => {
   return (Math.cbrt(t * 2 - 1) + 1) / 2;
-};
-
-// // EaseInBack
-// const c1 = 1.70158;
-// const c3 = c1 + 1;
-
-// return c3 * t * t * t - c1 * t * t;
-
-export const animateGainTile = (t: number) => {
-  // Linear
-  return t;
-};
-
-export const animateSword = (t: number) => {
-  // EaseInQuad
-  return t * t;
 };

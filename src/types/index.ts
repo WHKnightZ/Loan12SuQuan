@@ -102,6 +102,10 @@ export type IGamePlugin<T> = IRenderable &
      * Bắt đầu khởi chạy plugin
      */
     start(): void;
+    /**
+     * Kết thúc chạy plugin
+     */
+    stop(): void;
   };
 
 export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";

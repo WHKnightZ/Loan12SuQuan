@@ -14,6 +14,8 @@ export class GamePlugin<T> implements IGamePlugin<T> {
 
   start() {}
 
+  stop() {}
+
   render() {}
 
   update() {}

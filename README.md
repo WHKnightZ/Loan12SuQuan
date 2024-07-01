@@ -28,7 +28,7 @@
 - [ ] Admin sẽ dùng Nextjs (Reactjs) làm FE, Giao diện chơi dùng thuần js canvas
 - [ ] Hiệu ứng chain lightning làm như nào?
 - [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
-- [ ] Hiệu ứng full power (giống khi dùng item kiếm)
+- [ ] Hiệu ứng full power (giống khi dùng item kiếm), cần tính lại xem mỗi đào sẽ được bao nhiêu năng lượng là hợp lý
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
 - [x] Hiệu ứng rung avatar khi bị tấn công
@@ -39,6 +39,7 @@
 - [ ] Thêm comment đầy đủ
 - [ ] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn
 - [x] Điều kiện Thắng/Thua
+- [ ] Không split texture nữa, dùng spritesheet
 
 ### Bug:
 

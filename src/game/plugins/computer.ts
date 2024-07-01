@@ -1,13 +1,13 @@
 import { base } from "@/configs/consts";
+import { GamePlugin } from "@/plugins/plugin";
 import { IGame } from "@/types";
-import { GamePlugin } from "./plugin";
 
 /**
  * Điều khiển máy khi trạng thái game là IDLE
  */
 export class ComputerPlugin extends GamePlugin<IGame> {
-  constructor(game: IGame) {
-    super(game);
+  constructor(parent: IGame) {
+    super(parent);
   }
 
   start() {

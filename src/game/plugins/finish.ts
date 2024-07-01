@@ -1,7 +1,7 @@
 import { IGame } from "@/types";
 import { loseTextures, winTextures } from "@/textures";
 import { BOARD_CENTER, base } from "@/configs/consts";
-import { GamePlugin } from "./plugin";
+import { GamePlugin } from "@/plugins/plugin";
 
 const MAX_FRAME = 3;
 const FINISH_DELAY = 120;
@@ -15,8 +15,8 @@ export class FinishPlugin extends GamePlugin<IGame> {
   private textures: HTMLImageElement[];
   private state: number;
 
-  constructor(game: IGame) {
-    super(game);
+  constructor(parent: IGame) {
+    super(parent);
     this.textures = [winTextures, loseTextures];
   }
 

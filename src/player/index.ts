@@ -5,7 +5,6 @@ import {
   BOARD_SIZE,
   DEFAULT_ENERGY,
   DEFAULT_MANA,
-  LOSE_ENERGY_INTERVAL,
   SCREEN_WIDTH,
 } from "@/configs/consts";
 import { IHeroAttributes, IPlayer, IPlayerAttribute, IPlayerAttributeExtra } from "@/types";
@@ -66,7 +65,7 @@ export class Player implements IPlayer {
     this.intelligence = intelligence;
 
     this.life = this.initBarValue(life, life);
-    this.energy = this.initBarValue(DEFAULT_ENERGY, DEFAULT_ENERGY);
+    this.energy = this.initBarValue(DEFAULT_ENERGY / 4, DEFAULT_ENERGY);
     this.mana = this.initBarValue(DEFAULT_MANA, DEFAULT_MANA);
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
@@ -168,8 +167,6 @@ export class Player implements IPlayer {
    * Cập nhật
    */
   update() {
-    this.loseEnergy();
-
     // Update các bars
     this.bars.forEach(({ attribute, maxTimer }) => {
       if (Math.abs(attribute.currentDisplayValue - attribute.displayValue) < 0.1) return;
@@ -187,19 +184,6 @@ export class Player implements IPlayer {
     // Update animation border và spring
     this.borderAnimation.update();
     this.spring.update();
-  }
-
-  /**
-   * Người chơi mỗi LOSE_ENERGY_INTERVAL mà không tương tác sẽ mất năng lượng
-   */
-  private loseEnergy() {
-    if (this.index !== base.game.playerTurn) return;
-
-    this.energyTimer += 1;
-    if (this.energyTimer % LOSE_ENERGY_INTERVAL !== 0) return;
-
-    this.energy.realValue -= 1;
-    this.energy.displayValue = this.energy.realValue;
   }
 
   /**
