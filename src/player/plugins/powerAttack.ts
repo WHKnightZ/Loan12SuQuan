@@ -21,8 +21,11 @@ export class PowerAttackPlugin extends GamePlugin<IPlayer> implements IPowerAtta
   }
 
   start() {
+    if (this.active) return;
+
     super.start();
     this.frame = this.delay = 0;
+
     this.allow = this.hasCausedDamage = false;
   }
 

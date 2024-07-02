@@ -155,7 +155,7 @@ export const MATCH_4_SCORE = 100;
 /**
  * Sát thương tăng thêm khi được cuồng nộ
  */
-export const POWER_ATTACK_MULTIPLIER = 2;
+export const POWER_ATTACK_MULTIPLIER = 2.5;
 /**
  * Empty texture
  */

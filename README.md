@@ -45,8 +45,8 @@
 
 - [x] Click ngoài canvas không select tile nữa
 - [ ] Khi select mà Esc sẽ bị lỗi fadeOut, fadeIn
-- [ ] Đôi khi cuồng nộ không hoạt động
-- [ ] Màu của bar khi value = 0 hơi tối
+- [x] Đôi khi cuồng nộ không hoạt động
+- [x] Màu của bar khi value = 0 hơi tối
 
 ### Improve
 

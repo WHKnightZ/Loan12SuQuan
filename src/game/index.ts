@@ -310,7 +310,7 @@ export class Game implements IGame {
         break;
 
       case TILES.ENERGY:
-        activePlayer.gainEnergy(60);
+        activePlayer.gainEnergy(6);
         break;
 
       case TILES.MANA:

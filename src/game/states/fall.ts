@@ -109,7 +109,7 @@ export class FallGameState extends GameState implements IFallGameState {
         // Nếu đang ở trạng thái cuồng nộ mà gây sát thương thì reset trạng thái
         if (activePlayerPowerAttack.hasCausedDamage) {
           activePlayer.resetEnergy();
-          game.createTimeout(() => activePlayerPowerAttack.stop(), 15);
+          game.createTimeout(() => activePlayerPowerAttack.stop(), 12);
         } else {
           // Cho phép cuồng nộ hoạt động sau khi qua một lượt
           activePlayerPowerAttack.allow = true;

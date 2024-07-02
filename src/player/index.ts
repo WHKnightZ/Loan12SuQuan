@@ -84,7 +84,7 @@ export class Player implements IPlayer {
     this.mana = this.initBarValue(DEFAULT_MANA, DEFAULT_MANA);
     this.bars = [
       { attribute: this.life, maxTimer: 30, texture: barTextures.life },
-      { attribute: this.energy, maxTimer: 50, texture: barTextures.energy },
+      { attribute: this.energy, maxTimer: 80, texture: barTextures.energy },
       { attribute: this.mana, maxTimer: 25, texture: barTextures.mana },
     ];
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
