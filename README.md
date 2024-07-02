@@ -48,10 +48,10 @@
 - [x] Đôi khi cuồng nộ không hoạt động
 - [x] Màu của bar khi value = 0 hơi tối
 
-### Improve
+### Improves:
 
 - [ ]
 
-### Referrences:
+### References:
 
 - https://easings.net/
