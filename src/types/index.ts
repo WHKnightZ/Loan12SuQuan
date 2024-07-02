@@ -21,6 +21,10 @@ export type IRenderable = {
   update(): void;
 };
 
+export type IPassivable = {
+  active: boolean;
+};
+
 export type ILivable = {
   alive: boolean;
 };
@@ -115,9 +119,9 @@ export type IPlayer = IRenderable & {
 };
 
 export type IGamePlugin<T> = IRenderable &
-  IHasTimer & {
+  IHasTimer &
+  IPassivable & {
     parent: T;
-    active: boolean;
 
     /**
      * Bắt đầu khởi chạy plugin

@@ -105,10 +105,15 @@ export class FallGameState extends GameState implements IFallGameState {
       const activePlayer = game.getActivePlayer();
       const activePlayerPowerAttack = activePlayer.powerAttackPlugin;
 
-      // Nếu đang ở trạng thái cuồng nộ mà gây sát thương thì reset trạng thái
-      if (activePlayerPowerAttack.active && activePlayerPowerAttack.hasCausedDamage) {
-        activePlayer.resetEnergy();
-        game.createTimeout(() => activePlayerPowerAttack.stop(), 15);
+      if (activePlayerPowerAttack.active) {
+        // Nếu đang ở trạng thái cuồng nộ mà gây sát thương thì reset trạng thái
+        if (activePlayerPowerAttack.hasCausedDamage) {
+          activePlayer.resetEnergy();
+          game.createTimeout(() => activePlayerPowerAttack.stop(), 15);
+        } else {
+          // Cho phép cuồng nộ hoạt động sau khi qua một lượt
+          activePlayerPowerAttack.allow = true;
+        }
       }
 
       game.findAllMatchedPositions();
