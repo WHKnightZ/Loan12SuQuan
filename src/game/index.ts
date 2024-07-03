@@ -51,6 +51,7 @@ import {
 } from "./states";
 import { randomBool } from "@/utils/math";
 import { ComputerPlugin, FinishPlugin } from "./plugins";
+import { selectItemsFrameTexture } from "@/textures/frames";
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
@@ -418,6 +419,8 @@ export class Game implements IGame {
     this.state.render();
     this.effects.render();
     this.finishPlugin.render();
+
+    base.context.drawImage(selectItemsFrameTexture, 0, 0);
   }
 
   /**
