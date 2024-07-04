@@ -24,6 +24,7 @@ export {
   winTextures,
   loseTextures,
   powerAttackTextures,
+  selectItemsFrameTexture,
 };
 
 export const loadTextures = () => {

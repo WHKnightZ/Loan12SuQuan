@@ -1,20 +1,21 @@
+import { BOARD_SIZE } from "@/configs/consts";
 import { resize } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
 export let selectItemsFrameTexture: HTMLImageElement;
 
-const WIDTH = 176;
-const HEIGHT = 180;
-const OFFSET_BACKGROUND = 4;
-const OFFSET_V_FRAME_X = 3;
-const OFFSET_V_FRAME_Y = 27;
+const WIDTH = 160;
+const HEIGHT = 160;
+const OFFSET_BACKGROUND = 3;
 
 export const loadFrames = async () => {
-  const [frame1Horizontal, frame1Vertical, frame1Divide, frame1Decor] = await Promise.all([
-    loadTexture("frames/frame1-horizontal"),
-    loadTexture("frames/frame1-vertical"),
+  const [cornerTop, cornerBottom, horizontalTop, horizontalBottom, vertical] = await Promise.all([
+    loadTexture("frames/corner-top"),
+    loadTexture("frames/corner-bottom"),
+    loadTexture("frames/horizontal-top"),
+    loadTexture("frames/horizontal-bottom"),
+    loadTexture("frames/vertical"),
     loadTexture("frames/frame1-divide"),
-    loadTexture("frames/frame1-decor"),
   ]);
 
   const canvas = document.createElement("canvas");
@@ -25,44 +26,33 @@ export const loadFrames = async () => {
 
   const drawBackground = () => {
     const offset = OFFSET_BACKGROUND;
-    context.fillStyle = "#773b75";
+    context.fillStyle = "#774b75";
     context.fillRect(offset, offset, WIDTH - offset * 2, HEIGHT - offset * 2);
   };
 
   drawBackground();
 
-  const drawFrameHorizontal = () => {
-    const draw = () => context.drawImage(frame1Horizontal, 0, 0, WIDTH, frame1Horizontal.height);
-    draw();
-    context.save();
-    context.translate(0, HEIGHT);
-    context.scale(1, -1);
-    draw();
-    context.restore();
+  const drawSide = () => {
+    context.drawImage(cornerTop, 0, 0);
+    context.drawImage(vertical, 2, cornerTop.height, vertical.width, HEIGHT - cornerTop.height - cornerBottom.height);
+    context.drawImage(cornerBottom, 2, HEIGHT - cornerBottom.height);
   };
 
-  drawFrameHorizontal();
+  context.drawImage(horizontalTop, cornerTop.width, 2, WIDTH - 2 * cornerTop.width, horizontalTop.height);
+  context.drawImage(
+    horizontalBottom,
+    cornerBottom.width,
+    HEIGHT - 3,
+    WIDTH - 2 * cornerBottom.width,
+    horizontalBottom.height
+  );
 
-  const drawFrameVertical = () => {
-    const offsetX = OFFSET_V_FRAME_X;
-    const offsetY = OFFSET_V_FRAME_Y;
-    const draw = () => context.drawImage(frame1Vertical, offsetX, offsetY, frame1Vertical.width, HEIGHT - offsetY * 2);
-
-    draw();
-    context.save();
-    context.translate(WIDTH, 0);
-    context.scale(-1, 1);
-    draw();
-    context.restore();
-  };
-
-  drawFrameVertical();
-
-  const drawFrameDivide = () => {
-    context.drawImage(frame1Divide, 8, 54, frame1Divide.width, frame1Divide.height);
-  };
-
-  drawFrameDivide();
+  drawSide();
+  context.save();
+  context.translate(WIDTH, 0);
+  context.scale(-1, 1);
+  drawSide();
+  context.restore();
 
   selectItemsFrameTexture = new Image();
   selectItemsFrameTexture.src = canvas.toDataURL();
@@ -72,5 +62,5 @@ export const loadFrames = async () => {
     selectItemsFrameTexture.onload = () => res(null);
   });
 
-  selectItemsFrameTexture = await resize(selectItemsFrameTexture, 2.5);
+  selectItemsFrameTexture = await resize(selectItemsFrameTexture, BOARD_SIZE / WIDTH);
 };
