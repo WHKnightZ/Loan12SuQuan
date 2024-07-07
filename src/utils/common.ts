@@ -14,6 +14,12 @@ export const loadTexture = (src: string) => {
   return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
 };
 
+export const waitLoadImage = (img: HTMLImageElement) => {
+  return new Promise<HTMLImageElement>((res) => {
+    img.onload = () => res(img);
+  });
+};
+
 let sumProbability = 0;
 const tileProbabilities = Array.from({ length: COUNT_TILES }).map((_, index) => {
   const probability = mapTileInfo[index].probability;

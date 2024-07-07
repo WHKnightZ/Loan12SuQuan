@@ -144,7 +144,7 @@ export type IPowerAttackPlugin = IGamePlugin<IPlayer> & {
   hasCausedDamage: boolean;
 };
 
-export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT";
+export type IGameStateType = "IDLE" | "SELECT" | "EXPLODE" | "FALL" | "FADE" | "WAIT" | "SELECT_ITEMS";
 
 export type IGameState = IRenderable & {
   type: IGameStateType;
@@ -180,6 +180,7 @@ export type IFadeGameState = IGameState & {
   fadeOut(): void;
 };
 export type IWaitGameState = IGameState;
+export type ISelectItemsGameState = IGameState;
 
 export type MapGameState = {
   IDLE: IIdleGameState;
@@ -188,6 +189,7 @@ export type MapGameState = {
   FALL: IFallGameState;
   FADE: IFadeGameState;
   WAIT: IWaitGameState;
+  SELECT_ITEMS: ISelectItemsGameState;
 };
 
 export type IGame = IRenderable & {

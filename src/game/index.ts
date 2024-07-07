@@ -38,6 +38,7 @@ import {
   IWaitGameState,
   IFadeGameState,
   IGamePlugin,
+  ISelectItemsGameState,
 } from "@/types";
 import { check, generateMap, getKey } from "@/utils/common";
 import { menuTexture } from "@/textures";
@@ -47,11 +48,11 @@ import {
   FallGameState,
   IdleGameState,
   SelectGameState,
+  SelectItemsGameState,
   WaitGameState,
 } from "./states";
 import { randomBool } from "@/utils/math";
 import { ComputerPlugin, FinishPlugin } from "./plugins";
-import { selectItemsFrameTexture } from "@/textures/frames";
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
@@ -65,6 +66,7 @@ export class Game implements IGame {
   private fallGameState: IFallGameState;
   private fadeGameState: IFadeGameState;
   private waitGameState: IWaitGameState;
+  private selectItemsGameState: ISelectItemsGameState;
   private mapGameState: { [key in IGameStateType]: MapGameState[key] };
 
   private finishPlugin: IGamePlugin<IGame>;
@@ -102,6 +104,7 @@ export class Game implements IGame {
     this.fallGameState = new FallGameState(this);
     this.fadeGameState = new FadeGameState(this);
     this.waitGameState = new WaitGameState(this);
+    this.selectItemsGameState = new SelectItemsGameState(this);
 
     this.mapGameState = {
       IDLE: this.idleGameState,
@@ -110,6 +113,7 @@ export class Game implements IGame {
       FALL: this.fallGameState,
       FADE: this.fadeGameState,
       WAIT: this.waitGameState,
+      SELECT_ITEMS: this.selectItemsGameState,
     };
 
     this.init();
@@ -419,8 +423,6 @@ export class Game implements IGame {
     this.state.render();
     this.effects.render();
     this.finishPlugin.render();
-
-    base.context.drawImage(selectItemsFrameTexture, 0, 0);
   }
 
   /**
