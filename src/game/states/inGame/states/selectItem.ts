@@ -1,14 +1,15 @@
-import { IGame, ISelectItemsGameState } from "@/types";
-import { GameState } from "./gameState";
 import { BOARD_SIZE, base } from "@/configs/consts";
+import { GameState } from "@/extensions";
 import { selectItemsFrameTexture } from "@/textures";
+import { IInGameState } from "../types";
+import { IInGameStateType } from "@/types";
 
 /**
  * State chọn vật phẩm, kỹ năng
  */
-export class SelectItemsGameState extends GameState implements ISelectItemsGameState {
-  constructor(game: IGame) {
-    super("SELECT_ITEMS", game);
+export class InGameSelectItemState extends GameState<IInGameState, IInGameStateType> {
+  constructor(parent: IInGameState) {
+    super(parent, "SELECT_ITEM");
   }
 
   render() {
@@ -18,6 +19,4 @@ export class SelectItemsGameState extends GameState implements ISelectItemsGameS
       (BOARD_SIZE - selectItemsFrameTexture.height) / 2 - 2
     );
   }
-
-  update() {}
 }

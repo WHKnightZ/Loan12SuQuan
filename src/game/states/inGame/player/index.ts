@@ -9,16 +9,21 @@ import {
   POWER_ATTACK_MULTIPLIER,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IHeroAttributes, IPlayer, IPlayerAttribute, IPlayerAttributeExtra, IPowerAttackPlugin } from "@/types";
+import { IHeroAttributes } from "@/types";
 import { avatarTextures, barTextures } from "@/textures";
 import { clamp, easeInOutCubic, lerp, random } from "@/utils/math";
 import { BorderAnimation } from "./borderAnimation";
 import { Spring } from "./spring";
 import { PowerAttackPlugin } from "./plugins";
+import { IInGameState, IPlayer, IPlayerAttribute, IPlayerAttributeExtra, IPowerAttackPlugin } from "../types";
 
 const BAR_OFFSET_X = 132;
 
 export class Player implements IPlayer {
+  /**
+   * InGame
+   */
+  private inGame: IInGameState;
   /**
    * Animation chạy vòng tròn quanh avatar player
    */
@@ -73,7 +78,9 @@ export class Player implements IPlayer {
    */
   powerAttackPlugin: IPowerAttackPlugin;
 
-  constructor({ index, attributes }: { index: number; attributes: IHeroAttributes }) {
+  constructor({ inGame, index, attributes }: { inGame: IInGameState; index: number; attributes: IHeroAttributes }) {
+    this.inGame = inGame;
+
     const { attack, intelligence, life, avatar } = attributes;
     this.index = index;
     this.attack = attack;
@@ -95,7 +102,7 @@ export class Player implements IPlayer {
       y: AVATAR_OFFSET_Y,
     };
 
-    this.borderAnimation = new BorderAnimation(index, this.avatarOffset, this.avatarTexture);
+    this.borderAnimation = new BorderAnimation(this.inGame, index, this.avatarOffset, this.avatarTexture);
     this.spring = new Spring();
 
     this.powerAttackPlugin = new PowerAttackPlugin(this);
@@ -123,7 +130,7 @@ export class Player implements IPlayer {
    * Nhận sát thương sau một khoảng thời gian
    */
   takeDamage(damage: number, duration: number = 40) {
-    const activePlayerPowerAttack = base.game.getActivePlayer().powerAttackPlugin;
+    const activePlayerPowerAttack = this.inGame.getActivePlayer().powerAttackPlugin;
 
     if (activePlayerPowerAttack.active && activePlayerPowerAttack.allow) {
       damage *= POWER_ATTACK_MULTIPLIER; // Nếu người tấn công đang có cuồng nộ thì mọi sát thương gây ra được tăng thêm
@@ -135,7 +142,7 @@ export class Player implements IPlayer {
 
     if (this.life.realValue > EPSILON_2) return; // Nếu máu nhỏ hơn EPSILON là thua
 
-    base.game.finish(1 - this.index);
+    this.inGame.finish(1 - this.index);
   }
 
   /**

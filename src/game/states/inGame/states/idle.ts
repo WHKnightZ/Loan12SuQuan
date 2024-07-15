@@ -1,8 +1,9 @@
 import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
 import { hintArrows } from "@/textures";
-import { IDirection, IGame, IIdleGameState } from "@/types";
-import { GameState } from "./gameState";
+import { IDirection, IInGameStateType } from "@/types";
 import { FlickeringText } from "@/effects";
+import { IInGameState } from "../types";
+import { GameState } from "@/extensions";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -13,44 +14,44 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
 /**
  * State nghỉ, khi người chơi không làm gì cả
  */
-export class IdleGameState extends GameState implements IIdleGameState {
-  idleTimer: number;
-  hintDelayTimer: number;
+export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
+  private idleTimer: number;
+  private hintDelayTimer: number;
 
-  constructor(game: IGame) {
-    super("IDLE", game);
+  constructor(parent: IInGameState) {
+    super(parent, "IDLE");
   }
 
-  invoke() {
-    const game = this.game;
+  init() {
+    const parent = this.parent;
 
     this.idleTimer = 0;
     this.hintDelayTimer = TIMER_HINT_DELAY_DEFAULT;
-    this.game.combo = 0;
+    this.parent.combo = 0;
 
     // Chỉ show text, chuyển lượt chơi khi turn count update
     // Có trường hợp người chơi click xong huỷ, state chuyển về idle mà không có update gì
-    if (game.isUpdatedTurnCount) {
-      if (game.turnCount > 1) game.createEffect(new FlickeringText({ text: `Còn ${game.turnCount} lượt` }));
-      else if (game.turnCount === 0) {
-        game.changePlayer();
+    if (parent.isUpdatedTurnCount) {
+      if (parent.turnCount > 1) base.game.createEffect(new FlickeringText({ text: `Còn ${parent.turnCount} lượt` }));
+      else if (parent.turnCount === 0) {
+        parent.changePlayer();
       }
     }
-    game.isUpdatedTurnCount = false;
+    parent.isUpdatedTurnCount = false;
 
-    const activePlayer = game.getActivePlayer();
-    game.hintIndex = activePlayer.getHintIndex(game.matchedPositions.length);
+    const activePlayer = parent.getActivePlayer();
+    parent.hintIndex = activePlayer.getHintIndex(parent.matchedPositions.length);
 
-    if (game.playerTurn === 1) {
+    if (parent.playerTurn === 1) {
       // Computer
-      game.computerPlugin.start();
+      parent.computerPlugin.start();
     }
   }
 
   render() {
     if (this.hintDelayTimer > 0) return;
 
-    const hint = this.game.matchedPositions[this.game.hintIndex];
+    const hint = this.parent.matchedPositions[this.parent.hintIndex];
 
     if (!hint) return;
 
