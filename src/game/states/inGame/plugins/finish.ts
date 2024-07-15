@@ -1,7 +1,7 @@
-import { IGame } from "@/types";
 import { loseTextures, winTextures } from "@/textures";
 import { BOARD_CENTER, base } from "@/configs/consts";
-import { GamePlugin } from "@/plugins/plugin";
+import { GamePlugin } from "@/extensions";
+import { IInGameState } from "../types";
 
 const MAX_FRAME = 3;
 const FINISH_DELAY = 120;
@@ -9,13 +9,13 @@ const FINISH_DELAY = 120;
 /**
  * Kết thúc game, hiển thị text Thắng hoặc Thua
  */
-export class FinishPlugin extends GamePlugin<IGame> {
+export class FinishPlugin extends GamePlugin<IInGameState> {
   private finishDelay: number;
   private finishFrame: number;
   private textures: HTMLImageElement[];
   private state: number;
 
-  constructor(parent: IGame) {
+  constructor(parent: IInGameState) {
     super(parent);
     this.textures = [winTextures, loseTextures];
   }

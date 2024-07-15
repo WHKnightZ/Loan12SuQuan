@@ -3,7 +3,7 @@ import { Effect } from "./effect";
 import { easeInQuad } from "@/utils/math";
 import { CauseDamage } from "./causeDamage";
 import { swordCrystalTextures } from "@/textures";
-import { IPlayer } from "@/types";
+import { IPlayer } from "@/game/states/inGame/types";
 
 const swords = [
   { delay: 8, x: 10, y: -5 },

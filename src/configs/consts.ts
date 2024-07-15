@@ -193,6 +193,10 @@ export const AVATAR_OFFSET_X = 62;
  */
 export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
 /**
+ * Màu của spin
+ */
+export const SPIN_ANIMATION_COLOR = "#96e6e0";
+/**
  * Danh sách các nhân vật
  */
 export const HEROES: { [key in IHeroId]: IHeroAttributes } = {
@@ -202,3 +206,5 @@ export const HEROES: { [key in IHeroId]: IHeroAttributes } = {
   QUAI_VAT: { name: "Quái Vật", attack: 4.5, life: 160, intelligence: 50, avatar: 3 },
   KIEU_CONG_HAN: { name: "Kiều Công Hãn", attack: 5, life: 200, intelligence: 100, avatar: 4 },
 };
+
+export const ENEMIES = [HEROES.LINH_QUEN, HEROES.ANH_HUNG, HEROES.QUAI_VAT, HEROES.KIEU_CONG_HAN];

@@ -1,7 +1,7 @@
 import { base } from "@/configs/consts";
-import { GamePlugin } from "@/plugins/plugin";
+import { GamePlugin } from "@/extensions";
 import { powerAttackTextures } from "@/textures";
-import { IPlayer, IPowerAttackPlugin } from "@/types";
+import { IPlayer, IPowerAttackPlugin } from "../../types";
 
 const MAX_FRAME = 3;
 const MAX_DELAY = 50;

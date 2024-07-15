@@ -1,5 +1,6 @@
 import { CELL_SIZE } from "@/configs/consts";
-import { IDirection, IHintArrow } from "@/types";
+import { IHintArrow } from "@/game/states/inGame/types";
+import { IDirection } from "@/types";
 import { resize, rotateCW90 } from "@/utils/canvas";
 import { getImageSrc } from "@/utils/common";
 

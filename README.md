@@ -37,9 +37,11 @@
 - [x] Giảm máu sau khi kiếm đến nơi? => Cần phải đợi effect xong thì mới đổi lượt, đã chuyển thành delay 40 frame
 - [ ] Duration animation gain (lose) máu sẽ phụ thuộc theo chênh lệch, chênh lệch càng lớn thì duration càng lâu
 - [ ] Thêm comment đầy đủ
-- [ ] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn
+- [x] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn (Hiện chưa có các chỉ số)
 - [x] Điều kiện Thắng/Thua
 - [ ] Không split texture nữa, dùng spritesheet
+- [ ] Thêm nhiều loại font chữ mới
+- [x] Quản lý state
 
 ### Bug:
 

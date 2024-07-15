@@ -1,54 +1,55 @@
 import { base, CELL_SIZE, CELL_SIZE_HALF, getKeys, mapTileInfo, TILES, VELOCITY_BASE } from "@/configs/consts";
 import { findBelow, randomTile } from "@/utils/common";
-import { GameState } from "./gameState";
-import { IExplodeGameState, IGame } from "@/types";
 import { FloatingText, StarExplosion, SwordAttack } from "@/effects";
+import { GameState } from "@/extensions";
+import { IInGameState } from "../types";
+import { IInGameStateType } from "@/types";
 
 /**
  * State phát nổ khi ăn được 3 trên một hàng
  */
-export class ExplodeGameState extends GameState implements IExplodeGameState {
+export class InGameExplodeState extends GameState<IInGameState, IInGameStateType> {
   private explodeTimer: number;
   private explodeFrame: number;
 
-  constructor(game: IGame) {
-    super("EXPLODE", game);
+  constructor(parent: IInGameState) {
+    super(parent, "EXPLODE");
   }
 
-  invoke() {
-    const game = this.game;
+  init() {
+    const parent = this.parent;
 
     this.explodeTimer = 0;
     this.explodeFrame = 0;
 
-    game.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
+    parent.explosions.forEach(({ x, y }) => (base.map[y][x] = -1));
 
-    const center = game.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
+    const center = parent.explosions.reduce((a, b) => ({ x: a.x + b.x, y: a.y + b.y }), { x: 0, y: 0 });
 
-    if (game.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
+    if (parent.explosions.some(({ value }) => value === TILES.SWORD || value === TILES.SWORDRED)) {
       // Tạo hiệu ứng kiếm cắm xuống người chơi bị tấn công
-      game.createEffect(new SwordAttack(game.getActivePlayer(), game.getPassivePlayer()));
+      base.game.createEffect(new SwordAttack(parent.getActivePlayer(), parent.getPassivePlayer()));
     }
 
-    game.turnCount += game.matched4.turnCount;
+    parent.turnCount += parent.matched4.turnCount;
 
-    const x = center.x / game.explosions.length;
-    const y = center.y / game.explosions.length;
-    game.combo += 1;
+    const x = center.x / parent.explosions.length;
+    const y = center.y / parent.explosions.length;
+    parent.combo += 1;
     const effectX = x * CELL_SIZE + CELL_SIZE_HALF;
     const effectY = y * CELL_SIZE + CELL_SIZE_HALF;
 
-    if (game.combo < 2) return;
+    if (parent.combo < 2) return;
 
     // Tạo hiệu ứng toả sao khi được combo x2 trở lên
-    game.createEffect(new FloatingText({ text: `x${game.combo}`, x: effectX, y: effectY + 8 }));
-    game.createEffect(new StarExplosion(effectX, effectY));
+    base.game.createEffect(new FloatingText({ text: `x${parent.combo}`, x: effectX, y: effectY + 8 }));
+    base.game.createEffect(new StarExplosion(effectX, effectY));
   }
 
   render() {
-    const game = this.game;
+    const parent = this.parent;
 
-    game.explosions.forEach(({ x, y, value }) => {
+    parent.explosions.forEach(({ x, y, value }) => {
       const texture = mapTileInfo[value].explosions[this.explodeFrame];
       base.context.drawImage(
         texture,
@@ -59,7 +60,7 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
   }
 
   update() {
-    const game = this.game;
+    const parent = this.parent;
 
     this.explodeTimer += 1;
     if (this.explodeTimer % 2) return;
@@ -68,15 +69,15 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
     if (this.explodeFrame !== 4) return;
 
     this.explodeFrame = 0;
-    game.changeState("FALL");
+    parent.stateManager.changeState("FALL");
 
-    game.fall = {};
+    parent.fall = {};
 
-    const fall = game.fall;
+    const fall = parent.fall;
 
-    game.explodedTiles.forEach(({ x, y }) => {
+    parent.explodedTiles.forEach(({ x, y }) => {
       base.map[y][x] = -1;
-      if (game.fall[x]) {
+      if (parent.fall[x]) {
         !fall[x].list.find(({ x: x0, y: y0 }) => x0 === x && y0 === y) &&
           fall[x].list.push({ x, y, velocity: 0, offset: 0, value: -1 });
       } else fall[x] = { list: [{ x, y, velocity: 0, offset: 0, value: -1 }], below: -1, pushCount: 0 };
@@ -88,7 +89,7 @@ export class ExplodeGameState extends GameState implements IExplodeGameState {
       fall[key].list = [];
       key = Number(key);
 
-      for (let i = game.fall[key].below; i >= 0; i -= 1) {
+      for (let i = parent.fall[key].below; i >= 0; i -= 1) {
         if (base.map[i][key] !== -1) {
           fall[key].list.push({ x: key, y: i, velocity: VELOCITY_BASE, offset: 0, value: base.map[i][key] });
           base.map[i][key] = -1;

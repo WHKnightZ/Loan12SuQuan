@@ -4,4 +4,4 @@ export * from "./fall";
 export * from "./explode";
 export * from "./fade";
 export * from "./wait";
-export * from "./selectItems";
+export * from "./selectItem";

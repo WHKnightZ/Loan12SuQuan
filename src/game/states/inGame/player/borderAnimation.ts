@@ -1,12 +1,15 @@
 import { IPoint, IRenderable } from "@/types";
 import { Spin } from "./spin";
 import { base } from "@/configs/consts";
+import { IInGameState } from "../types";
 
 export class BorderAnimation implements IRenderable {
+  private inGame: IInGameState;
   private index: number;
   private spins: Spin[];
 
-  constructor(index: number, avatarOffset: IPoint, avatarTexture: HTMLImageElement) {
+  constructor(inGame: IInGameState, index: number, avatarOffset: IPoint, avatarTexture: HTMLImageElement) {
+    this.inGame = inGame;
     this.index = index;
 
     const padding = 4;
@@ -34,7 +37,7 @@ export class BorderAnimation implements IRenderable {
 
   update() {
     this.spins.forEach((e) => {
-      if (this.index === base.game.playerTurn) e.activate();
+      if (this.index === this.inGame.playerTurn) e.activate();
       else e.deactivate();
 
       e.update();

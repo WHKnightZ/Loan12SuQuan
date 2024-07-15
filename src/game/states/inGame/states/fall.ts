@@ -8,23 +8,22 @@ import {
   VELOCITY_BASE,
   getKeys,
 } from "@/configs/consts";
-import { IFallGameState, IGame, ITileInfo } from "@/types";
+import { GameState } from "@/extensions";
 import { combine } from "@/utils/common";
-import { GameState } from "./gameState";
+import { IInGameState } from "../types";
+import { IInGameStateType, ITileInfo } from "@/types";
 
 /**
  * State tile rơi xuống sau khi phát nổ
  */
-export class FallGameState extends GameState implements IFallGameState {
-  constructor(game: IGame) {
-    super("FALL", game);
+export class InGameFallState extends GameState<IInGameState, IInGameStateType> {
+  constructor(parent: IInGameState) {
+    super(parent, "FALL");
   }
 
-  invoke() {}
-
   render() {
-    const game = this.game;
-    const fall = game.fall;
+    const parent = this.parent;
+    const fall = parent.fall;
 
     getKeys(fall).forEach((col) => {
       fall[col].list.forEach(({ x, y, value, offset }) => {
@@ -38,9 +37,9 @@ export class FallGameState extends GameState implements IFallGameState {
   }
 
   update() {
-    const game = this.game;
+    const parent = this.parent;
     let stillFalling = false; // Rơi đến khi nào fill toàn bộ các ô thì dừng
-    const fall = game.fall;
+    const fall = parent.fall;
 
     getKeys(fall).forEach((col) => {
       const colData = fall[col]; // Danh sách các cell cần rơi của cột đang xét
@@ -73,51 +72,51 @@ export class FallGameState extends GameState implements IFallGameState {
 
     if (stillFalling) return;
 
-    // Nếu game đã kết thúc thì bỏ qua bước check bên dưới
-    if (game.isFinished) {
-      game.wait(0, () => {});
+    // Nếu parent đã kết thúc thì bỏ qua bước check bên dưới
+    if (parent.isFinished) {
+      parent.wait(0, () => {});
       return;
     }
 
     // Nếu các cell đã được lấp đầy thì xuống bước check xem có ăn được tiếp combo x2, x3 ... không
 
-    game.matched4 = { turnCount: 0, matchedList: {} };
-    game.matched4Tiles = [];
+    parent.matched4 = { turnCount: 0, matchedList: {} };
+    parent.matched4Tiles = [];
     const tileInfos: ITileInfo[][] = [];
     for (let i = 0; i < MAP_WIDTH; i += 1) {
       for (let j = 0; j < MAP_WIDTH; j += 1) {
-        const { matched: m0, tiles: t0, matched4Tiles: m40 } = game.matchPosition(j, i);
+        const { matched: m0, tiles: t0, matched4Tiles: m40 } = parent.matchPosition(j, i);
         if (m0) tileInfos.push(t0);
-        if (m40.length) game.matched4Tiles = game.matched4Tiles.concat(m40);
+        if (m40.length) parent.matched4Tiles = parent.matched4Tiles.concat(m40);
       }
     }
 
     if (tileInfos.length) {
-      game.explodedTiles = combine(tileInfos);
-      game.explosions = [];
-      game.explodedTiles.forEach((tile) => {
+      parent.explodedTiles = combine(tileInfos);
+      parent.explosions = [];
+      parent.explodedTiles.forEach((tile) => {
         const { x, y } = tile;
-        game.gainTile(tile);
-        game.explosions.push({ x, y, value: base.map[y][x] });
+        parent.gainTile(tile);
+        parent.explosions.push({ x, y, value: base.map[y][x] });
       });
-      game.explode();
+      parent.explode();
     } else {
-      const activePlayer = game.getActivePlayer();
+      const activePlayer = parent.getActivePlayer();
       const activePlayerPowerAttack = activePlayer.powerAttackPlugin;
 
       if (activePlayerPowerAttack.active) {
         // Nếu đang ở trạng thái cuồng nộ mà gây sát thương thì reset trạng thái
         if (activePlayerPowerAttack.hasCausedDamage) {
           activePlayer.resetEnergy();
-          game.createTimeout(() => activePlayerPowerAttack.stop(), 12);
+          base.game.createTimeout(() => activePlayerPowerAttack.stop(), 12);
         } else {
           // Cho phép cuồng nộ hoạt động sau khi qua một lượt
           activePlayerPowerAttack.allow = true;
         }
       }
 
-      game.findAllMatchedPositions();
-      game.changeState("IDLE");
+      parent.findAllMatchedPositions();
+      parent.stateManager.changeState("IDLE");
     }
   }
 }
