@@ -1,4 +1,4 @@
-import { base } from "@/configs/consts";
+import { SPIN_ANIMATION_COLOR, base } from "@/configs/consts";
 import { IRenderable } from "@/types";
 
 type Rotation = "CW" | "CCW"; // Clockwise, Counter Clockwise
@@ -163,7 +163,7 @@ export class Spin implements IRenderable {
     ctx.globalAlpha = this.opacity;
 
     ctx.lineWidth = this.thickness;
-    ctx.strokeStyle = "#96e6e0";
+    ctx.strokeStyle = SPIN_ANIMATION_COLOR;
 
     if (x0 === x1 || y0 === y1) {
       ctx.beginPath();

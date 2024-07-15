@@ -30,7 +30,6 @@ export class Game implements IGame {
     this.stateManager.render();
     this.effects.render();
   }
-
   /**
    * Cập nhật
    */
@@ -40,28 +39,30 @@ export class Game implements IGame {
     this.stateManager.update();
     this.effects.update();
   }
-
   /**
    * Tạo effect
    */
   createEffect(effect: IEffect) {
     this.effects.create(effect);
   }
-
+  /**
+   * Xử lý sự kiện move chuột
+   */
+  onMouseMove(e: MouseEvent) {
+    this.stateManager.onMouseMove(e);
+  }
   /**
    * Xử lý sự kiện click chuột
    */
   onClick(e: MouseEvent) {
     this.stateManager.onClick(e);
   }
-
   /**
    * Xử lý sự kiện nhấn phím
    */
   onKeyDown(e: KeyboardEvent) {
     this.stateManager.onKeyDown(e);
   }
-
   /**
    * Tạo timeout
    */
@@ -71,14 +72,12 @@ export class Game implements IGame {
     this.timeouts.list.push({ id, callback, currentFrame: 0, maxFrame: frame });
     return id;
   }
-
   /**
    * Xoá timeout
    */
   clearTimeout(timeoutId: number): void {
     this.timeouts.list = this.timeouts.list.filter((x) => x.id !== timeoutId);
   }
-
   /**
    * Xử lý danh sách các timeout
    */

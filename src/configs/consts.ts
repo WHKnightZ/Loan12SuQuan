@@ -193,6 +193,10 @@ export const AVATAR_OFFSET_X = 62;
  */
 export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
 /**
+ * Màu của spin
+ */
+export const SPIN_ANIMATION_COLOR = "#96e6e0";
+/**
  * Danh sách các nhân vật
  */
 export const HEROES: { [key in IHeroId]: IHeroAttributes } = {

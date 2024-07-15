@@ -32,6 +32,10 @@ export type IEffect = ILivable & IRenderable;
 
 export type IHasEvent = {
   /**
+   * Xử lý sự kiện move chuột
+   */
+  onMouseMove(e: MouseEvent): void;
+  /**
    * Xử lý sự kiện click chuột
    */
   onClick(e: MouseEvent): void;
@@ -66,7 +70,7 @@ export type IGameState<TParent, TGameStateType extends string> = IRenderable &
     /**
      * Hàm sẽ được thực thi khi vừa chuyển game state
      */
-    init(): void;
+    init(...params: any[]): void;
     /**
      * Hàm check xem game state này có giống với tham số truyền vào không
      */

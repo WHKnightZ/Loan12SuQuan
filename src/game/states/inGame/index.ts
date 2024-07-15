@@ -15,6 +15,7 @@ import {
   BOARD_SIZE,
   CELL_SIZE,
   CELL_SIZE_HALF,
+  ENEMIES,
   GAIN_TURN,
   HEROES,
   MAP_WIDTH,
@@ -70,29 +71,8 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   constructor(parent: IGame) {
     super(parent, "IN_GAME");
 
-    this.players = [
-      new Player({ inGame: this, index: 0, attributes: { ...HEROES.TRANG_SI, intelligence: PLAYER_INTELLIGENCE } }),
-      new Player({ inGame: this, index: 1, attributes: HEROES.LINH_QUEN }),
-    ];
-    this.playerTurn = 0;
-    this.turnCount = 1;
-    this.isUpdatedTurnCount = true;
-    this.waitProperties = null;
-
-    this.matched4 = { turnCount: 0, matchedList: {} };
-
     this.computerPlugin = new ComputerPlugin(this);
     this.finishPlugin = new FinishPlugin(this);
-
-    base.map = generateMap();
-    this.findAllMatchedPositions();
-    this.selected = null;
-    this.swapped = null;
-    this.reswap = false;
-    this.fall = {};
-    this.combo = 0;
-    this.explosions = [];
-    this.isFinished = false;
 
     this.stateManager = new GameStateManager([
       {
@@ -125,6 +105,28 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
         state: new InGameSelectItemState(this),
       },
     ]);
+  }
+
+  init(enemyIndex: number): void {
+    this.waitProperties = null;
+    this.matched4 = { turnCount: 0, matchedList: {} };
+    base.map = generateMap();
+    this.findAllMatchedPositions();
+    this.selected = null;
+    this.swapped = null;
+    this.reswap = false;
+    this.fall = {};
+    this.combo = 0;
+    this.explosions = [];
+    this.isFinished = false;
+
+    this.players = [
+      new Player({ inGame: this, index: 0, attributes: { ...HEROES.TRANG_SI, intelligence: PLAYER_INTELLIGENCE } }),
+      new Player({ inGame: this, index: 1, attributes: ENEMIES[enemyIndex] }),
+    ];
+    this.playerTurn = 0;
+    this.turnCount = 1;
+    this.isUpdatedTurnCount = true;
 
     this.fadeIn();
   }
@@ -218,7 +220,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
       matched4Tiles,
     };
   }
-
   /**
    * Hoán đổi 2 tile gần nhau
    */
@@ -227,7 +228,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     base.map[y0][x0] = base.map[y1][x1];
     base.map[y1][x1] = tmp;
   }
-
   /**
    * Thử xem cách hoán đổi này có khả thi không, nếu khả thi thì thêm vào danh sách
    */
@@ -240,7 +240,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     if (m0 || m1) allMatchedPositions.push({ ...pos, score: p0 + p1 });
     this.swap(x0, y0, x1, y1);
   }
-
   /**
    * Tìm tất cả các cách hoán đổi khả thi
    */
@@ -260,7 +259,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     allMatchedPositions.sort((a, b) => (a.score < b.score ? 1 : -1));
     this.matchedPositions = allMatchedPositions;
   }
-
   /**
    * Ăn tile
    */
@@ -306,7 +304,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
         break;
     }
   }
-
   /**
    * Đổi lượt
    */
@@ -314,21 +311,18 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.playerTurn = 1 - this.playerTurn;
     this.turnCount = 1;
   }
-
   /**
    * Lấy ra người chơi ở lượt này
    */
   getActivePlayer() {
     return this.players[this.playerTurn];
   }
-
   /**
    * Lấy ra người chơi còn lại
    */
   getPassivePlayer() {
     return this.players[1 - this.playerTurn];
   }
-
   /**
    * Kết thúc trò chơi: 0: Thắng hoặc 1: Thua
    */
@@ -336,14 +330,12 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.winner = state;
     this.finishPlugin.start();
   }
-
   /**
    * Chuyển qua state nổ sau khi đợi một khoảng thời gian
    */
   explode() {
     this.wait(this.combo === 0 ? 4 : 8, () => this.stateManager.changeState("EXPLODE"));
   }
-
   /**
    * Đợi một khoảng thời gian mới thực hiện callback
    */
@@ -355,21 +347,18 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     };
     this.stateManager.changeState("WAIT");
   }
-
   /**
    * Chuyển qua state fade in
    */
   fadeIn() {
     this.stateManager.changeState("FADE", false);
   }
-
   /**
    * Chuyển qua state fade out
    */
   fadeOut() {
     this.stateManager.changeState("FADE", true);
   }
-
   /**
    * Hiển thị
    */
@@ -391,7 +380,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.stateManager.render();
     this.finishPlugin.render();
   }
-
   /**
    * Cập nhật
    */
@@ -401,7 +389,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.computerPlugin.update();
     this.finishPlugin.update();
   }
-
   /**
    * Xử lý sự kiện click chuột
    */
@@ -436,7 +423,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
   }
-
   /**
    * Xử lý sự kiện nhấn phím
    */

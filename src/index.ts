@@ -57,6 +57,7 @@ const main = async () => {
   base.game = game;
 
   base.canvas.addEventListener("click", (e) => game.onClick(e));
+  base.canvas.addEventListener("mousemove", (e) => game.onMouseMove(e));
   document.addEventListener("keydown", (e) => game.onKeyDown(e));
 };
 
