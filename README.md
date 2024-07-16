@@ -42,6 +42,7 @@
 - [ ] Không split texture nữa, dùng spritesheet
 - [ ] Thêm nhiều loại font chữ mới
 - [x] Quản lý state
+- [ ] Chuyển state có thể truyền thêm tham số: transitionType: fade, slide hoặc push, reveal, checker-board, zoom
 
 ### Bug:
 
