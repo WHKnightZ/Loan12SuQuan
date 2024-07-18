@@ -129,6 +129,10 @@ export const EPSILON_2 = 0.01;
  */
 export const TIMER_HINT_DELAY_DEFAULT = 300;
 /**
+ * Sau khi load font xong, x2 kích thước font
+ */
+export const FONT_SCALE = 2;
+/**
  * Code của các tile
  */
 export const TILES: { [key in ITileType]: number } = {

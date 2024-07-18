@@ -1,5 +1,5 @@
 import { base, EPSILON } from "@/configs/consts";
-import { font } from "@/elements/font";
+import { Font } from "@/elements/font";
 import { Effect } from "./effect";
 
 export class FloatingText extends Effect {
@@ -17,7 +17,7 @@ export class FloatingText extends Effect {
   render() {
     base.context.save();
     base.context.globalAlpha = this.opacity;
-    font.draw({ text: this.text, x: this.x, y: this.y });
+    Font.draw({ text: this.text, x: this.x, y: this.y });
     base.context.restore();
   }
 
