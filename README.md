@@ -40,8 +40,10 @@
 - [x] Chức năng tạm: Chọn máy đánh cùng: Bao gồm các chỉ số: Thông minh, Sức mạnh, May mắn (Hiện chưa có các chỉ số)
 - [x] Điều kiện Thắng/Thua
 - [ ] Không split texture nữa, dùng spritesheet
-- [ ] Thêm nhiều loại font chữ mới
+- [x] Thêm nhiều loại font chữ mới
+- [ ] Hàm draw font có thêm textAlign, wrapText (defaultTrue), xuống dòng keep textAlign + gap giữa các dòng dựa theo height cao nhất của ký tự
 - [x] Quản lý state
+- [ ] Slide transition
 
 ### Bug:
 

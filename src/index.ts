@@ -4,6 +4,7 @@ import { loadTextures } from "@/textures";
 import { updateFps } from "@/utils/misc";
 import { Loading } from "@/common/loading";
 import { pause } from "./utils/common";
+import { Font } from "./elements/font";
 
 let game: Game;
 let loading: Loading;
@@ -49,6 +50,7 @@ const main = async () => {
   update();
 
   await loadTextures();
+  Font.init();
   await pause(500);
 
   loading.end();

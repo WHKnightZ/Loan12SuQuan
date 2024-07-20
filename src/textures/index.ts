@@ -2,7 +2,7 @@ import { loadAvatars, avatarTextures } from "./avatars";
 import { loadCommonTextures, hintArrows } from "./commonTextures";
 import { loadCornerSelections, cornerSelections } from "./cornerSelections";
 import { loadCrystals, crystalTextures, swordCrystalTextures, damageTextures } from "./crystals";
-import { loadFont, mapFontChar } from "./fonts";
+import { loadFonts, fontTextures } from "./fonts";
 import { loadFrames, selectItemsFrameTexture } from "./frames";
 import { loadMenu, menuTexture, barTextures } from "./menu";
 import { loadPowerAttackTextures, powerAttackTextures } from "./powerAttack";
@@ -17,7 +17,7 @@ export {
   crystalTextures,
   swordCrystalTextures,
   damageTextures,
-  mapFontChar,
+  fontTextures,
   menuTexture,
   barTextures,
   starTextures,
@@ -34,7 +34,7 @@ export const loadTextures = () => {
     loadCommonTextures(),
     loadMenu(),
     loadAvatars(),
-    loadFont(),
+    loadFonts(),
     loadStars(),
     loadCrystals(),
     loadWinLoseTextures(),

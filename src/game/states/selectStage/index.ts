@@ -1,5 +1,5 @@
 import { ENEMIES, SCREEN_HEIGHT, SCREEN_WIDTH, SPIN_ANIMATION_COLOR, base } from "@/configs/consts";
-import { font } from "@/elements/font";
+import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
 import { IGame, IGameStateType } from "@/types";
@@ -36,7 +36,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   render() {
     base.context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    font.draw({
+    Font.draw({
       text: "Chọn Quân Địch",
       y: 60,
     });
@@ -54,7 +54,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
 
       const { name } = ENEMIES[this.activeAvatar];
 
-      font.draw({
+      Font.draw({
         text: name,
         y: SCREEN_HEIGHT - 60,
       });
@@ -65,7 +65,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    */
   update() {}
   /**
-   * Xử lý sụ kiện move chuột
+   * Xử lý sự kiện move chuột
    */
   onMouseMove(e: MouseEvent) {
     const x = Math.floor((e.offsetX - avatarOffsetX) / avatarFullWidth);

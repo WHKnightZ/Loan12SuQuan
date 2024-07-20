@@ -1,5 +1,5 @@
 import { base, EPSILON } from "@/configs/consts";
-import { font } from "@/elements/font";
+import { Font } from "@/elements/font";
 import { Effect } from "./effect";
 
 export class FlickeringText extends Effect {
@@ -19,7 +19,7 @@ export class FlickeringText extends Effect {
     if (!this.show) return;
     base.context.save();
     base.context.globalAlpha = this.opacity;
-    font.draw({ text: this.text, x: this.x, y: this.y });
+    Font.draw({ text: this.text, x: this.x, y: this.y });
     base.context.restore();
   }
 

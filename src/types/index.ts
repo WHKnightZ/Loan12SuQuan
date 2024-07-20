@@ -117,7 +117,7 @@ export type IBase = {
   map: number[][];
 };
 
-export type IFontChar = { texture: HTMLImageElement; offsetY: number };
+export type IFontFamily = "CAP_WHITE" | "CAP_YELLOW" | "ARIAL" | "BLACK" | "VERDANA";
 
 export type IHeroId = "TRANG_SI" | "LINH_QUEN" | "ANH_HUNG" | "QUAI_VAT" | "KIEU_CONG_HAN";
 
