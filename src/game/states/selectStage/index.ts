@@ -65,7 +65,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    */
   update() {}
   /**
-   * Xử lý sụ kiện move chuột
+   * Xử lý sự kiện move chuột
    */
   onMouseMove(e: MouseEvent) {
     const x = Math.floor((e.offsetX - avatarOffsetX) / avatarFullWidth);
