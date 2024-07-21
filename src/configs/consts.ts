@@ -1,4 +1,4 @@
-import { IBase, ICharacterAttributes, ICharacterId, ICharacterWithoutIdAttributes, ITileType } from "@/types";
+import { IBase, ICharacterAttributes, ICharacterId, ICharacterWithoutIdAttributes, IPoint, ITileType } from "@/types";
 
 /**
  * Get danh sách các key của object
@@ -259,3 +259,5 @@ export const ENEMIES = [
 ];
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
+
+export const BASE_MAP: IPoint[] = [];

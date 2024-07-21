@@ -34,23 +34,37 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    * Hiển thị
    */
   render() {
-    base.context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const context = base.context;
+
+    context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     Font.draw({
       text: "Chọn Quân Địch",
       y: 60,
     });
 
+    context.strokeStyle = "#2465D3";
+    context.lineWidth = 3;
+
     ENEMIES.forEach((e, i) => {
-      base.context.drawImage(avatarTextures[e.id][0], getAvatarOffsetX(i), getAvatarOffsetY(i));
+      const x = getAvatarOffsetX(i);
+      const y = getAvatarOffsetY(i);
+      context.save();
+      context.beginPath();
+      context.arc(x + 30, y + 26, 26, 0, Math.PI * 2, true);
+      context.stroke();
+      context.clip();
+      context.closePath();
+      context.drawImage(avatarTextures[e.id][0], x, y);
+      context.restore();
     });
 
     if (this.activeAvatar !== -1) {
       const offsetX = getAvatarOffsetX(this.activeAvatar);
       const offsetY = getAvatarOffsetY(this.activeAvatar);
-      base.context.strokeStyle = SPIN_ANIMATION_COLOR;
-      base.context.lineWidth = 2;
-      base.context.strokeRect(offsetX - 3, offsetY - 3, avatarWidth + 6, avatarHeight + 6);
+      context.strokeStyle = SPIN_ANIMATION_COLOR;
+      context.lineWidth = 2;
+      context.strokeRect(offsetX - 3, offsetY - 3, avatarWidth + 6, avatarHeight + 6);
 
       const { name } = ENEMIES[this.activeAvatar];
 

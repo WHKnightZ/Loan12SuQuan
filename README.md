@@ -48,6 +48,7 @@ https://12lords.khanhnn.xyz
 - [ ] Hàm draw font có thêm textAlign, wrapText (defaultTrue), xuống dòng keep textAlign + gap giữa các dòng dựa theo height cao nhất của ký tự
 - [x] Quản lý state
 - [ ] Slide transition
+- [ ] Map tương tự Candy Crush, vẽ sẵn 40-50 points, lặp lại từ đầu, mỗi point là 1 rounded image có border, hệ toạ độ 0-1, hỗ trợ vuốt để scroll
 
 ### Bug:
 
