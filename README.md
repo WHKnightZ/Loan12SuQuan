@@ -1,5 +1,9 @@
 # Loạn 12 Sứ Quân
 
+### Demo:
+
+https://12lords.khanhnn.xyz
+
 ### Chức năng bổ sung:
 
 - [x] Hiệu ứng khi select 1 tile
@@ -27,7 +31,7 @@
 - [ ] Ban đầu sẽ xử lý ở FE, về sau sẽ implement socket để xử lý BE
 - [ ] Admin sẽ dùng Nextjs (Reactjs) làm FE, Giao diện chơi dùng thuần js canvas
 - [ ] Hiệu ứng chain lightning làm như nào?
-- [ ] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
+- [x] Thay đào => power (khi đầy power sẽ được crit dam trong 1 lượt sau đó reset) + đổi texture của power => gradient
 - [ ] Hiệu ứng full power (giống khi dùng item kiếm), cần tính lại xem mỗi đào sẽ được bao nhiêu năng lượng là hợp lý
 - [ ] Thêm mỗi lượt có 30s, không đi sẽ mất lượt
 - [ ] Hiệu ứng nhấp nháy ngoài biên khi đổi lượt
