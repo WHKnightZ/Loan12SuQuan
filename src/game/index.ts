@@ -3,6 +3,7 @@ import { GameStateManager } from "@/extensions";
 import { IEffect, IGame, IGameStateType } from "@/types";
 import { SelectStageState } from "./states/selectStage";
 import { InGameState } from "./states/inGame";
+import { base } from "@/configs/consts";
 
 type ITimeout = { id: number; callback: () => void; currentFrame: number; maxFrame: number };
 
@@ -49,13 +50,21 @@ export class Game implements IGame {
    * Xử lý sự kiện move chuột
    */
   onMouseMove(e: MouseEvent) {
-    this.stateManager.onMouseMove(e);
+    const canvas = base.canvas;
+    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
+    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
+
+    this.stateManager.onMouseMove({ offsetX, offsetY });
   }
   /**
    * Xử lý sự kiện click chuột
    */
   onClick(e: MouseEvent) {
-    this.stateManager.onClick(e);
+    const canvas = base.canvas;
+    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
+    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
+
+    this.stateManager.onClick({ offsetX, offsetY });
   }
   /**
    * Xử lý sự kiện nhấn phím

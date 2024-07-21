@@ -1,4 +1,4 @@
-import { IGameState, IGameStateManager } from "@/types";
+import { IGameState, IGameStateManager, IMouseEvent } from "@/types";
 
 /**
  * Base game state
@@ -34,11 +34,11 @@ export class GameState<TParent, TGameStateType extends string> implements IGameS
   /**
    * Xử lý sự kiện move chuột
    */
-  onMouseMove(e: MouseEvent) {}
+  onMouseMove(e: IMouseEvent) {}
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {}
+  onClick(e: IMouseEvent) {}
   /**
    * Xử lý sự kiện nhấn phím
    */
@@ -96,13 +96,13 @@ export class GameStateManager<TParent, TGameStateType extends string>
   /**
    * Xử lý sự kiện move chuột
    */
-  onMouseMove(e: MouseEvent) {
+  onMouseMove(e: IMouseEvent) {
     this.state.onMouseMove(e);
   }
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {
+  onClick(e: IMouseEvent) {
     this.state.onClick(e);
   }
   /**

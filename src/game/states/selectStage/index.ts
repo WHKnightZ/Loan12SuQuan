@@ -2,7 +2,7 @@ import { DEFAULT_CHARACTER, ENEMIES, SCREEN_HEIGHT, SCREEN_WIDTH, SPIN_ANIMATION
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
-import { IGame, IGameStateType } from "@/types";
+import { IGame, IGameStateType, IMouseEvent } from "@/types";
 
 const AVATARS_PER_ROW = 5;
 let avatarWidth: number;
@@ -67,14 +67,14 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   /**
    * Xử lý sự kiện move chuột
    */
-  onMouseMove(e: MouseEvent) {
-    const x = Math.floor((e.offsetX - avatarOffsetX) / avatarFullWidth);
-    const y = Math.floor((e.offsetY - avatarOffsetY) / avatarFullHeight);
+  onMouseMove({ offsetX, offsetY }: IMouseEvent) {
+    const x = Math.floor((offsetX - avatarOffsetX) / avatarFullWidth);
+    const y = Math.floor((offsetY - avatarOffsetY) / avatarFullHeight);
 
     const startX = x * avatarFullWidth + avatarOffsetX;
     const startY = y * avatarFullHeight + avatarOffsetY;
 
-    if (x < 0 || y < 0 || startX + avatarWidth < e.offsetX || startY + avatarHeight < e.offsetY) {
+    if (x < 0 || y < 0 || startX + avatarWidth < offsetX || startY + avatarHeight < offsetY) {
       this.activeAvatar = -1;
       return;
     }
@@ -91,7 +91,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {
+  onClick(e: IMouseEvent) {
     if (this.activeAvatar === -1) return;
 
     this.parent.stateManager.changeState("IN_GAME", this.activeAvatar);

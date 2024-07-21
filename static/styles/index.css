@@ -83,10 +83,12 @@ body {
   height: 28px;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 500px) {
   #canvas {
-    width: 80vw;
-    height: 96vw;
+    width: 100vw;
+    height: 120vw;
+    border-width: 3px;
+    box-sizing: border-box;
   }
 
   #github {

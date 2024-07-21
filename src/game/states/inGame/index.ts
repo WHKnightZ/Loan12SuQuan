@@ -4,6 +4,7 @@ import {
   IGameStateManager,
   IGameStateType,
   IInGameStateType,
+  IMouseEvent,
   IPoint,
   IPointExt,
   ITileInfo,
@@ -397,13 +398,8 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {
+  onClick({ offsetX, offsetY }: IMouseEvent) {
     if ((!this.stateManager.is("IDLE") && !this.stateManager.is("SELECT")) || this.playerTurn !== 0) return;
-
-    const canvas = base.canvas;
-
-    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
-    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
 
     if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
 

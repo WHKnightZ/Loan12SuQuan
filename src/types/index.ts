@@ -30,15 +30,20 @@ export type IHasTimer = {
 
 export type IEffect = ILivable & IRenderable;
 
+export type IMouseEvent = {
+  offsetX: number;
+  offsetY: number;
+};
+
 export type IHasEvent = {
   /**
    * Xử lý sự kiện move chuột
    */
-  onMouseMove(e: MouseEvent): void;
+  onMouseMove(e: IMouseEvent): void;
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent): void;
+  onClick(e: IMouseEvent): void;
   /**
    * Xử lý sự kiện nhấn phím
    */
