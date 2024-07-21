@@ -119,12 +119,38 @@ export type IBase = {
 
 export type IFontFamily = "CAP_WHITE" | "CAP_YELLOW" | "ARIAL" | "BLACK" | "VERDANA";
 
-export type IHeroId = "TRANG_SI" | "LINH_QUEN" | "ANH_HUNG" | "QUAI_VAT" | "KIEU_CONG_HAN";
+export type ICharacterId =
+  | "trang-si"
+  | "linh-quen"
+  | "cay-an-thit"
+  | "nguyen-bac"
+  | "quy-ong"
+  | "linh-binh-kieu"
+  | "quy-lun"
+  | "son-tac"
+  | "linh-hoi-ho"
+  | "ly-khue"
+  | "moc-tinh"
+  | "la-duong"
+  | "linh-tam-dai"
+  | "xa-tinh"
+  | "tuong-do-dong"
+  | "doc-nhan-tru"
+  | "do-canh-thac"
+  | "ngo-xuong-xi"
+  | "quai-su"
+  | "nguyen-tri-kha"
+  | "ngo-nhat-khanh"
+  | "sau-quy"
+  | "kieu-thuan";
 
-export type IHeroAttributes = {
+export type ICharacterWithoutIdAttributes = {
   name: string;
   attack: number;
   intelligence: number;
   life: number;
-  avatar: number;
+};
+
+export type ICharacterAttributes = ICharacterWithoutIdAttributes & {
+  id: string;
 };

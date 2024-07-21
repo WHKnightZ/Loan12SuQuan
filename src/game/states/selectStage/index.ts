@@ -1,13 +1,13 @@
-import { ENEMIES, SCREEN_HEIGHT, SCREEN_WIDTH, SPIN_ANIMATION_COLOR, base } from "@/configs/consts";
+import { DEFAULT_CHARACTER, ENEMIES, SCREEN_HEIGHT, SCREEN_WIDTH, SPIN_ANIMATION_COLOR, base } from "@/configs/consts";
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
 import { IGame, IGameStateType } from "@/types";
 
-const AVATARS_PER_ROW = 4;
+const AVATARS_PER_ROW = 5;
 let avatarWidth: number;
 let avatarHeight: number;
-const avatarOffsetX = 90;
+const avatarOffsetX = 50;
 const avatarOffsetY = 120;
 const avatarGapX = 20;
 const avatarGapY = 20;
@@ -24,8 +24,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     super(parent, "SELECT_STAGE");
 
     this.activeAvatar = -1;
-    avatarWidth = avatarTextures[0][0].width;
-    avatarHeight = avatarTextures[0][0].height;
+    avatarWidth = avatarTextures[DEFAULT_CHARACTER][0].width;
+    avatarHeight = avatarTextures[DEFAULT_CHARACTER][0].height;
     avatarFullWidth = avatarWidth + avatarGapX;
     avatarFullHeight = avatarHeight + avatarGapY;
   }
@@ -42,7 +42,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     });
 
     ENEMIES.forEach((e, i) => {
-      base.context.drawImage(avatarTextures[e.avatar][0], getAvatarOffsetX(i), getAvatarOffsetY(i));
+      base.context.drawImage(avatarTextures[e.id][0], getAvatarOffsetX(i), getAvatarOffsetY(i));
     });
 
     if (this.activeAvatar !== -1) {

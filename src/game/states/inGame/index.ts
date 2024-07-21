@@ -17,7 +17,7 @@ import {
   CELL_SIZE_HALF,
   ENEMIES,
   GAIN_TURN,
-  HEROES,
+  CHARACTERS,
   MAP_WIDTH,
   MAP_WIDTH_1,
   MATCH_4_SCORE,
@@ -27,6 +27,7 @@ import {
   TILE_OFFSET,
   base,
   mapTileInfo,
+  DEFAULT_CHARACTER,
 } from "@/configs/consts";
 import { Player } from "./player";
 import { check, generateMap, getKey } from "@/utils/common";
@@ -121,7 +122,11 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.isFinished = false;
 
     this.players = [
-      new Player({ inGame: this, index: 0, attributes: { ...HEROES.TRANG_SI, intelligence: PLAYER_INTELLIGENCE } }),
+      new Player({
+        inGame: this,
+        index: 0,
+        attributes: { ...CHARACTERS[DEFAULT_CHARACTER], intelligence: PLAYER_INTELLIGENCE },
+      }),
       new Player({ inGame: this, index: 1, attributes: ENEMIES[enemyIndex] }),
     ];
     this.playerTurn = 0;

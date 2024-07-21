@@ -9,7 +9,7 @@ import {
   POWER_ATTACK_MULTIPLIER,
   SCREEN_WIDTH,
 } from "@/configs/consts";
-import { IHeroAttributes } from "@/types";
+import { ICharacterAttributes } from "@/types";
 import { avatarTextures, barTextures } from "@/textures";
 import { clamp, easeInOutCubic, lerp, random } from "@/utils/math";
 import { BorderAnimation } from "./borderAnimation";
@@ -78,10 +78,18 @@ export class Player implements IPlayer {
    */
   powerAttackPlugin: IPowerAttackPlugin;
 
-  constructor({ inGame, index, attributes }: { inGame: IInGameState; index: number; attributes: IHeroAttributes }) {
+  constructor({
+    inGame,
+    index,
+    attributes,
+  }: {
+    inGame: IInGameState;
+    index: number;
+    attributes: ICharacterAttributes;
+  }) {
     this.inGame = inGame;
 
-    const { attack, intelligence, life, avatar } = attributes;
+    const { id, attack, intelligence, life } = attributes;
     this.index = index;
     this.attack = attack;
     this.intelligence = intelligence;
@@ -96,7 +104,7 @@ export class Player implements IPlayer {
     ];
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
 
-    this.avatarTexture = avatarTextures[avatar][index];
+    this.avatarTexture = avatarTextures[id][index];
     this.avatarOffset = {
       x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatarTexture.width,
       y: AVATAR_OFFSET_Y,

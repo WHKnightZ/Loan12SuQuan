@@ -1,20 +1,19 @@
+import { CHARACTERS, getKeys } from "@/configs/consts";
+import { ICharacterId } from "@/types";
 import { flipHorizontal, resize } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
-const COUNT_AVATARS = 5;
-
-export const avatarTextures = Array.from({ length: COUNT_AVATARS }).map(() => [null, null]) as HTMLImageElement[][];
+export const avatarTextures = {} as { [key in ICharacterId]: HTMLImageElement[] };
 
 export const loadAvatars = async () => {
   return await Promise.all(
-    avatarTextures.map(
-      (_, index) =>
+    getKeys(CHARACTERS).map(
+      (key) =>
         new Promise(async (res) => {
-          let img = await loadTexture(`avatars/${index}`);
-          img = await resize(img, 2);
-          avatarTextures[index][1] = img;
-          img = await flipHorizontal(img);
-          avatarTextures[index][0] = img;
+          const img = await loadTexture(`avatars/${key}`);
+          const imgR = await resize(img, 2);
+          const imgL = await flipHorizontal(imgR);
+          avatarTextures[key] = [imgL, imgR];
           res(null);
         })
     )

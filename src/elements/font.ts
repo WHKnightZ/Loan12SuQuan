@@ -306,6 +306,7 @@ const fonts: { [key in IFontFamily]: IFontProperties } = {
 
 export class Font {
   private static family: IFontFamily;
+  private static savedFamily: IFontFamily;
   private static mappingFont: IMappingFont;
 
   static init() {
@@ -335,7 +336,19 @@ export class Font {
       };
     });
 
-    this.family = "CAP_WHITE";
+    this.reset();
+  }
+
+  static reset() {
+    this.family = this.savedFamily = "CAP_WHITE";
+  }
+
+  static save() {
+    this.savedFamily = this.family;
+  }
+
+  static restore() {
+    this.family = this.savedFamily;
   }
 
   static setFamily(family: IFontFamily) {
@@ -374,5 +387,3 @@ export class Font {
     });
   }
 }
-
-export const font = new Font();
