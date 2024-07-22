@@ -1,6 +1,9 @@
 import {
+  AVATAR_CENTER,
+  AVATAR_HEIGHT,
   AVATAR_OFFSET_X,
   AVATAR_OFFSET_Y,
+  AVATAR_WIDTH,
   base,
   BOARD_SIZE,
   DEFAULT_ENERGY,
@@ -104,9 +107,9 @@ export class Player implements IPlayer {
     ];
     this.barOffsetX = index === 0 ? BAR_OFFSET_X : SCREEN_WIDTH - BAR_OFFSET_X - barTextures.life.width;
 
-    this.avatarTexture = avatarTextures[id][index];
+    this.avatarTexture = avatarTextures[id];
     this.avatarOffset = {
-      x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - this.avatarTexture.width,
+      x: this.index === 0 ? AVATAR_OFFSET_X : SCREEN_WIDTH - AVATAR_OFFSET_X - AVATAR_WIDTH,
       y: AVATAR_OFFSET_Y,
     };
 
@@ -197,17 +200,32 @@ export class Player implements IPlayer {
    * Hiển thị
    */
   render() {
+    const context = base.context;
+
     // Hiển thị các bars
     this.bars.forEach(({ texture, attribute }, index) => {
       const amount = attribute.currentDisplayValue / attribute.maxValue;
       const width = 84 * amount;
       if (width < 1) return;
-      base.context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
+      context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
     });
 
     // Hiển thị avatar
     const offsetAvatar = this.spring.getSpringOffet();
-    base.context.drawImage(this.avatarTexture, this.avatarOffset.x + offsetAvatar, this.avatarOffset.y);
+    const x = this.avatarOffset.x + offsetAvatar;
+    const y = this.avatarOffset.y;
+
+    if (this.index === 0) {
+      // Rotate
+      context.save();
+      context.translate(x, y);
+      context.translate(this.avatarTexture.width, 0);
+      context.scale(-1, 1);
+      context.drawImage(this.avatarTexture, 0, 4, AVATAR_WIDTH, AVATAR_HEIGHT, 0, 4, AVATAR_WIDTH, AVATAR_HEIGHT);
+      context.restore();
+    } else {
+      context.drawImage(this.avatarTexture, x, y);
+    }
 
     // Hiển thị border animation
     this.borderAnimation.render();

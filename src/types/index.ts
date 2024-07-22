@@ -134,8 +134,10 @@ export type ICharacterId =
   | "quy-lun"
   | "son-tac"
   | "linh-hoi-ho"
+  | "chon-tinh"
   | "ly-khue"
   | "moc-tinh"
+  | "linh-phong-chau"
   | "la-duong"
   | "linh-tam-dai"
   | "xa-tinh"
@@ -143,11 +145,12 @@ export type ICharacterId =
   | "doc-nhan-tru"
   | "do-canh-thac"
   | "ngo-xuong-xi"
-  | "quai-su"
+  | "nhen-tinh"
   | "nguyen-tri-kha"
   | "ngo-nhat-khanh"
   | "sau-quy"
-  | "kieu-thuan";
+  | "kieu-thuan"
+  | "kieu-cong-han";
 
 export type ICharacterWithoutIdAttributes = {
   name: string;

@@ -1,4 +1,12 @@
-import { DEFAULT_CHARACTER, ENEMIES, SCREEN_HEIGHT, SCREEN_WIDTH, SPIN_ANIMATION_COLOR, base } from "@/configs/consts";
+import {
+  AVATAR_CENTER,
+  DEFAULT_CHARACTER,
+  ENEMIES,
+  SCREEN_HEIGHT,
+  SCREEN_WIDTH,
+  SPIN_ANIMATION_COLOR,
+  base,
+} from "@/configs/consts";
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
@@ -8,9 +16,9 @@ const AVATARS_PER_ROW = 5;
 let avatarWidth: number;
 let avatarHeight: number;
 const avatarOffsetX = 50;
-const avatarOffsetY = 120;
+const avatarOffsetY = 110;
 const avatarGapX = 20;
-const avatarGapY = 20;
+const avatarGapY = 15;
 let avatarFullWidth: number;
 let avatarFullHeight: number;
 
@@ -24,8 +32,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     super(parent, "SELECT_STAGE");
 
     this.activeAvatar = -1;
-    avatarWidth = avatarTextures[DEFAULT_CHARACTER][0].width;
-    avatarHeight = avatarTextures[DEFAULT_CHARACTER][0].height;
+    avatarWidth = avatarTextures[DEFAULT_CHARACTER].width;
+    avatarHeight = avatarTextures[DEFAULT_CHARACTER].height;
     avatarFullWidth = avatarWidth + avatarGapX;
     avatarFullHeight = avatarHeight + avatarGapY;
   }
@@ -51,11 +59,11 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
       const y = getAvatarOffsetY(i);
       context.save();
       context.beginPath();
-      context.arc(x + 30, y + 26, 26, 0, Math.PI * 2, true);
+      context.arc(x + AVATAR_CENTER, y + AVATAR_CENTER, AVATAR_CENTER, 0, Math.PI * 2, true);
       context.stroke();
       context.clip();
       context.closePath();
-      context.drawImage(avatarTextures[e.id][0], x, y);
+      context.drawImage(avatarTextures[e.id], x, y);
       context.restore();
     });
 

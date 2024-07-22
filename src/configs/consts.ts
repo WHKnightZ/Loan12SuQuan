@@ -189,6 +189,18 @@ export const mapTileInfo: {
  */
 export const base = {} as IBase;
 /**
+ * Avatar width
+ */
+export const AVATAR_WIDTH = 60;
+/**
+ * Avatar height
+ */
+export const AVATAR_HEIGHT = 52;
+/**
+ * Avatar center
+ */
+export const AVATAR_CENTER = AVATAR_WIDTH / 2;
+/**
  * Offset X của avatar
  */
 export const AVATAR_OFFSET_X = 62;
@@ -213,8 +225,10 @@ const CHARACTER_WITHOUT_IDS: { [key in ICharacterId]: ICharacterWithoutIdAttribu
   "quy-lun": { name: "Quỷ Lùn", attack: 5, life: 200, intelligence: 100 },
   "son-tac": { name: "Sơn Tặc", attack: 5, life: 200, intelligence: 100 },
   "linh-hoi-ho": { name: "Lính Hồi Hồ", attack: 5, life: 200, intelligence: 100 },
+  "chon-tinh": { name: "Chồn Tinh", attack: 5, life: 200, intelligence: 100 },
   "ly-khue": { name: "Lý Khuê", attack: 5, life: 200, intelligence: 100 },
   "moc-tinh": { name: "Mộc Tinh", attack: 5, life: 200, intelligence: 100 },
+  "linh-phong-chau": { name: "Lính Phong Châu", attack: 5, life: 200, intelligence: 100 },
   "la-duong": { name: "Lã Đường", attack: 5, life: 200, intelligence: 100 },
   "linh-tam-dai": { name: "Lính Tam Đái", attack: 5, life: 200, intelligence: 100 },
   "xa-tinh": { name: "Xà Tinh", attack: 5, life: 200, intelligence: 100 },
@@ -222,11 +236,12 @@ const CHARACTER_WITHOUT_IDS: { [key in ICharacterId]: ICharacterWithoutIdAttribu
   "doc-nhan-tru": { name: "Độc Nhãn Trư", attack: 5, life: 200, intelligence: 100 },
   "do-canh-thac": { name: "Đỗ Cảnh Thạc", attack: 5, life: 200, intelligence: 100 },
   "ngo-xuong-xi": { name: "Ngô Xương Xí", attack: 5, life: 200, intelligence: 100 },
-  "quai-su": { name: "Quái Sư", attack: 5, life: 200, intelligence: 100 },
+  "nhen-tinh": { name: "Nhện Tinh", attack: 5, life: 200, intelligence: 100 },
   "nguyen-tri-kha": { name: "Nguyễn Trí Khả", attack: 5, life: 200, intelligence: 100 },
   "ngo-nhat-khanh": { name: "Ngô Nhật Khánh", attack: 5, life: 200, intelligence: 100 },
   "sau-quy": { name: "Sâu Quỷ", attack: 5, life: 200, intelligence: 100 },
   "kieu-thuan": { name: "Kiều Thuận", attack: 15, life: 1000, intelligence: 100 },
+  "kieu-cong-han": { name: "Kiều Công Hãn", attack: 15, life: 1000, intelligence: 100 },
 };
 export const CHARACTERS = getKeys(CHARACTER_WITHOUT_IDS).reduce(
   (a, b) => ({ ...a, [b]: { ...CHARACTER_WITHOUT_IDS[b], id: b } }),
@@ -242,8 +257,10 @@ export const ENEMIES = [
   CHARACTERS["quy-lun"],
   CHARACTERS["son-tac"],
   CHARACTERS["linh-hoi-ho"],
+  CHARACTERS["chon-tinh"],
   CHARACTERS["ly-khue"],
   CHARACTERS["moc-tinh"],
+  CHARACTERS["linh-phong-chau"],
   CHARACTERS["la-duong"],
   CHARACTERS["linh-tam-dai"],
   CHARACTERS["xa-tinh"],
@@ -251,11 +268,12 @@ export const ENEMIES = [
   CHARACTERS["doc-nhan-tru"],
   CHARACTERS["do-canh-thac"],
   CHARACTERS["ngo-xuong-xi"],
-  CHARACTERS["quai-su"],
+  CHARACTERS["nhen-tinh"],
   CHARACTERS["nguyen-tri-kha"],
   CHARACTERS["ngo-nhat-khanh"],
   CHARACTERS["sau-quy"],
   CHARACTERS["kieu-thuan"],
+  CHARACTERS["kieu-cong-han"],
 ];
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
