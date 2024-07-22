@@ -278,4 +278,25 @@ export const ENEMIES = [
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
 
-export const BASE_MAP: IPoint[] = [];
+// 641 x 665
+export const BASE_MAP: IPoint[] = [
+  { x: 147, y: 87 },
+  { x: 204, y: 202 },
+  { x: 372, y: 281 },
+  { x: 580, y: 236 },
+  { x: 785, y: 217 },
+  { x: 848, y: 310 },
+  { x: 675, y: 388 },
+  { x: 707, y: 492 },
+  { x: 795, y: 594 },
+  { x: 569, y: 589 },
+  { x: 377, y: 525 },
+  { x: 149, y: 517 },
+  { x: 132, y: 636 },
+  { x: 297, y: 708 },
+  { x: 519, y: 746 },
+  { x: 689, y: 773 },
+].map(({ x, y }) => ({
+  x: Math.floor((x * SCREEN_WIDTH) / 1000),
+  y: Math.floor(((y * 665) / 641 / 1000) * SCREEN_WIDTH),
+}));
