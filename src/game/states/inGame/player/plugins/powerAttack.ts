@@ -1,4 +1,4 @@
-import { base } from "@/configs/consts";
+import { AVATAR_HEIGHT, AVATAR_WIDTH, base } from "@/configs/consts";
 import { GamePlugin } from "@/extensions";
 import { powerAttackTextures } from "@/textures";
 import { IPlayer, IPowerAttackPlugin } from "../../types";
@@ -44,8 +44,8 @@ export class PowerAttackPlugin extends GamePlugin<IPlayer> implements IPowerAtta
       0,
       width,
       height,
-      player.avatarOffset.x + (player.avatarTexture.width - width) / 2,
-      player.avatarOffset.y + player.avatarTexture.height - height + 1,
+      player.avatarOffset.x + (AVATAR_WIDTH - width) / 2,
+      player.avatarOffset.y + AVATAR_HEIGHT - height + 1,
       width,
       height
     );

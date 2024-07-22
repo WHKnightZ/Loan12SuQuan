@@ -29,6 +29,7 @@ import {
   base,
   mapTileInfo,
   DEFAULT_CHARACTER,
+  AVATAR_WIDTH,
 } from "@/configs/consts";
 import { Player } from "./player";
 import { check, generateMap, getKey } from "@/utils/common";
@@ -278,7 +279,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
           tile: value,
           startX: x * CELL_SIZE + CELL_SIZE_HALF,
           startY: y * CELL_SIZE + CELL_SIZE_HALF,
-          endX: activePlayer.avatarOffset.x + activePlayer.avatarTexture.width / 2,
+          endX: activePlayer.avatarOffset.x + AVATAR_WIDTH / 2,
           endY: activePlayer.avatarOffset.y,
         })
       );

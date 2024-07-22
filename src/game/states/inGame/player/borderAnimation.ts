@@ -8,7 +8,7 @@ export class BorderAnimation implements IRenderable {
   private index: number;
   private spins: Spin[];
 
-  constructor(inGame: IInGameState, index: number, avatarOffset: IPoint, avatarTexture: HTMLImageElement) {
+  constructor(inGame: IInGameState, index: number, avatarOffset: IPoint) {
     this.inGame = inGame;
     this.index = index;
 

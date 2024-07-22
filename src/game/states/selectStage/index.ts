@@ -1,5 +1,6 @@
 import {
   AVATAR_CENTER,
+  AVATAR_WIDTH,
   DEFAULT_CHARACTER,
   ENEMIES,
   SCREEN_HEIGHT,
@@ -13,8 +14,6 @@ import { avatarTextures } from "@/textures";
 import { IGame, IGameStateType, IMouseEvent } from "@/types";
 
 const AVATARS_PER_ROW = 5;
-let avatarWidth: number;
-let avatarHeight: number;
 const avatarOffsetX = 50;
 const avatarOffsetY = 110;
 const avatarGapX = 20;
@@ -32,10 +31,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     super(parent, "SELECT_STAGE");
 
     this.activeAvatar = -1;
-    avatarWidth = avatarTextures[DEFAULT_CHARACTER].width;
-    avatarHeight = avatarTextures[DEFAULT_CHARACTER].height;
-    avatarFullWidth = avatarWidth + avatarGapX;
-    avatarFullHeight = avatarHeight + avatarGapY;
+    avatarFullWidth = AVATAR_WIDTH + avatarGapX;
+    avatarFullHeight = AVATAR_WIDTH + avatarGapY;
   }
 
   /**
@@ -72,7 +69,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
       const offsetY = getAvatarOffsetY(this.activeAvatar);
       context.strokeStyle = SPIN_ANIMATION_COLOR;
       context.lineWidth = 2;
-      context.strokeRect(offsetX - 3, offsetY - 3, avatarWidth + 6, avatarHeight + 6);
+      context.strokeRect(offsetX - 3, offsetY - 3, AVATAR_WIDTH + 6, AVATAR_WIDTH + 6);
 
       const { name } = ENEMIES[this.activeAvatar];
 
@@ -96,7 +93,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     const startX = x * avatarFullWidth + avatarOffsetX;
     const startY = y * avatarFullHeight + avatarOffsetY;
 
-    if (x < 0 || y < 0 || startX + avatarWidth < offsetX || startY + avatarHeight < offsetY) {
+    if (x < 0 || y < 0 || x >= AVATARS_PER_ROW || startX + AVATAR_WIDTH < offsetX || startY + AVATAR_WIDTH < offsetY) {
       this.activeAvatar = -1;
       return;
     }

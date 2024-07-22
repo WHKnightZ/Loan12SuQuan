@@ -113,7 +113,7 @@ export class Player implements IPlayer {
       y: AVATAR_OFFSET_Y,
     };
 
-    this.borderAnimation = new BorderAnimation(this.inGame, index, this.avatarOffset, this.avatarTexture);
+    this.borderAnimation = new BorderAnimation(this.inGame, index, this.avatarOffset);
     this.spring = new Spring();
 
     this.powerAttackPlugin = new PowerAttackPlugin(this);
@@ -215,17 +215,15 @@ export class Player implements IPlayer {
     const x = this.avatarOffset.x + offsetAvatar;
     const y = this.avatarOffset.y;
 
+    context.save();
+    context.translate(x, y);
     if (this.index === 0) {
-      // Rotate
-      context.save();
-      context.translate(x, y);
-      context.translate(this.avatarTexture.width, 0);
+      // Rotate nếu là người chơi 1 (do ảnh ban đầu bị lật ngược)
+      context.translate(AVATAR_WIDTH, 0);
       context.scale(-1, 1);
-      context.drawImage(this.avatarTexture, 0, 4, AVATAR_WIDTH, AVATAR_HEIGHT, 0, 4, AVATAR_WIDTH, AVATAR_HEIGHT);
-      context.restore();
-    } else {
-      context.drawImage(this.avatarTexture, x, y);
     }
+    context.drawImage(this.avatarTexture, 0, 4, AVATAR_WIDTH, AVATAR_HEIGHT, 0, 0, AVATAR_WIDTH, AVATAR_HEIGHT);
+    context.restore();
 
     // Hiển thị border animation
     this.borderAnimation.render();
