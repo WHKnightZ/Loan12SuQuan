@@ -297,6 +297,6 @@ export const BASE_MAP: IPoint[] = [
   { x: 519, y: 746 },
   { x: 689, y: 773 },
 ].map(({ x, y }) => ({
-  x: Math.floor((x * SCREEN_WIDTH) / 1000),
-  y: Math.floor(((y * 665) / 641 / 1000) * SCREEN_WIDTH),
+  x: Math.floor(((x - 40) * SCREEN_WIDTH) / 880),
+  y: Math.floor(((y * 665) / 641 / 800) * SCREEN_WIDTH),
 }));

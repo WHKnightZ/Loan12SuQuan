@@ -1,5 +1,5 @@
-import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
-import { ITileInfo } from "@/types";
+import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES, BASE_MAP } from "@/configs/consts";
+import { IPoint, ITileInfo } from "@/types";
 import { random } from "./math";
 
 export const pause = (duration: number) => {
@@ -160,4 +160,126 @@ export const isString = (value: any): value is string => {
 
 export const isFunction = (value: any): value is Function => {
   return typeof value === "function";
+};
+
+export const curveThroughPoints = () => {
+  const context = base.context;
+
+  context.beginPath();
+
+  let p0: IPoint;
+  let p1: IPoint;
+  let p2: IPoint;
+  let p3: IPoint;
+  let i6 = 1 / 6;
+
+  // context.lineJoin = "round";
+
+  for (let i = 2, n = BASE_MAP.length; i <= n; i += 1) {
+    p0 = BASE_MAP[i - 3 + (i === 2 ? 1 : 0)];
+    p1 = BASE_MAP[i - 2];
+    p2 = BASE_MAP[i - 1];
+    p3 = BASE_MAP[i + (i === n ? -1 : 0)];
+
+    if (i === 2) {
+      context.moveTo(p1.x, p1.y);
+    }
+
+    context.bezierCurveTo(
+      p2.x * i6 + p1.x - p0.x * i6,
+      p2.y * i6 + p1.y - p0.y * i6,
+      p3.x * -i6 + p2.x + p1.x * i6,
+      p3.y * -i6 + p2.y + p1.y * i6,
+      p2.x,
+      p2.y
+    );
+  }
+
+  context.lineWidth = 3;
+  context.strokeStyle = "#566783";
+  context.stroke();
+};
+
+export const curveThroughPoints2 = () => {
+  const context = base.context;
+
+  // options or defaults
+  const tension = 0.5;
+  const numOfSeg = 5;
+
+  const points = BASE_MAP.reduce((a, b) => [...a, b.x, b.y], []);
+
+  var i = 1,
+    l = points.length,
+    rPos = 0,
+    rLen = (l - 2) * numOfSeg + 2 + (close ? 2 * numOfSeg : 0),
+    res = new Float32Array(rLen),
+    cache = new Float32Array((numOfSeg + 2) * 4),
+    cachePtr = 4;
+
+  const pts = points.slice(0);
+
+  pts.unshift(points[1]); // copy 1. point and insert at beginning
+  pts.unshift(points[0]);
+  pts.push(points[l - 2], points[l - 1]); // duplicate end-points
+
+  // cache inner-loop calculations as they are based on t alone
+  cache[0] = 1; // 1,0,0,0
+
+  for (; i < numOfSeg; i++) {
+    var st = i / numOfSeg,
+      st2 = st * st,
+      st3 = st2 * st,
+      st23 = st3 * 2,
+      st32 = st2 * 3;
+
+    cache[cachePtr++] = st23 - st32 + 1; // c1
+    cache[cachePtr++] = st32 - st23; // c2
+    cache[cachePtr++] = st3 - 2 * st2 + st; // c3
+    cache[cachePtr++] = st3 - st2; // c4
+  }
+
+  cache[++cachePtr] = 1; // 0,1,0,0
+
+  const parse = (pts, cache, l) => {
+    for (var i = 2, t; i < l; i += 2) {
+      var pt1 = pts[i],
+        pt2 = pts[i + 1],
+        pt3 = pts[i + 2],
+        pt4 = pts[i + 3],
+        t1x = (pt3 - pts[i - 2]) * tension,
+        t1y = (pt4 - pts[i - 1]) * tension,
+        t2x = (pts[i + 4] - pt1) * tension,
+        t2y = (pts[i + 5] - pt2) * tension;
+
+      for (t = 0; t < numOfSeg; t++) {
+        var c = t << 2, //t * 4;
+          c1 = cache[c],
+          c2 = cache[c + 1],
+          c3 = cache[c + 2],
+          c4 = cache[c + 3];
+
+        res[rPos++] = c1 * pt1 + c2 * pt3 + c3 * t1x + c4 * t2x;
+        res[rPos++] = c1 * pt2 + c2 * pt4 + c3 * t1y + c4 * t2y;
+      }
+    }
+  };
+
+  // calc. points
+  parse(pts, cache, l);
+
+  // add last point
+  l = points.length - 2;
+  res[rPos++] = points[l];
+  res[rPos] = points[l + 1];
+
+  context.beginPath();
+  context.moveTo(pts[0], pts[1]);
+
+  // add lines to path
+  for (i = 0, l = res.length; i < l; i += 2) base.context.lineTo(res[i], res[i + 1]);
+
+  context.strokeStyle = "#000";
+  context.lineWidth = 3;
+  context.stroke();
 };
