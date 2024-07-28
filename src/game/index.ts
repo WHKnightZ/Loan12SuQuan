@@ -59,12 +59,22 @@ export class Game implements IGame {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {
+  onMouseDown(e: MouseEvent) {
     const canvas = base.canvas;
     const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
     const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
 
-    this.stateManager.onClick({ offsetX, offsetY });
+    this.stateManager.onMouseDown({ offsetX, offsetY });
+  }
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp(e: MouseEvent): void {
+    const canvas = base.canvas;
+    const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
+    const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
+
+    this.stateManager.onMouseUp({ offsetX, offsetY });
   }
   /**
    * Xử lý sự kiện nhấn phím

@@ -2,8 +2,9 @@ import {
   AVATAR_CENTER,
   AVATAR_WIDTH,
   BACKGROUND_COLOR,
-  BASE_MAP,
   ENEMIES,
+  LOOP_CYCLE,
+  MAP,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
   SPIN_ANIMATION_COLOR,
@@ -12,8 +13,8 @@ import {
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
-import { IGame, IGameStateType, IMouseEvent } from "@/types";
-import { curveThroughPoints, curveThroughPoints2 } from "@/utils/common";
+import { IGame, IGameStateType, IMapPoint, IMouseEvent } from "@/types";
+import { curveThroughPoints, curveThroughPoints2, curveThroughPoints3 } from "@/utils/common";
 
 const AVATARS_PER_ROW = 5;
 const avatarOffsetX = 50;
@@ -23,18 +24,27 @@ const avatarGapY = 15;
 let avatarFullWidth: number;
 let avatarFullHeight: number;
 
-const drawPoints = () => {
-  base.context.strokeStyle = "#1562af7f";
-  base.context.lineWidth = 3;
-  base.context.fillStyle = "#3f8dda";
+const enemyCount = ENEMIES.length;
 
-  for (let i = 0, n = BASE_MAP.length, p; i < n; i += 1) {
-    p = BASE_MAP[i];
-    base.context.beginPath();
-    base.context.arc(p.x, p.y, 21, 0, Math.PI * 2, false);
-    base.context.fill();
-    base.context.stroke();
-  }
+const drawPoints = (points: IMapPoint[]) => {
+  const context = base.context;
+
+  // base.context.strokeStyle = "#1562af";
+  context.strokeStyle = "#00a88e";
+  context.lineWidth = 5;
+
+  points.forEach(({ x, y, hidden, index }) => {
+    if (hidden) return;
+
+    context.save();
+    context.beginPath();
+    context.arc(x, y, 20, 0, Math.PI * 2, true);
+    context.stroke();
+    context.clip();
+    context.closePath();
+    context.drawImage(avatarTextures[ENEMIES[index % enemyCount].id], x - 20, y - 20, 40, 40);
+    context.restore();
+  });
 };
 
 const getAvatarOffsetX = (index: number) => (index % AVATARS_PER_ROW) * avatarFullWidth + avatarOffsetX;
@@ -42,6 +52,10 @@ const getAvatarOffsetY = (index: number) => Math.floor(index / AVATARS_PER_ROW) 
 
 export class SelectStageState extends GameState<IGame, IGameStateType> {
   private activeAvatar: number;
+  private oldOffsetY: number;
+  private offsetY: number;
+  private offsetY2: number;
+  private dragging: boolean;
 
   constructor(parent: IGame) {
     super(parent, "SELECT_STAGE");
@@ -49,6 +63,10 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.activeAvatar = -1;
     avatarFullWidth = AVATAR_WIDTH + avatarGapX;
     avatarFullHeight = AVATAR_WIDTH + avatarGapY;
+
+    this.offsetY = 0;
+    this.offsetY2 = 0;
+    this.dragging = false;
   }
 
   /**
@@ -57,11 +75,29 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   render() {
     const context = base.context;
 
+    context.reset();
+
     context.fillStyle = BACKGROUND_COLOR;
     context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    curveThroughPoints2();
-    // drawPoints();
+    const from = this.offsetY + this.offsetY2 - 200;
+    const to = from + SCREEN_HEIGHT + 200;
+
+    const a = -Math.floor(from / LOOP_CYCLE) + 1;
+    let b = -Math.ceil(to / LOOP_CYCLE);
+
+    if (b < 0) b = 0;
+
+    // console.log(a, b);
+
+    const newMap = MAP.slice(b * 31, a * 31);
+
+    const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * 31 }));
+
+    curveThroughPoints(map);
+    // curveThroughPoints2(map);
+    // curveThroughPoints3(map);
+    drawPoints(map);
 
     return;
 
@@ -109,6 +145,12 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    * Xử lý sự kiện move chuột
    */
   onMouseMove({ offsetX, offsetY }: IMouseEvent) {
+    if (this.dragging) {
+      this.offsetY2 = offsetY - this.oldOffsetY;
+    }
+
+    return;
+
     const x = Math.floor((offsetX - avatarOffsetX) / avatarFullWidth);
     const y = Math.floor((offsetY - avatarOffsetY) / avatarFullHeight);
 
@@ -132,9 +174,18 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: IMouseEvent) {
+  onMouseDown({ offsetY }: IMouseEvent) {
+    this.dragging = true;
+    this.oldOffsetY = offsetY;
+
     if (this.activeAvatar === -1) return;
 
     this.parent.stateManager.changeState("IN_GAME", this.activeAvatar);
+  }
+
+  onMouseUp(e: IMouseEvent) {
+    this.offsetY += this.offsetY2;
+    this.offsetY2 = 0;
+    this.dragging = false;
   }
 }

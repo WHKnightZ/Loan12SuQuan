@@ -399,7 +399,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick({ offsetX, offsetY }: IMouseEvent) {
+  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
     if ((!this.stateManager.is("IDLE") && !this.stateManager.is("SELECT")) || this.playerTurn !== 0) return;
 
     if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
@@ -425,6 +425,10 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
   }
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp(e: IMouseEvent) {}
   /**
    * Xử lý sự kiện nhấn phím
    */

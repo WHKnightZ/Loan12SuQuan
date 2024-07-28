@@ -51,14 +51,15 @@ const main = async () => {
 
   await loadTextures();
   Font.init();
-  await pause(500);
+  // await pause(500);
 
   loading.end();
 
   game = new Game();
   base.game = game;
 
-  base.canvas.addEventListener("click", (e) => game.onClick(e));
+  base.canvas.addEventListener("mousedown", (e) => game.onMouseDown(e));
+  base.canvas.addEventListener("mouseup", (e) => game.onMouseUp(e));
   base.canvas.addEventListener("mousemove", (e) => game.onMouseMove(e));
   document.addEventListener("keydown", (e) => game.onKeyDown(e));
 };

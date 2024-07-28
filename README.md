@@ -49,6 +49,8 @@ https://12lords.khanhnn.xyz
 - [x] Quản lý state
 - [ ] Slide transition
 - [ ] Map tương tự Candy Crush, vẽ sẵn 40-50 points, lặp lại từ đầu, mỗi point là 1 rounded image có border, hệ toạ độ 0-1, hỗ trợ vuốt để scroll
+- [ ] Vẽ bao nhiêu điểm trên map thì bị tụt FPS? 1000? Sau đó thử tối ưu virtual scroll, và test với 10000 điểm
+- [ ] Chia toạ độ cho chu kỳ để ước lượng được khoảng hiện tại, sau đó check trong 3 khoảng hiện tại (-1 => 1) các điểm nằm trong màn hình để tối ưu render
 
 ### Bug:
 

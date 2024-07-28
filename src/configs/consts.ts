@@ -1,4 +1,11 @@
-import { IBase, ICharacterAttributes, ICharacterId, ICharacterWithoutIdAttributes, IPoint, ITileType } from "@/types";
+import {
+  IBase,
+  ICharacterAttributes,
+  ICharacterId,
+  ICharacterWithoutIdAttributes,
+  IMapPoint,
+  ITileType,
+} from "@/types";
 
 /**
  * Get danh sách các key của object
@@ -278,25 +285,45 @@ export const ENEMIES = [
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
 
-// 641 x 665
-export const BASE_MAP: IPoint[] = [
-  { x: 147, y: 87 },
-  { x: 204, y: 202 },
-  { x: 372, y: 281 },
-  { x: 580, y: 236 },
-  { x: 785, y: 217 },
-  { x: 848, y: 310 },
-  { x: 675, y: 388 },
-  { x: 707, y: 492 },
-  { x: 795, y: 594 },
-  { x: 569, y: 589 },
-  { x: 377, y: 525 },
-  { x: 149, y: 517 },
-  { x: 132, y: 636 },
-  { x: 297, y: 708 },
-  { x: 519, y: 746 },
-  { x: 689, y: 773 },
-].map(({ x, y }) => ({
-  x: Math.floor(((x - 40) * SCREEN_WIDTH) / 880),
-  y: Math.floor(((y * 665) / 641 / 800) * SCREEN_WIDTH),
-}));
+export let BASE_MAP: IMapPoint[] = [
+  { x: 66, y: 48 },
+  { x: 97, y: 115 },
+  { x: 180, y: 157 },
+  { x: 288, y: 128 },
+  { x: 398, y: 119 },
+  { x: 426, y: 174 },
+  { x: 341, y: 213 },
+  { x: 320, y: 244, hidden: true },
+  { x: 355, y: 272 },
+  { x: 410, y: 300, hidden: true },
+  { x: 395, y: 337 },
+  { x: 282, y: 331 },
+  { x: 182, y: 283 },
+  { x: 79, y: 278 },
+  { x: 55, y: 362 },
+  { x: 139, y: 401 },
+  { x: 246, y: 425 },
+  { x: 338, y: 425 },
+  { x: 378, y: 458, hidden: true },
+  { x: 348, y: 500 },
+  { x: 246, y: 522 },
+  { x: 116, y: 536 },
+  { x: 62, y: 591 },
+  { x: 118, y: 637 },
+  { x: 223, y: 633 },
+  { x: 310, y: 611 },
+  { x: 407, y: 622 },
+  { x: 416, y: 685 },
+  { x: 331, y: 718 },
+  { x: 228, y: 714 },
+  { x: 116, y: 722 },
+];
+
+const COUNT_VISIBLE_POINTS = BASE_MAP.filter((x) => !x.hidden).length;
+export const LOOP_CYCLE = BASE_MAP[BASE_MAP.length - 1].y;
+
+export const MAP = [...BASE_MAP];
+
+for (let i = 1; i <= 500; i += 1) {
+  MAP.push(...BASE_MAP.map((p) => ({ ...p, y: p.y + LOOP_CYCLE * i })));
+}

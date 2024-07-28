@@ -1,5 +1,6 @@
 export type IPoint = { x: number; y: number };
 export type IPointExt = IPoint & { value: number };
+export type IMapPoint = IPoint & { hidden?: boolean; index?: number };
 export type ITileInfo = IPointExt & { score: number };
 
 export type ITileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
@@ -43,7 +44,11 @@ export type IHasEvent = {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: IMouseEvent): void;
+  onMouseDown(e: IMouseEvent): void;
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp(e: IMouseEvent): void;
   /**
    * Xử lý sự kiện nhấn phím
    */
