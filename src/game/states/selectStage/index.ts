@@ -38,11 +38,11 @@ const drawPoints = (points: IMapPoint[]) => {
 
     context.save();
     context.beginPath();
-    context.arc(x, y, 20, 0, Math.PI * 2, true);
+    context.arc(x, y, 22, 0, Math.PI * 2, true);
     context.stroke();
     context.clip();
     context.closePath();
-    context.drawImage(avatarTextures[ENEMIES[index % enemyCount].id], x - 20, y - 20, 40, 40);
+    context.drawImage(avatarTextures[ENEMIES[index % enemyCount].id], x - 22, y - 22, 44, 44);
     context.restore();
   });
 };

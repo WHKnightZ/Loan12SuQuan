@@ -61,6 +61,12 @@ const main = async () => {
   base.canvas.addEventListener("mousedown", (e) => game.onMouseDown(e));
   base.canvas.addEventListener("mouseup", (e) => game.onMouseUp(e));
   base.canvas.addEventListener("mousemove", (e) => game.onMouseMove(e));
+  base.canvas.addEventListener("touchstart", (e) => game.onMouseDown(e as any));
+  base.canvas.addEventListener("touchend", (e) => game.onMouseUp(e as any));
+  base.canvas.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    game.onMouseMove(e as any);
+  });
   document.addEventListener("keydown", (e) => game.onKeyDown(e));
 };
 
