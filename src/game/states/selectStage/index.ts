@@ -55,6 +55,9 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   private oldOffsetY: number;
   private offsetY: number;
   private offsetY2: number;
+  private velocity: number;
+  private lastTime: number;
+  private offset: number;
   private dragging: boolean;
 
   constructor(parent: IGame) {
@@ -67,6 +70,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.offsetY = 0;
     this.offsetY2 = 0;
     this.dragging = false;
+
+    this.velocity = 0;
   }
 
   /**
@@ -140,12 +145,21 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   /**
    * Cập nhật
    */
-  update() {}
+  update() {
+    this.offsetY += this.velocity;
+    this.velocity *= 0.97;
+  }
   /**
    * Xử lý sự kiện move chuột
    */
   onMouseMove({ offsetX, offsetY }: IMouseEvent) {
     if (this.dragging) {
+      const o = offsetY - this.offset;
+      const t = performance.now();
+      const v = o / (t - this.lastTime) / 8;
+      this.lastTime = t;
+      this.offset = this.offset;
+      this.velocity += v;
       this.offsetY2 = offsetY - this.oldOffsetY;
     }
 
@@ -177,6 +191,9 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   onMouseDown({ offsetY }: IMouseEvent) {
     this.dragging = true;
     this.oldOffsetY = offsetY;
+
+    this.lastTime = performance.now();
+    this.offset = offsetY;
 
     if (this.activeAvatar === -1) return;
 
