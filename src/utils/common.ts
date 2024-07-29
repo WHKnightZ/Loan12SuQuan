@@ -1,4 +1,4 @@
-import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES, BASE_MAP } from "@/configs/consts";
+import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
 import { IPoint, ITileInfo } from "@/types";
 import { random } from "./math";
 

@@ -183,7 +183,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.parent.stateManager.changeState("IN_GAME", this.activeAvatar);
   }
 
-  onMouseUp(e: IMouseEvent) {
+  onMouseUp() {
     this.offsetY += this.offsetY2;
     this.offsetY2 = 0;
     this.dragging = false;

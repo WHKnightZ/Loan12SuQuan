@@ -428,7 +428,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện nhả chuột
    */
-  onMouseUp(e: IMouseEvent) {}
+  onMouseUp() {}
   /**
    * Xử lý sự kiện nhấn phím
    */

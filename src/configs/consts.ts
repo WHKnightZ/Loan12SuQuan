@@ -8,6 +8,13 @@ import {
 } from "@/types";
 
 /**
+ * Check xem thiết bị phải mobile không
+ */
+export const IS_MOBILE =
+  typeof window !== "undefined"
+    ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    : false;
+/**
  * Get danh sách các key của object
  */
 export const getKeys = Object.keys as <T extends object>(obj: T) => Array<keyof T>;

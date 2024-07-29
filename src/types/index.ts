@@ -48,7 +48,7 @@ export type IHasEvent = {
   /**
    * Xử lý sự kiện nhả chuột
    */
-  onMouseUp(e: IMouseEvent): void;
+  onMouseUp(): void;
   /**
    * Xử lý sự kiện nhấn phím
    */

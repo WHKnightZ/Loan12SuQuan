@@ -1,4 +1,4 @@
-import { base, SCREEN_WIDTH, SCREEN_HEIGHT, INTERVAL } from "@/configs/consts";
+import { base, SCREEN_WIDTH, SCREEN_HEIGHT, INTERVAL, IS_MOBILE } from "@/configs/consts";
 import { Game } from "@/game";
 import { loadTextures } from "@/textures";
 import { updateFps } from "@/utils/misc";
@@ -58,15 +58,26 @@ const main = async () => {
   game = new Game();
   base.game = game;
 
-  base.canvas.addEventListener("mousedown", (e) => game.onMouseDown(e));
-  base.canvas.addEventListener("mouseup", (e) => game.onMouseUp(e));
-  base.canvas.addEventListener("mousemove", (e) => game.onMouseMove(e));
-  base.canvas.addEventListener("touchstart", (e) => game.onMouseDown(e as any));
-  base.canvas.addEventListener("touchend", (e) => game.onMouseUp(e as any));
-  base.canvas.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-    game.onMouseMove(e as any);
-  });
+  if (IS_MOBILE) {
+    const getOffset = (e: TouchEvent) => {
+      const target = e.targetTouches[0];
+      const offsetX = target.clientX;
+      const offsetY = target.clientY;
+      return { offsetX, offsetY };
+    };
+
+    base.canvas.addEventListener("touchstart", (e) => game.onMouseDown(getOffset(e)));
+    base.canvas.addEventListener("touchend", () => game.onMouseUp());
+    base.canvas.addEventListener("touchmove", (e) => {
+      e.preventDefault();
+      game.onMouseMove(getOffset(e));
+    });
+  } else {
+    base.canvas.addEventListener("mousedown", (e) => game.onMouseDown(e));
+    base.canvas.addEventListener("mouseup", () => game.onMouseUp());
+    base.canvas.addEventListener("mousemove", (e) => game.onMouseMove(e));
+  }
+
   document.addEventListener("keydown", (e) => game.onKeyDown(e));
 };
 
