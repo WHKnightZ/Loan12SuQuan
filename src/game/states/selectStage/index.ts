@@ -7,7 +7,6 @@ import {
   MAP,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
-  SPIN_ANIMATION_COLOR,
   base,
 } from "@/configs/consts";
 import { Font } from "@/elements/font";
@@ -85,41 +84,46 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     context.fillStyle = BACKGROUND_COLOR;
     context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    const from = this.offsetY + this.offsetY2 - 200;
-    const to = from + SCREEN_HEIGHT + 200;
+    // const from = this.offsetY + this.offsetY2 - 200;
+    // const to = from + SCREEN_HEIGHT + 200;
 
-    const a = -Math.floor(from / LOOP_CYCLE) + 1;
-    let b = -Math.ceil(to / LOOP_CYCLE);
+    // const a = -Math.floor(from / LOOP_CYCLE) + 1;
+    // let b = -Math.ceil(to / LOOP_CYCLE);
 
-    if (b < 0) b = 0;
+    // if (b < 0) b = 0;
 
-    // console.log(a, b);
+    // // console.log(a, b);
 
-    const newMap = MAP.slice(b * 31, a * 31);
+    // const newMap = MAP.slice(b * 31, a * 31);
 
-    const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * 31 }));
+    // const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * 31 }));
 
-    curveThroughPoints(map);
-    // curveThroughPoints2(map);
-    // curveThroughPoints3(map);
-    drawPoints(map);
+    // curveThroughPoints(map);
+    // // curveThroughPoints2(map);
+    // // curveThroughPoints3(map);
+    // drawPoints(map);
 
-    return;
+    // Font.draw({
+    //   text: "Chọn Quân Địch",
+    //   y: 60,
+    // });
+
+    // return;
 
     Font.draw({
       text: "Chọn Quân Địch",
       y: 60,
     });
 
-    context.strokeStyle = "#2465D3";
-    context.lineWidth = 3;
+    context.strokeStyle = "#00a88e";
+    context.lineWidth = 5;
 
     ENEMIES.forEach((e, i) => {
       const x = getAvatarOffsetX(i);
       const y = getAvatarOffsetY(i);
       context.save();
       context.beginPath();
-      context.arc(x + AVATAR_CENTER, y + AVATAR_CENTER, AVATAR_CENTER, 0, Math.PI * 2, true);
+      context.arc(x + AVATAR_CENTER, y + AVATAR_CENTER, 27, 0, Math.PI * 2, true);
       context.stroke();
       context.clip();
       context.closePath();
@@ -128,11 +132,14 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     });
 
     if (this.activeAvatar !== -1) {
-      const offsetX = getAvatarOffsetX(this.activeAvatar);
-      const offsetY = getAvatarOffsetY(this.activeAvatar);
-      context.strokeStyle = SPIN_ANIMATION_COLOR;
+      const offsetX = getAvatarOffsetX(this.activeAvatar) + AVATAR_CENTER;
+      const offsetY = getAvatarOffsetY(this.activeAvatar) + AVATAR_CENTER;
       context.lineWidth = 2;
-      context.strokeRect(offsetX - 3, offsetY - 3, AVATAR_WIDTH + 6, AVATAR_WIDTH + 6);
+      context.strokeStyle = "#f8ae49";
+      context.beginPath();
+      context.arc(offsetX, offsetY, 34, 0, Math.PI * 2, true);
+      context.closePath();
+      context.stroke();
 
       const { name } = ENEMIES[this.activeAvatar];
 
@@ -147,23 +154,23 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    */
   update() {
     this.offsetY += this.velocity;
-    this.velocity *= 0.97;
+    this.velocity *= 0.93;
   }
   /**
    * Xử lý sự kiện move chuột
    */
   onMouseMove({ offsetX, offsetY }: IMouseEvent) {
-    if (this.dragging) {
-      const o = offsetY - this.offset;
-      const t = performance.now();
-      const v = o / (t - this.lastTime) / 8;
-      this.lastTime = t;
-      this.offset = this.offset;
-      this.velocity += v;
-      this.offsetY2 = offsetY - this.oldOffsetY;
-    }
+    // if (this.dragging) {
+    //   const o = offsetY - this.offset;
+    //   const t = performance.now();
+    //   const v = o / (t - this.lastTime) / 2;
+    //   this.lastTime = t;
+    //   this.offset = offsetY;
+    //   this.velocity += v;
+    //   this.offsetY2 = offsetY - this.oldOffsetY;
+    // }
 
-    return;
+    // return;
 
     const x = Math.floor((offsetX - avatarOffsetX) / avatarFullWidth);
     const y = Math.floor((offsetY - avatarOffsetY) / avatarFullHeight);
