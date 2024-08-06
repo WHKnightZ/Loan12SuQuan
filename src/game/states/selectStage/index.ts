@@ -25,27 +25,6 @@ let avatarFullHeight: number;
 
 const enemyCount = ENEMIES.length;
 
-const drawPoints = (points: IMapPoint[]) => {
-  const context = base.context;
-
-  // base.context.strokeStyle = "#1562af";
-  context.strokeStyle = "#00a88e";
-  context.lineWidth = 5;
-
-  points.forEach(({ x, y, hidden, index }) => {
-    if (hidden) return;
-
-    context.save();
-    context.beginPath();
-    context.arc(x, y, 22, 0, Math.PI * 2, true);
-    context.stroke();
-    context.clip();
-    context.closePath();
-    context.drawImage(avatarTextures[ENEMIES[index % enemyCount].id], x - 22, y - 22, 44, 44);
-    context.restore();
-  });
-};
-
 const getAvatarOffsetX = (index: number) => (index % AVATARS_PER_ROW) * avatarFullWidth + avatarOffsetX;
 const getAvatarOffsetY = (index: number) => Math.floor(index / AVATARS_PER_ROW) * avatarFullHeight + avatarOffsetY;
 

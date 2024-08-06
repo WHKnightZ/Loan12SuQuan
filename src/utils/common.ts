@@ -1,5 +1,5 @@
 import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
-import { IPoint, ITileInfo } from "@/types";
+import { IMapPoint, IPoint, IPointAvatar, ITileInfo } from "@/types";
 import { random } from "./math";
 
 export const pause = (duration: number) => {
@@ -330,4 +330,23 @@ export const curveThroughPoints3 = (points: IPoint[], numPoints = 10) => {
   context.lineWidth = 4;
   context.strokeStyle = "black";
   context.stroke();
+};
+
+export const drawPoints = (points: IPointAvatar[]) => {
+  const context = base.context;
+
+  // base.context.strokeStyle = "#1562af";
+  context.strokeStyle = "#00a88e";
+  context.lineWidth = 5;
+
+  points.forEach(({ x, y, avatar }) => {
+    context.save();
+    context.beginPath();
+    context.arc(x, y, 22, 0, Math.PI * 2, true);
+    context.stroke();
+    context.clip();
+    context.closePath();
+    context.drawImage(avatar, x - 22, y - 22, 44, 44);
+    context.restore();
+  });
 };

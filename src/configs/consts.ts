@@ -292,7 +292,7 @@ export const ENEMIES = [
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
 
-export let BASE_MAP: IMapPoint[] = [
+export const BASE_MAP_POINTS: IMapPoint[] = [
   { x: 66, y: 48 },
   { x: 97, y: 115 },
   { x: 180, y: 157 },
@@ -326,7 +326,9 @@ export let BASE_MAP: IMapPoint[] = [
   { x: 116, y: 722 },
 ];
 
-const COUNT_VISIBLE_POINTS = BASE_MAP.filter((x) => !x.hidden).length;
+export const BASE_MAP_VISIBLE_POINTS = BASE_MAP_POINTS.filter((x) => !x.hidden);
+
+const COUNT_VISIBLE_POINTS = BASE_MAP_VISIBLE_POINTS.length;
 export const LOOP_CYCLE = BASE_MAP[BASE_MAP.length - 1].y;
 
 export const MAP = [...BASE_MAP];

@@ -1,6 +1,7 @@
 export type IPoint = { x: number; y: number };
 export type IPointExt = IPoint & { value: number };
 export type IMapPoint = IPoint & { hidden?: boolean; index?: number };
+export type IPointAvatar = IPoint & { avatar: HTMLImageElement };
 export type ITileInfo = IPointExt & { score: number };
 
 export type ITileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
