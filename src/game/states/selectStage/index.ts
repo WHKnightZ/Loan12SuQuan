@@ -3,7 +3,6 @@ import {
   AVATAR_WIDTH,
   BACKGROUND_COLOR,
   ENEMIES,
-  LOOP_CYCLE,
   MAP,
   SCREEN_HEIGHT,
   SCREEN_WIDTH,
@@ -12,7 +11,7 @@ import {
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
-import { IGame, IGameStateType, IMapPoint, IMouseEvent } from "@/types";
+import { IGame, IGameStateType, IMouseEvent } from "@/types";
 import { curveThroughPoints, curveThroughPoints2, curveThroughPoints3 } from "@/utils/common";
 
 const AVATARS_PER_ROW = 5;

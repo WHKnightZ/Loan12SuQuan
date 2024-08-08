@@ -1,5 +1,5 @@
 import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
-import { IMapPoint, IPoint, IPointAvatar, ITileInfo } from "@/types";
+import { IPoint, IPointAvatar, ITileInfo } from "@/types";
 import { random } from "./math";
 
 export const pause = (duration: number) => {

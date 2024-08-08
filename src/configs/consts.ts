@@ -292,7 +292,7 @@ export const ENEMIES = [
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
 
-export const BASE_MAP_POINTS: IMapPoint[] = [
+export const MAP_POINTS: IMapPoint[] = [
   { x: 66, y: 48 },
   { x: 97, y: 115 },
   { x: 180, y: 157 },
@@ -326,13 +326,24 @@ export const BASE_MAP_POINTS: IMapPoint[] = [
   { x: 116, y: 722 },
 ];
 
-export const BASE_MAP_VISIBLE_POINTS = BASE_MAP_POINTS.filter((x) => !x.hidden);
+export const MAP_VISIBLE_POINTS = MAP_POINTS.filter((x) => !x.hidden);
+export const CYCLE_POINTS = MAP_POINTS.length;
+export const CYCLE_VISIBLE_POINTS = MAP_VISIBLE_POINTS.length;
+export const CYCLE_HEIGHT = MAP_POINTS[MAP_POINTS.length - 1].y;
 
-const COUNT_VISIBLE_POINTS = BASE_MAP_VISIBLE_POINTS.length;
-export const LOOP_CYCLE = BASE_MAP[BASE_MAP.length - 1].y;
+const COUNT_POINTS = 12000;
+const CYCLES = Math.floor(COUNT_POINTS / CYCLE_VISIBLE_POINTS);
 
-export const MAP = [...BASE_MAP];
+export const MAP: IMapPoint[] = [];
 
-for (let i = 1; i <= 500; i += 1) {
-  MAP.push(...BASE_MAP.map((p) => ({ ...p, y: p.y + LOOP_CYCLE * i })));
+for (let i = 1; i <= CYCLES; i += 1) {
+  MAP.push(...MAP_POINTS.map((p) => ({ ...p, y: p.y + CYCLE_HEIGHT * i })));
+}
+let currentCount = CYCLES * CYCLE_VISIBLE_POINTS;
+let i = 0;
+while (currentCount < COUNT_POINTS) {
+  const p = MAP_POINTS[i];
+  i += 1;
+  MAP.push(p);
+  if (!p.hidden) currentCount += 1;
 }
