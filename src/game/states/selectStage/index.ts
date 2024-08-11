@@ -2,6 +2,8 @@ import {
   AVATAR_CENTER,
   AVATAR_WIDTH,
   BACKGROUND_COLOR,
+  CYCLE_HEIGHT,
+  CYCLE_POINTS,
   ENEMIES,
   MAP,
   SCREEN_HEIGHT,
@@ -12,7 +14,7 @@ import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
 import { avatarTextures } from "@/textures";
 import { IGame, IGameStateType, IMouseEvent } from "@/types";
-import { curveThroughPoints, curveThroughPoints2, curveThroughPoints3 } from "@/utils/common";
+import { curveThroughPoints, curveThroughPoints2, curveThroughPoints3, drawPoints } from "@/utils/common";
 
 const AVATARS_PER_ROW = 5;
 const avatarOffsetX = 50;
@@ -62,31 +64,35 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     context.fillStyle = BACKGROUND_COLOR;
     context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    // const from = this.offsetY + this.offsetY2 - 200;
-    // const to = from + SCREEN_HEIGHT + 200;
+    const from = this.offsetY + this.offsetY2 - 200;
+    const to = from + SCREEN_HEIGHT + 200;
 
-    // const a = -Math.floor(from / LOOP_CYCLE) + 1;
-    // let b = -Math.ceil(to / LOOP_CYCLE);
+    let a = Math.floor(from / CYCLE_HEIGHT);
+    const b = Math.ceil(to / CYCLE_HEIGHT);
 
-    // if (b < 0) b = 0;
+    // debugger;
 
-    // // console.log(a, b);
+    // TODO: Tìm a, b hợp lý, search trong đoạn slice xem các điểm nào nằm trong màn hình thì mới show (offset +-200)
+    // TODO: Màn bé sửa lại vận tốc cho hợp lý hơn
+    if (a < 0) a = 0;
 
-    // const newMap = MAP.slice(b * 31, a * 31);
+    // console.log(a, b);
 
-    // const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * 31 }));
+    const newMap = MAP.slice(a * CYCLE_POINTS, b * CYCLE_POINTS);
 
-    // curveThroughPoints(map);
-    // // curveThroughPoints2(map);
-    // // curveThroughPoints3(map);
-    // drawPoints(map);
+    const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * CYCLE_POINTS }));
 
-    // Font.draw({
-    //   text: "Chọn Quân Địch",
-    //   y: 60,
-    // });
+    curveThroughPoints(map);
+    // curveThroughPoints2(map);
+    // curveThroughPoints3(map);
+    drawPoints(map);
 
-    // return;
+    Font.draw({
+      text: "Chọn Quân Địch",
+      y: 60,
+    });
+
+    return;
 
     Font.draw({
       text: "Chọn Quân Địch",
@@ -138,17 +144,17 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    * Xử lý sự kiện move chuột
    */
   onMouseMove({ offsetX, offsetY }: IMouseEvent) {
-    // if (this.dragging) {
-    //   const o = offsetY - this.offset;
-    //   const t = performance.now();
-    //   const v = o / (t - this.lastTime) / 2;
-    //   this.lastTime = t;
-    //   this.offset = offsetY;
-    //   this.velocity += v;
-    //   this.offsetY2 = offsetY - this.oldOffsetY;
-    // }
+    if (this.dragging) {
+      const o = offsetY - this.offset;
+      const t = performance.now();
+      const v = o / (t - this.lastTime) / 2;
+      this.lastTime = t;
+      this.offset = offsetY;
+      this.velocity += v;
+      this.offsetY2 = offsetY - this.oldOffsetY;
+    }
 
-    // return;
+    return;
 
     const x = Math.floor((offsetX - avatarOffsetX) / avatarFullWidth);
     const y = Math.floor((offsetY - avatarOffsetY) / avatarFullHeight);

@@ -4,6 +4,7 @@ import {
   ICharacterId,
   ICharacterWithoutIdAttributes,
   IMapPoint,
+  IMapPointAvatar,
   ITileType,
 } from "@/types";
 
@@ -331,19 +332,36 @@ export const CYCLE_POINTS = MAP_POINTS.length;
 export const CYCLE_VISIBLE_POINTS = MAP_VISIBLE_POINTS.length;
 export const CYCLE_HEIGHT = MAP_POINTS[MAP_POINTS.length - 1].y;
 
+const COUNT_ENEMIES = ENEMIES.length;
 const COUNT_POINTS = 12000;
 const CYCLES = Math.floor(COUNT_POINTS / CYCLE_VISIBLE_POINTS);
 
-export const MAP: IMapPoint[] = [];
+export const MAP: IMapPointAvatar[] = [];
 
-for (let i = 1; i <= CYCLES; i += 1) {
-  MAP.push(...MAP_POINTS.map((p) => ({ ...p, y: p.y + CYCLE_HEIGHT * i })));
+let enemyIndex = 0;
+
+for (let i = 0; i < CYCLES; i += 1) {
+  MAP.push(
+    ...MAP_POINTS.map((p) => {
+      const ret = { ...p, y: p.y + CYCLE_HEIGHT * i, avatar: enemyIndex };
+      if (!p.hidden) {
+        enemyIndex += 1;
+        if (enemyIndex === COUNT_ENEMIES) enemyIndex = 0;
+      }
+      return ret;
+    })
+  );
 }
+
 let currentCount = CYCLES * CYCLE_VISIBLE_POINTS;
 let i = 0;
 while (currentCount < COUNT_POINTS) {
   const p = MAP_POINTS[i];
   i += 1;
-  MAP.push(p);
-  if (!p.hidden) currentCount += 1;
+  MAP.push({ ...p, avatar: enemyIndex });
+  if (!p.hidden) {
+    currentCount += 1;
+    enemyIndex += 1;
+    if (enemyIndex === COUNT_ENEMIES) enemyIndex = 0;
+  }
 }

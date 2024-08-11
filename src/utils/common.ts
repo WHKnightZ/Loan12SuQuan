@@ -1,6 +1,7 @@
-import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES } from "@/configs/consts";
-import { IPoint, IPointAvatar, ITileInfo } from "@/types";
+import { base, COUNT_TILES, mapTileInfo, MAP_WIDTH, MAP_WIDTH_1, TILES, ENEMIES } from "@/configs/consts";
+import { IMapPointAvatar, IPoint, ITileInfo } from "@/types";
 import { random } from "./math";
+import { avatarTextures } from "@/textures";
 
 export const pause = (duration: number) => {
   return new Promise((res) => setTimeout(() => res(null), duration));
@@ -332,21 +333,23 @@ export const curveThroughPoints3 = (points: IPoint[], numPoints = 10) => {
   context.stroke();
 };
 
-export const drawPoints = (points: IPointAvatar[]) => {
+export const drawPoints = (points: IMapPointAvatar[]) => {
   const context = base.context;
 
   // base.context.strokeStyle = "#1562af";
   context.strokeStyle = "#00a88e";
   context.lineWidth = 5;
 
-  points.forEach(({ x, y, avatar }) => {
+  points.forEach(({ x, y, avatar, hidden }) => {
+    if (hidden) return;
+
     context.save();
     context.beginPath();
     context.arc(x, y, 22, 0, Math.PI * 2, true);
     context.stroke();
     context.clip();
     context.closePath();
-    context.drawImage(avatar, x - 22, y - 22, 44, 44);
+    context.drawImage(avatarTextures[ENEMIES[avatar].id], x - 22, y - 22, 44, 44);
     context.restore();
   });
 };
