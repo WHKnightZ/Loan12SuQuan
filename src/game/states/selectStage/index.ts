@@ -74,6 +74,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
 
     // TODO: Tìm a, b hợp lý, search trong đoạn slice xem các điểm nào nằm trong màn hình thì mới show (offset +-200)
     // TODO: Màn bé sửa lại vận tốc cho hợp lý hơn
+    // TODO: Hover + touch thì show popup chi tiết enemy
+    // TODO: Có thể thêm 1 cái overlay gradient ở đoạn title Chọn quân địch để ko bị đè text lên avatar
     if (a < 0) a = 0;
 
     // console.log(a, b);
