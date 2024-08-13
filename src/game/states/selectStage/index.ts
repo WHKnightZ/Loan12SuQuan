@@ -24,7 +24,7 @@ const avatarGapY = 15;
 let avatarFullWidth: number;
 let avatarFullHeight: number;
 
-const enemyCount = ENEMIES.length;
+const OFFSET_DRAW_AVATAR = 200;
 
 const getAvatarOffsetX = (index: number) => (index % AVATARS_PER_ROW) * avatarFullWidth + avatarOffsetX;
 const getAvatarOffsetY = (index: number) => Math.floor(index / AVATARS_PER_ROW) * avatarFullHeight + avatarOffsetY;
@@ -64,25 +64,21 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     context.fillStyle = BACKGROUND_COLOR;
     context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    const from = this.offsetY + this.offsetY2 - 200;
-    const to = from + SCREEN_HEIGHT + 200;
+    const from = -this.offsetY - this.offsetY2 - OFFSET_DRAW_AVATAR;
+    const to = from + SCREEN_HEIGHT + OFFSET_DRAW_AVATAR;
 
     let a = Math.floor(from / CYCLE_HEIGHT);
     const b = Math.ceil(to / CYCLE_HEIGHT);
 
-    // debugger;
-
-    // TODO: Tìm a, b hợp lý, search trong đoạn slice xem các điểm nào nằm trong màn hình thì mới show (offset +-200)
     // TODO: Màn bé sửa lại vận tốc cho hợp lý hơn
     // TODO: Hover + touch thì show popup chi tiết enemy
     // TODO: Có thể thêm 1 cái overlay gradient ở đoạn title Chọn quân địch để ko bị đè text lên avatar
     if (a < 0) a = 0;
 
-    // console.log(a, b);
-
-    const newMap = MAP.slice(a * CYCLE_POINTS, b * CYCLE_POINTS);
-
-    const map = newMap.map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * CYCLE_POINTS }));
+    const newMap = MAP.slice(a * CYCLE_POINTS, b * CYCLE_POINTS); // Ước lượng ra các điểm có thể có dựa theo toạ độ màn hình
+    const map = newMap
+      .map((p, i) => ({ ...p, y: p.y + this.offsetY + this.offsetY2, index: i + b * CYCLE_POINTS }))
+      .filter(({ y }) => y > -OFFSET_DRAW_AVATAR && y < SCREEN_HEIGHT + OFFSET_DRAW_AVATAR); // Chỉ vẽ những điểm nằm trong màn hình
 
     curveThroughPoints(map);
     // curveThroughPoints2(map);
