@@ -1,7 +1,6 @@
 import {
   AVATAR_CENTER,
   AVATAR_WIDTH,
-  BACKGROUND_COLOR,
   CYCLE_HEIGHT,
   CYCLE_POINTS,
   ENEMIES,
@@ -12,7 +11,7 @@ import {
 } from "@/configs/consts";
 import { Font } from "@/elements/font";
 import { GameState } from "@/extensions";
-import { avatarTextures } from "@/textures";
+import { avatarTextures, backgroundTextures } from "@/textures";
 import { IGame, IGameStateType, IMouseEvent } from "@/types";
 import { curveThroughPoints, curveThroughPoints2, curveThroughPoints3, drawPoints } from "@/utils/common";
 
@@ -38,6 +37,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   private lastTime: number;
   private offset: number;
   private dragging: boolean;
+  private gradient: CanvasGradient;
 
   constructor(parent: IGame) {
     super(parent, "SELECT_STAGE");
@@ -46,11 +46,16 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     avatarFullWidth = AVATAR_WIDTH + avatarGapX;
     avatarFullHeight = AVATAR_WIDTH + avatarGapY;
 
-    this.offsetY = 0;
+    this.offsetY = 80;
     this.offsetY2 = 0;
     this.dragging = false;
 
     this.velocity = 0;
+
+    this.gradient = base.context.createLinearGradient(0, 0, 0, 125);
+    this.gradient.addColorStop(0.0, "#000000bf");
+    this.gradient.addColorStop(0.7, "#0000005f");
+    this.gradient.addColorStop(1.0, "#00000000");
   }
 
   /**
@@ -61,8 +66,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
 
     context.reset();
 
-    context.fillStyle = BACKGROUND_COLOR;
-    context.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    context.drawImage(backgroundTextures.menu, 0, -40, SCREEN_WIDTH, 640);
 
     const from = -this.offsetY - this.offsetY2 - OFFSET_DRAW_AVATAR;
     const to = from + SCREEN_HEIGHT + OFFSET_DRAW_AVATAR;
@@ -70,7 +74,6 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     let a = Math.floor(from / CYCLE_HEIGHT);
     const b = Math.ceil(to / CYCLE_HEIGHT);
 
-    // TODO: Màn bé sửa lại vận tốc cho hợp lý hơn
     // TODO: Hover + touch thì show popup chi tiết enemy
     // TODO: Có thể thêm 1 cái overlay gradient ở đoạn title Chọn quân địch để ko bị đè text lên avatar
     if (a < 0) a = 0;
@@ -84,6 +87,9 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     // curveThroughPoints2(map);
     // curveThroughPoints3(map);
     drawPoints(map);
+
+    context.fillStyle = this.gradient;
+    context.fillRect(0, 0, 480, 125);
 
     Font.draw({
       text: "Chọn Quân Địch",
