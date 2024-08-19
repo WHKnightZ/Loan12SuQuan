@@ -23,6 +23,7 @@ const avatarGapY = 15;
 let avatarFullWidth: number;
 let avatarFullHeight: number;
 
+const OFFSET_MAP = 80;
 const OFFSET_DRAW_AVATAR = 200;
 
 const getAvatarOffsetX = (index: number) => (index % AVATARS_PER_ROW) * avatarFullWidth + avatarOffsetX;
@@ -38,6 +39,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   private offset: number;
   private dragging: boolean;
   private gradient: CanvasGradient;
+  private factor: number;
 
   constructor(parent: IGame) {
     super(parent, "SELECT_STAGE");
@@ -46,9 +48,10 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     avatarFullWidth = AVATAR_WIDTH + avatarGapX;
     avatarFullHeight = AVATAR_WIDTH + avatarGapY;
 
-    this.offsetY = 80;
+    this.offsetY = OFFSET_MAP;
     this.offsetY2 = 0;
     this.dragging = false;
+    this.factor = 1;
 
     this.velocity = 0;
 
@@ -141,8 +144,14 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    * Cập nhật
    */
   update() {
+    if (!this.dragging && this.offsetY > OFFSET_MAP) {
+      this.velocity = 0;
+      this.offsetY *= this.factor;
+      this.factor = 1 + (this.factor - 1) * 0.93;
+    }
+
     this.offsetY += this.velocity;
-    this.velocity *= 0.93;
+    this.velocity *= 0.94;
   }
   /**
    * Xử lý sự kiện move chuột
@@ -199,5 +208,6 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.offsetY += this.offsetY2;
     this.offsetY2 = 0;
     this.dragging = false;
+    this.factor = 0.9;
   }
 }
