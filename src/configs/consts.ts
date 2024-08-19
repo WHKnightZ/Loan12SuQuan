@@ -333,7 +333,7 @@ export const CYCLE_VISIBLE_POINTS = MAP_VISIBLE_POINTS.length;
 export const CYCLE_HEIGHT = MAP_POINTS[MAP_POINTS.length - 1].y;
 
 const COUNT_ENEMIES = ENEMIES.length;
-const COUNT_POINTS = 12000;
+const COUNT_POINTS = 5000;
 const CYCLES = Math.floor(COUNT_POINTS / CYCLE_VISIBLE_POINTS);
 
 export const MAP: IMapPointAvatar[] = [];

@@ -336,17 +336,21 @@ export const curveThroughPoints3 = (points: IPoint[], numPoints = 10) => {
 export const drawPoints = (points: IMapPointAvatar[]) => {
   const context = base.context;
 
-  // base.context.strokeStyle = "#1562af";
-  context.strokeStyle = "#00a88e";
-  context.lineWidth = 5;
-
   points.forEach(({ x, y, avatar, hidden }) => {
     if (hidden) return;
 
     context.save();
     context.beginPath();
     context.arc(x, y, 22, 0, Math.PI * 2, true);
+
+    context.strokeStyle = "#00a88e";
+    context.lineWidth = 6;
     context.stroke();
+
+    context.strokeStyle = "#1562af";
+    context.lineWidth = 2;
+    context.stroke();
+
     context.clip();
     context.closePath();
     context.drawImage(avatarTextures[ENEMIES[avatar].id], x - 22, y - 22, 44, 44);
