@@ -85,42 +85,6 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
       text: "Chọn Quân Địch",
       y: 60,
     });
-
-    return;
-
-    context.strokeStyle = "#00a88e";
-    context.lineWidth = 5;
-
-    ENEMIES.forEach((e, i) => {
-      const x = getAvatarOffsetX(i);
-      const y = getAvatarOffsetY(i);
-      context.save();
-      context.beginPath();
-      context.arc(x + AVATAR_CENTER, y + AVATAR_CENTER, 27, 0, Math.PI * 2, true);
-      context.stroke();
-      context.clip();
-      context.closePath();
-      context.drawImage(avatarTextures[e.id], x, y);
-      context.restore();
-    });
-
-    if (this.activeAvatar !== -1) {
-      const offsetX = getAvatarOffsetX(this.activeAvatar) + AVATAR_CENTER;
-      const offsetY = getAvatarOffsetY(this.activeAvatar) + AVATAR_CENTER;
-      context.lineWidth = 2;
-      context.strokeStyle = "#f8ae49";
-      context.beginPath();
-      context.arc(offsetX, offsetY, 34, 0, Math.PI * 2, true);
-      context.closePath();
-      context.stroke();
-
-      const { name } = ENEMIES[this.activeAvatar];
-
-      Font.draw({
-        text: name,
-        y: SCREEN_HEIGHT - 60,
-      });
-    }
   }
   /**
    * Cập nhật
@@ -179,28 +143,6 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.offsetY2 = offsetY - this.oldOffsetY;
 
     if (sqr(offsetX - this.oldOffsetX) + sqr(offsetY - this.oldOffsetY) > 600) this.canChoose = false; // Move chuột quá xa điểm ban đầu => ko muốn chọn stage mà muốn scroll
-
-    return;
-
-    const x = Math.floor((offsetX - avatarOffsetX) / avatarFullWidth);
-    const y = Math.floor((offsetY - avatarOffsetY) / avatarFullHeight);
-
-    const startX = x * avatarFullWidth + avatarOffsetX;
-    const startY = y * avatarFullHeight + avatarOffsetY;
-
-    if (x < 0 || y < 0 || x >= AVATARS_PER_ROW || startX + AVATAR_WIDTH < offsetX || startY + AVATAR_WIDTH < offsetY) {
-      this.activeAvatar = -1;
-      return;
-    }
-
-    const current = y * AVATARS_PER_ROW + x;
-
-    if (current >= ENEMIES.length) {
-      this.activeAvatar = -1;
-      return;
-    }
-
-    this.activeAvatar = current;
   }
   /**
    * Xử lý sự kiện click chuột
@@ -215,7 +157,9 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.lastTime = performance.now();
     this.offset = offsetY;
   }
-
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
   onMouseUp() {
     this.offsetY += this.offsetY2;
     this.offsetY2 = 0;
