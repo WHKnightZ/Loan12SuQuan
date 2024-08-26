@@ -48,6 +48,12 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
     }
   }
 
+  onKeyDown(e: KeyboardEvent) {
+    if (e.key !== "Enter") return;
+
+    this.parent.stateManager.changeState("SELECT_ITEM");
+  }
+
   render() {
     if (this.hintDelayTimer > 0) return;
 

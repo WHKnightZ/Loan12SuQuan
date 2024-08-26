@@ -433,6 +433,8 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
    * Xử lý sự kiện nhấn phím
    */
   onKeyDown(e: KeyboardEvent) {
+    this.stateManager.onKeyDown(e);
+
     switch (e.key) {
       case "Escape":
         this.fadeOut();

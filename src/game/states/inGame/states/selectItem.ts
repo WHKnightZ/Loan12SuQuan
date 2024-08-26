@@ -12,6 +12,12 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
     super(parent, "SELECT_ITEM");
   }
 
+  onKeyDown(e: KeyboardEvent) {
+    if (e.key !== "Enter") return;
+
+    this.parent.stateManager.changeState("IDLE");
+  }
+
   render() {
     base.context.drawImage(
       selectItemsFrameTexture,
