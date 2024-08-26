@@ -1,4 +1,4 @@
-import { SCREEN_WIDTH, base } from "@/configs/consts";
+import { AVATAR_HEIGHT, AVATAR_WIDTH, SCREEN_WIDTH, base } from "@/configs/consts";
 import { Effect } from "./effect";
 import { easeInQuad } from "@/utils/math";
 import { CauseDamage } from "./causeDamage";
@@ -38,8 +38,8 @@ export class SwordAttack extends Effect {
     this.attackingPlayer = attackingPlayer;
     this.attackedPlayer = attackedPlayer;
     this.playerIndex = attackingPlayer.index;
-    const endX = attackedPlayer.avatarOffset.x + attackedPlayer.avatarTexture.width / 2;
-    const endY = attackedPlayer.avatarOffset.y + attackedPlayer.avatarTexture.height / 2;
+    const endX = attackedPlayer.avatarOffset.x + AVATAR_WIDTH / 2;
+    const endY = attackedPlayer.avatarOffset.y + AVATAR_HEIGHT / 2;
     this.halfSize = swordCrystalTextures[0][2].width / 2;
     this.endX = endX;
     this.endY = endY;

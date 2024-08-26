@@ -1,4 +1,5 @@
 import { loadAvatars, avatarTextures } from "./avatars";
+import { loadBackgroundTextures, backgroundTextures } from "./backgrounds";
 import { loadCommonTextures, hintArrows } from "./commonTextures";
 import { loadCornerSelections, cornerSelections } from "./cornerSelections";
 import { loadCrystals, crystalTextures, swordCrystalTextures, damageTextures } from "./crystals";
@@ -25,6 +26,7 @@ export {
   loseTextures,
   powerAttackTextures,
   selectItemsFrameTexture,
+  backgroundTextures,
 };
 
 export const loadTextures = () => {
@@ -40,5 +42,6 @@ export const loadTextures = () => {
     loadWinLoseTextures(),
     loadPowerAttackTextures(),
     loadFrames(),
+    loadBackgroundTextures(),
   ]);
 };

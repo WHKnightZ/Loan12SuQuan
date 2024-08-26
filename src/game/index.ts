@@ -1,6 +1,6 @@
 import { Effects } from "@/effects";
 import { GameStateManager } from "@/extensions";
-import { IEffect, IGame, IGameStateType } from "@/types";
+import { IEffect, IGame, IGameStateType, IMouseEvent } from "@/types";
 import { SelectStageState } from "./states/selectStage";
 import { InGameState } from "./states/inGame";
 import { base } from "@/configs/consts";
@@ -49,7 +49,7 @@ export class Game implements IGame {
   /**
    * Xử lý sự kiện move chuột
    */
-  onMouseMove(e: MouseEvent) {
+  onMouseMove(e: IMouseEvent) {
     const canvas = base.canvas;
     const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
     const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
@@ -59,12 +59,18 @@ export class Game implements IGame {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: MouseEvent) {
+  onMouseDown(e: IMouseEvent) {
     const canvas = base.canvas;
     const offsetX = (e.offsetX * canvas.width) / canvas.clientWidth;
     const offsetY = (e.offsetY * canvas.height) / canvas.clientHeight;
 
-    this.stateManager.onClick({ offsetX, offsetY });
+    this.stateManager.onMouseDown({ offsetX, offsetY });
+  }
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp(): void {
+    this.stateManager.onMouseUp();
   }
   /**
    * Xử lý sự kiện nhấn phím

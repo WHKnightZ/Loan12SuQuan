@@ -1,6 +1,6 @@
 import { IPoint, IRenderable } from "@/types";
 import { Spin } from "./spin";
-import { base } from "@/configs/consts";
+import { AVATAR_HEIGHT, AVATAR_WIDTH } from "@/configs/consts";
 import { IInGameState } from "../types";
 
 export class BorderAnimation implements IRenderable {
@@ -8,7 +8,7 @@ export class BorderAnimation implements IRenderable {
   private index: number;
   private spins: Spin[];
 
-  constructor(inGame: IInGameState, index: number, avatarOffset: IPoint, avatarTexture: HTMLImageElement) {
+  constructor(inGame: IInGameState, index: number, avatarOffset: IPoint) {
     this.inGame = inGame;
     this.index = index;
 
@@ -18,15 +18,15 @@ export class BorderAnimation implements IRenderable {
       (_, i) =>
         new Spin(
           avatarOffset.x - padding,
-          avatarOffset.x + avatarTexture.width + padding,
+          avatarOffset.x + AVATAR_WIDTH + padding,
           avatarOffset.y - padding,
-          avatarOffset.y + avatarTexture.height + padding,
+          avatarOffset.y + AVATAR_HEIGHT + padding,
           0.8,
           "CW",
           40,
           3,
-          avatarOffset.x + (i === 0 ? 10 - padding : avatarTexture.width + padding - 10),
-          avatarOffset.y + (i === 0 ? -padding : avatarTexture.height + padding)
+          avatarOffset.x + (i === 0 ? 10 - padding : AVATAR_WIDTH + padding - 10),
+          avatarOffset.y + (i === 0 ? -padding : AVATAR_HEIGHT + padding)
         )
     );
   }

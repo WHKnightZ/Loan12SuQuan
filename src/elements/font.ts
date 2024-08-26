@@ -31,7 +31,7 @@ type IMappingFont = {
 const fonts: { [key in IFontFamily]: IFontProperties } = {
   CAP_WHITE: {
     chars:
-      ' 0123456789.,:!?()+-*/#$%"@<=>;_&ABCD\u0110EFGHIJKLMNOPQRSTUVWXYZ\u00c1\u00c0\u1ea2\u00c3\u1ea0\u0102\u1eae\u1eb0\u1eb2\u1eb4\u1eb6\u00c2\u1ea4\u1ea6\u1ea8\u1eaa\u1eac\u00c9\u00c8\u1eba\u1ebc\u1eb8\u00ca\u1ebe\u1ec0\u1ec2\u1ec4\u1ec6\u00cd\u00cc\u1ec8\u0128\u1eca\u00d3\u00d2\u1ece\u00d5\u1ecc\u00d4\u1ed0\u1ed2\u1ed4\u1ed6\u1ed8\u01a0\u1eda\u1edc\u1ede\u1ee0\u1ee2\u00da\u00d9\u1ee6\u0168\u1ee4\u01af\u1ee8\u1eea\u1eec\u1eee\u1ef0\u00dd\u1ef2\u1ef6\u1ef8\u1ef4',
+      ' 0123456789.,:!?()+-*/#$%"@<=>;_&ABCDĐEFGHIJKLMNOPQRSTUVWXYZÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ',
     xList: [
       0, 2, 10, 16, 24, 32, 40, 48, 56, 64, 72, 80, 84, 88, 92, 80, 0, 6, 12, 87, 19, 26, 32, 41, 49, 62, 67, 92, 78,
       12, 96, 86, 32, 49, 58, 66, 74, 83, 41, 92, 0, 20, 8, 14, 29, 48, 55, 65, 37, 73, 81, 90, 0, 20, 7, 28, 46, 57,
@@ -75,7 +75,7 @@ const fonts: { [key in IFontFamily]: IFontProperties } = {
   },
   CAP_YELLOW: {
     chars:
-      ' 0123456789.,:!?()+-*/#$%"@<=>;_&ABCD\u0110EFGHIJKLMNOPQRSTUVWXYZ\u00c1\u00c0\u1ea2\u00c3\u1ea0\u0102\u1eae\u1eb0\u1eb2\u1eb4\u1eb6\u00c2\u1ea4\u1ea6\u1ea8\u1eaa\u1eac\u00c9\u00c8\u1eba\u1ebc\u1eb8\u00ca\u1ebe\u1ec0\u1ec2\u1ec4\u1ec6\u00cd\u00cc\u1ec8\u0128\u1eca\u00d3\u00d2\u1ece\u00d5\u1ecc\u00d4\u1ed0\u1ed2\u1ed4\u1ed6\u1ed8\u01a0\u1eda\u1edc\u1ede\u1ee0\u1ee2\u00da\u00d9\u1ee6\u0168\u1ee4\u01af\u1ee8\u1eea\u1eec\u1eee\u1ef0\u00dd\u1ef2\u1ef6\u1ef8\u1ef4',
+      ' 0123456789.,:!?()+-*/#$%"@<=>;_&ABCDĐEFGHIJKLMNOPQRSTUVWXYZÁÀẢÃẠĂẮẰẲẴẶÂẤẦẨẪẬÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỦŨỤƯỨỪỬỮỰÝỲỶỸỴ',
     xList: [
       0, 2, 10, 16, 24, 32, 40, 48, 56, 64, 72, 80, 84, 88, 92, 80, 0, 6, 12, 87, 19, 26, 32, 41, 49, 62, 67, 92, 78,
       12, 96, 86, 32, 49, 58, 66, 74, 83, 41, 92, 0, 20, 8, 14, 29, 48, 55, 65, 37, 73, 81, 90, 0, 20, 7, 28, 46, 57,

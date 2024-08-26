@@ -29,6 +29,7 @@ import {
   base,
   mapTileInfo,
   DEFAULT_CHARACTER,
+  AVATAR_WIDTH,
 } from "@/configs/consts";
 import { Player } from "./player";
 import { check, generateMap, getKey } from "@/utils/common";
@@ -278,7 +279,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
           tile: value,
           startX: x * CELL_SIZE + CELL_SIZE_HALF,
           startY: y * CELL_SIZE + CELL_SIZE_HALF,
-          endX: activePlayer.avatarOffset.x + activePlayer.avatarTexture.width / 2,
+          endX: activePlayer.avatarOffset.x + AVATAR_WIDTH / 2,
           endY: activePlayer.avatarOffset.y,
         })
       );
@@ -398,7 +399,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick({ offsetX, offsetY }: IMouseEvent) {
+  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
     if ((!this.stateManager.is("IDLE") && !this.stateManager.is("SELECT")) || this.playerTurn !== 0) return;
 
     if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
@@ -424,6 +425,10 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.swapped = { x, y, value: base.map[y][x] };
     base.map[y][x] = -1;
   }
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp() {}
   /**
    * Xử lý sự kiện nhấn phím
    */

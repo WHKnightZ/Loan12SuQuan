@@ -1,5 +1,20 @@
-import { IBase, ICharacterAttributes, ICharacterId, ICharacterWithoutIdAttributes, ITileType } from "@/types";
+import {
+  IBase,
+  ICharacterAttributes,
+  ICharacterId,
+  ICharacterWithoutIdAttributes,
+  IMapPoint,
+  IMapPointAvatar,
+  ITileType,
+} from "@/types";
 
+/**
+ * Check xem thiết bị phải mobile không
+ */
+export const IS_MOBILE =
+  typeof window !== "undefined"
+    ? /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    : false;
 /**
  * Get danh sách các key của object
  */
@@ -189,6 +204,18 @@ export const mapTileInfo: {
  */
 export const base = {} as IBase;
 /**
+ * Avatar width
+ */
+export const AVATAR_WIDTH = 60;
+/**
+ * Avatar height
+ */
+export const AVATAR_HEIGHT = 52;
+/**
+ * Avatar center
+ */
+export const AVATAR_CENTER = AVATAR_WIDTH / 2;
+/**
  * Offset X của avatar
  */
 export const AVATAR_OFFSET_X = 62;
@@ -213,8 +240,10 @@ const CHARACTER_WITHOUT_IDS: { [key in ICharacterId]: ICharacterWithoutIdAttribu
   "quy-lun": { name: "Quỷ Lùn", attack: 5, life: 200, intelligence: 100 },
   "son-tac": { name: "Sơn Tặc", attack: 5, life: 200, intelligence: 100 },
   "linh-hoi-ho": { name: "Lính Hồi Hồ", attack: 5, life: 200, intelligence: 100 },
+  "chon-tinh": { name: "Chồn Tinh", attack: 5, life: 200, intelligence: 100 },
   "ly-khue": { name: "Lý Khuê", attack: 5, life: 200, intelligence: 100 },
   "moc-tinh": { name: "Mộc Tinh", attack: 5, life: 200, intelligence: 100 },
+  "linh-phong-chau": { name: "Lính Phong Châu", attack: 5, life: 200, intelligence: 100 },
   "la-duong": { name: "Lã Đường", attack: 5, life: 200, intelligence: 100 },
   "linh-tam-dai": { name: "Lính Tam Đái", attack: 5, life: 200, intelligence: 100 },
   "xa-tinh": { name: "Xà Tinh", attack: 5, life: 200, intelligence: 100 },
@@ -222,11 +251,12 @@ const CHARACTER_WITHOUT_IDS: { [key in ICharacterId]: ICharacterWithoutIdAttribu
   "doc-nhan-tru": { name: "Độc Nhãn Trư", attack: 5, life: 200, intelligence: 100 },
   "do-canh-thac": { name: "Đỗ Cảnh Thạc", attack: 5, life: 200, intelligence: 100 },
   "ngo-xuong-xi": { name: "Ngô Xương Xí", attack: 5, life: 200, intelligence: 100 },
-  "quai-su": { name: "Quái Sư", attack: 5, life: 200, intelligence: 100 },
+  "nhen-tinh": { name: "Nhện Tinh", attack: 5, life: 200, intelligence: 100 },
   "nguyen-tri-kha": { name: "Nguyễn Trí Khả", attack: 5, life: 200, intelligence: 100 },
   "ngo-nhat-khanh": { name: "Ngô Nhật Khánh", attack: 5, life: 200, intelligence: 100 },
   "sau-quy": { name: "Sâu Quỷ", attack: 5, life: 200, intelligence: 100 },
   "kieu-thuan": { name: "Kiều Thuận", attack: 15, life: 1000, intelligence: 100 },
+  "kieu-cong-han": { name: "Kiều Công Hãn", attack: 15, life: 1000, intelligence: 100 },
 };
 export const CHARACTERS = getKeys(CHARACTER_WITHOUT_IDS).reduce(
   (a, b) => ({ ...a, [b]: { ...CHARACTER_WITHOUT_IDS[b], id: b } }),
@@ -242,8 +272,10 @@ export const ENEMIES = [
   CHARACTERS["quy-lun"],
   CHARACTERS["son-tac"],
   CHARACTERS["linh-hoi-ho"],
+  CHARACTERS["chon-tinh"],
   CHARACTERS["ly-khue"],
   CHARACTERS["moc-tinh"],
+  CHARACTERS["linh-phong-chau"],
   CHARACTERS["la-duong"],
   CHARACTERS["linh-tam-dai"],
   CHARACTERS["xa-tinh"],
@@ -251,11 +283,85 @@ export const ENEMIES = [
   CHARACTERS["doc-nhan-tru"],
   CHARACTERS["do-canh-thac"],
   CHARACTERS["ngo-xuong-xi"],
-  CHARACTERS["quai-su"],
+  CHARACTERS["nhen-tinh"],
   CHARACTERS["nguyen-tri-kha"],
   CHARACTERS["ngo-nhat-khanh"],
   CHARACTERS["sau-quy"],
   CHARACTERS["kieu-thuan"],
+  CHARACTERS["kieu-cong-han"],
 ];
 
 export const DEFAULT_CHARACTER: ICharacterId = "trang-si";
+
+export const MAP_POINTS: IMapPoint[] = [
+  { x: 66, y: 48 },
+  { x: 97, y: 115 },
+  { x: 180, y: 157 },
+  { x: 288, y: 128 },
+  { x: 398, y: 119 },
+  { x: 426, y: 174 },
+  { x: 341, y: 213 },
+  { x: 320, y: 244, hidden: true },
+  { x: 355, y: 272 },
+  { x: 410, y: 300, hidden: true },
+  { x: 395, y: 337 },
+  { x: 282, y: 331 },
+  { x: 182, y: 283 },
+  { x: 79, y: 278 },
+  { x: 55, y: 362 },
+  { x: 139, y: 401 },
+  { x: 246, y: 425 },
+  { x: 338, y: 425 },
+  { x: 378, y: 458, hidden: true },
+  { x: 348, y: 500 },
+  { x: 246, y: 522 },
+  { x: 116, y: 536 },
+  { x: 62, y: 591 },
+  { x: 118, y: 637 },
+  { x: 223, y: 633 },
+  { x: 310, y: 611 },
+  { x: 407, y: 622 },
+  { x: 416, y: 685 },
+  { x: 331, y: 718 },
+  { x: 228, y: 714 },
+  { x: 116, y: 722 },
+];
+
+export const MAP_VISIBLE_POINTS = MAP_POINTS.filter((x) => !x.hidden);
+export const CYCLE_POINTS = MAP_POINTS.length;
+export const CYCLE_VISIBLE_POINTS = MAP_VISIBLE_POINTS.length;
+export const CYCLE_HEIGHT = MAP_POINTS[MAP_POINTS.length - 1].y;
+
+const COUNT_ENEMIES = ENEMIES.length;
+const COUNT_POINTS = 5000;
+const CYCLES = Math.floor(COUNT_POINTS / CYCLE_VISIBLE_POINTS);
+
+export const MAP: IMapPointAvatar[] = [];
+
+let enemyIndex = 0;
+
+for (let i = 0; i < CYCLES; i += 1) {
+  MAP.push(
+    ...MAP_POINTS.map((p) => {
+      const ret = { ...p, y: p.y + CYCLE_HEIGHT * i, avatar: enemyIndex };
+      if (!p.hidden) {
+        enemyIndex += 1;
+        if (enemyIndex === COUNT_ENEMIES) enemyIndex = 0;
+      }
+      return ret;
+    })
+  );
+}
+
+let currentCount = CYCLES * CYCLE_VISIBLE_POINTS;
+let i = 0;
+while (currentCount < COUNT_POINTS) {
+  const p = MAP_POINTS[i];
+  i += 1;
+  MAP.push({ ...p, avatar: enemyIndex });
+  if (!p.hidden) {
+    currentCount += 1;
+    enemyIndex += 1;
+    if (enemyIndex === COUNT_ENEMIES) enemyIndex = 0;
+  }
+}

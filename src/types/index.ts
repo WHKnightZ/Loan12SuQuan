@@ -1,5 +1,7 @@
 export type IPoint = { x: number; y: number };
 export type IPointExt = IPoint & { value: number };
+export type IMapPoint = IPoint & { hidden?: boolean };
+export type IMapPointAvatar = IMapPoint & { avatar: number };
 export type ITileInfo = IPointExt & { score: number };
 
 export type ITileType = "SWORD" | "HEART" | "GOLD" | "ENERGY" | "MANA" | "EXP" | "SWORDRED";
@@ -43,7 +45,11 @@ export type IHasEvent = {
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: IMouseEvent): void;
+  onMouseDown(e: IMouseEvent): void;
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp(): void;
   /**
    * Xử lý sự kiện nhấn phím
    */
@@ -134,8 +140,10 @@ export type ICharacterId =
   | "quy-lun"
   | "son-tac"
   | "linh-hoi-ho"
+  | "chon-tinh"
   | "ly-khue"
   | "moc-tinh"
+  | "linh-phong-chau"
   | "la-duong"
   | "linh-tam-dai"
   | "xa-tinh"
@@ -143,11 +151,12 @@ export type ICharacterId =
   | "doc-nhan-tru"
   | "do-canh-thac"
   | "ngo-xuong-xi"
-  | "quai-su"
+  | "nhen-tinh"
   | "nguyen-tri-kha"
   | "ngo-nhat-khanh"
   | "sau-quy"
-  | "kieu-thuan";
+  | "kieu-thuan"
+  | "kieu-cong-han";
 
 export type ICharacterWithoutIdAttributes = {
   name: string;

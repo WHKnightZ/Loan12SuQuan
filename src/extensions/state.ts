@@ -38,7 +38,11 @@ export class GameState<TParent, TGameStateType extends string> implements IGameS
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: IMouseEvent) {}
+  onMouseDown(e: IMouseEvent) {}
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp() {}
   /**
    * Xử lý sự kiện nhấn phím
    */
@@ -102,8 +106,14 @@ export class GameStateManager<TParent, TGameStateType extends string>
   /**
    * Xử lý sự kiện click chuột
    */
-  onClick(e: IMouseEvent) {
-    this.state.onClick(e);
+  onMouseDown(e: IMouseEvent) {
+    this.state.onMouseDown(e);
+  }
+  /**
+   * Xử lý sự kiện nhả chuột
+   */
+  onMouseUp() {
+    this.state.onMouseUp();
   }
   /**
    * Xử lý sự kiện nhấn phím
