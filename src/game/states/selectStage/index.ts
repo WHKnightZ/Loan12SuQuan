@@ -118,20 +118,6 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    * Xử lý sự kiện move chuột
    */
   onMouseMove({ offsetX, offsetY }: IMouseEvent) {
-    this.activeAvatar = -1;
-    this.map.forEach(({ x, y, avatar, hidden }) => {
-      if (hidden || this.activeAvatar != -1) return;
-
-      if (
-        offsetX >= x - AVATAR_CENTER &&
-        offsetX <= x + AVATAR_CENTER &&
-        offsetY >= y - AVATAR_CENTER &&
-        offsetY <= y + AVATAR_CENTER
-      ) {
-        this.activeAvatar = avatar;
-      }
-    });
-
     if (!this.dragging) return;
 
     const o = offsetY - this.offset;
@@ -149,6 +135,20 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
    */
   onMouseDown({ offsetX, offsetY }: IMouseEvent) {
     this.canChoose = true;
+
+    this.activeAvatar = -1;
+    this.map.forEach(({ x, y, avatar, hidden }) => {
+      if (hidden || this.activeAvatar != -1) return;
+
+      if (
+        offsetX >= x - AVATAR_CENTER &&
+        offsetX <= x + AVATAR_CENTER &&
+        offsetY >= y - AVATAR_CENTER &&
+        offsetY <= y + AVATAR_CENTER
+      ) {
+        this.activeAvatar = avatar;
+      }
+    });
 
     this.dragging = true;
     this.oldOffsetX = offsetX;

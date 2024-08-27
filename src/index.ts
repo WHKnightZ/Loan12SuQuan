@@ -51,7 +51,7 @@ const main = async () => {
 
   await loadTextures();
   Font.init();
-  // await pause(500);
+  await pause(500);
 
   loading.end();
 
@@ -60,9 +60,10 @@ const main = async () => {
 
   if (IS_MOBILE) {
     const getOffset = (e: TouchEvent) => {
+      const element = e.target as HTMLCanvasElement;
       const target = e.targetTouches[0];
-      const offsetX = target.clientX;
-      const offsetY = target.clientY;
+      const offsetX = target.clientX - element.offsetLeft;
+      const offsetY = target.clientY - element.offsetTop;
       return { offsetX, offsetY };
     };
 
