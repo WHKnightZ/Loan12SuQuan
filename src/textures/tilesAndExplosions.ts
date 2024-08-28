@@ -8,6 +8,7 @@ export const loadTilesAndExplosions = async () => {
   const loadImage = (key: number, src: string) => {
     const image = new Image();
     image.src = getImageSrc(`tiles/${src}`);
+
     return new Promise(
       (res) =>
         (image.onload = async () => {

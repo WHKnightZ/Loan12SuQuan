@@ -13,7 +13,7 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
   }
 
   onKeyDown(e: KeyboardEvent) {
-    if (e.key !== "Enter") return;
+    if (e.key !== "Esc") return;
 
     this.parent.stateManager.changeState("IDLE");
   }

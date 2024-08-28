@@ -2,23 +2,16 @@ import { CELL_SIZE } from "@/configs/consts";
 import { IHintArrow } from "@/game/states/inGame/types";
 import { IDirection } from "@/types";
 import { resize, rotateCW90 } from "@/utils/canvas";
-import { getImageSrc } from "@/utils/common";
+import { loadTexture } from "@/utils/common";
 
-export let hintArrows: {
+export const hintArrows: {
   [key in IDirection]: IHintArrow;
 } = {} as any;
 
-export const loadCommonTextures = async () => {
-  let image = new Image();
-  image.src = getImageSrc("common/hint-arrow");
+export let menuButtons = null as HTMLImageElement;
 
-  await new Promise(
-    (res) =>
-      (image.onload = async () => {
-        image = await resize(image, 2);
-        res(null);
-      })
-  );
+export const loadCommonTextures = async () => {
+  let image = await loadTexture("common/hint-arrow").then((img) => resize(img, 2));
 
   hintArrows.UP = {
     offset: { x: (CELL_SIZE - image.width) / 2, y: -6 },
@@ -43,4 +36,6 @@ export const loadCommonTextures = async () => {
     texture: image,
     drt: { x: -1, y: 0 },
   };
+
+  menuButtons = await loadTexture("common/menu-buttons").then((img) => resize(img, 2));
 };

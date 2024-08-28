@@ -64,9 +64,9 @@ export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
  */
 export const BOARD_CENTER = BOARD_SIZE / 2;
 /**
- * Chiều cao menu
+ * Chiều cao status board
  */
-export const MENU_HEIGHT = 96;
+export const STATUS_BOARD_HEIGHT = 96;
 /**
  * Chiều rộng màn hình
  */
@@ -74,7 +74,7 @@ export const SCREEN_WIDTH = BOARD_SIZE;
 /**
  * Chiều cao màn hình
  */
-export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
+export const SCREEN_HEIGHT = BOARD_SIZE + STATUS_BOARD_HEIGHT;
 /**
  * Chính giữa ngang màn hình
  */

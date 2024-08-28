@@ -1,5 +1,5 @@
-import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
-import { hintArrows } from "@/textures";
+import { base, CELL_SIZE, SCREEN_HEIGHT, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
+import { hintArrows, menuButtons } from "@/textures";
 import { IDirection, IInGameStateType } from "@/types";
 import { FlickeringText } from "@/effects";
 import { IInGameState } from "../types";
@@ -55,6 +55,8 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   }
 
   render() {
+    base.context.drawImage(menuButtons, 0, 0, 28, 28, 10, SCREEN_HEIGHT - 28 - 10, 28, 28);
+
     if (this.hintDelayTimer > 0) return;
 
     const hint = this.parent.matchedPositions[this.parent.hintIndex];

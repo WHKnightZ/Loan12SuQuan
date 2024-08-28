@@ -35,7 +35,7 @@ import { Player } from "./player";
 import { check, generateMap, getKey } from "@/utils/common";
 import { randomBool } from "@/utils/math";
 import { GainTile } from "@/effects";
-import { menuTexture } from "@/textures";
+import { statusBoardTexture } from "@/textures";
 import {
   InGameExplodeState,
   InGameFadeState,
@@ -382,7 +382,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
       }
     }
 
-    base.context.drawImage(menuTexture, 0, BOARD_SIZE);
+    base.context.drawImage(statusBoardTexture, 0, BOARD_SIZE);
     this.players.forEach((p) => p.render());
     this.stateManager.render();
     this.finishPlugin.render();
