@@ -170,4 +170,10 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
 
     this.parent.stateManager.changeState("IN_GAME", this.activeAvatar);
   }
+  /**
+   * Xử lý sự kiện chuột đi ra khỏi canvas
+   */
+  onMouseLeave() {
+    this.onMouseUp();
+  }
 }
