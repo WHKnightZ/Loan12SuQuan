@@ -51,6 +51,10 @@ export type IHasEvent = {
    */
   onMouseUp(): void;
   /**
+   * Xử lý sự kiện chuột đi ra khỏi canvas
+   */
+  onMouseLeave(): void;
+  /**
    * Xử lý sự kiện nhấn phím
    */
   onKeyDown(e: KeyboardEvent): void;

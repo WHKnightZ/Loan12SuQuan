@@ -69,8 +69,14 @@ export class Game implements IGame {
   /**
    * Xử lý sự kiện nhả chuột
    */
-  onMouseUp(): void {
+  onMouseUp() {
     this.stateManager.onMouseUp();
+  }
+  /**
+   * Xử lý sự kiện chuột đi ra khỏi canvas
+   */
+  onMouseLeave() {
+    this.stateManager.onMouseLeave();
   }
   /**
    * Xử lý sự kiện nhấn phím

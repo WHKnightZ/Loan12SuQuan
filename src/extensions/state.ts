@@ -44,6 +44,10 @@ export class GameState<TParent, TGameStateType extends string> implements IGameS
    */
   onMouseUp() {}
   /**
+   * Xử lý sự kiện chuột đi ra khỏi canvas
+   */
+  onMouseLeave() {}
+  /**
    * Xử lý sự kiện nhấn phím
    */
   onKeyDown(e: KeyboardEvent) {}
@@ -114,6 +118,12 @@ export class GameStateManager<TParent, TGameStateType extends string>
    */
   onMouseUp() {
     this.state.onMouseUp();
+  }
+  /**
+   * Xử lý sự kiện chuột đi ra khỏi canvas
+   */
+  onMouseLeave() {
+    this.state.onMouseLeave();
   }
   /**
    * Xử lý sự kiện nhấn phím

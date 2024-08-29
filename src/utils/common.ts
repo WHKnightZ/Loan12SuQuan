@@ -169,6 +169,9 @@ export const curveThroughPoints = (points: IPoint[]) => {
   context.beginPath();
 
   let p0 = points[0];
+
+  if (!p0) return;
+
   let p1: IPoint;
   let p2: IPoint;
   let p3: IPoint;
