@@ -110,6 +110,10 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     ]);
   }
 
+  /**
+   * Khởi tạo
+   * @param enemyIndex
+   */
   init(enemyIndex: number): void {
     this.waitProperties = null;
     this.matched4 = { turnCount: 0, matchedList: {} };
@@ -137,7 +141,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
 
     this.fadeIn();
   }
-
   /**
    * Kiểm tra cách hoán đổi này ăn được những gì
    */
@@ -399,7 +402,11 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện click chuột
    */
-  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
+  onMouseDown(e: IMouseEvent) {
+    this.stateManager.onMouseDown(e);
+
+    const { offsetX, offsetY } = e;
+
     if ((!this.stateManager.is("IDLE") && !this.stateManager.is("SELECT")) || this.playerTurn !== 0) return;
 
     if (offsetX < 0 || offsetX >= BOARD_SIZE || offsetY < 0 || offsetY >= BOARD_SIZE) return;
@@ -428,17 +435,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
   /**
    * Xử lý sự kiện nhả chuột
    */
-  onMouseUp() {}
-  /**
-   * Xử lý sự kiện nhấn phím
-   */
-  onKeyDown(e: KeyboardEvent) {
-    this.stateManager.onKeyDown(e);
-
-    switch (e.key) {
-      case "Escape":
-        this.fadeOut();
-        break;
-    }
+  onMouseUp() {
+    this.stateManager.onMouseUp();
   }
 }

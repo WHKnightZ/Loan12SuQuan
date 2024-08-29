@@ -1,9 +1,10 @@
 import { base, CELL_SIZE, SCREEN_HEIGHT, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
 import { hintArrows, menuButtons } from "@/textures";
-import { IDirection, IInGameStateType } from "@/types";
+import { IDirection, IInGameStateType, IMouseEvent } from "@/types";
 import { FlickeringText } from "@/effects";
 import { IInGameState } from "../types";
 import { GameState } from "@/extensions";
+import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -48,14 +49,14 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
     }
   }
 
-  onKeyDown(e: KeyboardEvent) {
-    if (e.key !== "Enter") return;
-
-    this.parent.stateManager.changeState("SELECT_ITEM");
-  }
-
   render() {
-    base.context.drawImage(menuButtons, 0, 0, 28, 28, 10, SCREEN_HEIGHT - 28 - 10, 28, 28);
+    // Menu button
+    if (this.parent.playerTurn === 0) {
+      const size = MENU_BUTTON_SIZE;
+      const offset = MENU_BUTTON_OFFSET;
+
+      base.context.drawImage(menuButtons, 0, 0, size, size, offset, SCREEN_HEIGHT - size - offset, size, size);
+    }
 
     if (this.hintDelayTimer > 0) return;
 
@@ -88,5 +89,33 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
     }
 
     this.idleTimer += 1;
+  }
+
+  /**
+   * Xử lý sự kiện nhấn phím
+   */
+  onKeyDown(e: KeyboardEvent) {
+    if (e.key !== "Enter") return;
+
+    this.parent.stateManager.changeState("SELECT_ITEM");
+  }
+  // onKeyDown(e: KeyboardEvent) {
+  //   this.stateManager.onKeyDown(e);
+
+  //   switch (e.key) {
+  //     case "Escape":
+  //       this.fadeOut();
+  //       break;
+  //   }
+  // }
+
+  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
+    const offset = MENU_BUTTON_OFFSET - 4; // Expand 4 pixel
+    const size = MENU_BUTTON_SIZE + 8; // Expand 4 pixel
+    const h = SCREEN_HEIGHT;
+
+    if (offsetX < offset || offsetX > offset + size || offsetY < h - offset - size || offsetY > h - offset) return;
+
+    this.parent.stateManager.changeState("SELECT_ITEM");
   }
 }

@@ -59,7 +59,7 @@ https://12lords.khanhnn.xyz
 - [ ] Khi select mà Esc sẽ bị lỗi fadeOut, fadeIn
 - [x] Đôi khi cuồng nộ không hoạt động
 - [x] Màu của bar khi value = 0 hơi tối
-- [ ] Move mouse outside thì dragging phải bằng false
+- [x] Move mouse outside thì dragging phải bằng false
 
 ### Improves:
 

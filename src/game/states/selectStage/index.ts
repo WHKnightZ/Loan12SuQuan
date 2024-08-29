@@ -73,7 +73,7 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     const context = base.context;
 
     context.reset();
-    context.drawImage(backgroundTextures.menu, 0, -40, SCREEN_WIDTH, 640);
+    context.drawImage(backgroundTextures.menu, 0, (SCREEN_HEIGHT - 640) / 2, SCREEN_WIDTH, 640);
 
     curveThroughPoints(this.map);
     drawPoints(this.map);

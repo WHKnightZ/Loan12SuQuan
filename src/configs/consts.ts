@@ -66,7 +66,7 @@ export const BOARD_CENTER = BOARD_SIZE / 2;
 /**
  * Chiều cao status board
  */
-export const STATUS_BOARD_HEIGHT = 96;
+export const STATUS_BOARD_HEIGHT = 150;
 /**
  * Chiều rộng màn hình
  */

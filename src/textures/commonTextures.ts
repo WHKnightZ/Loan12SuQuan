@@ -8,6 +8,9 @@ export const hintArrows: {
   [key in IDirection]: IHintArrow;
 } = {} as any;
 
+export const MENU_BUTTON_SIZE = 28;
+export const MENU_BUTTON_OFFSET = 11;
+
 export let menuButtons = null as HTMLImageElement;
 
 export const loadCommonTextures = async () => {
