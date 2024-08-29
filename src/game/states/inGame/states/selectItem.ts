@@ -4,23 +4,46 @@ import { menuButtons, selectItemsFrameTexture } from "@/textures";
 import { IInGameState } from "../types";
 import { IInGameStateType, IMouseEvent } from "@/types";
 import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
+import { Button } from "@/elements/button";
 
 /**
  * State chọn vật phẩm, kỹ năng
  */
 export class InGameSelectItemState extends GameState<IInGameState, IInGameStateType> {
+  private btnConfirm: Button;
+  private btnCancel: Button;
+
   constructor(parent: IInGameState) {
     super(parent, "SELECT_ITEM");
+
+    this.btnConfirm = new Button({
+      x: MENU_BUTTON_OFFSET,
+      y: SCREEN_HEIGHT - MENU_BUTTON_SIZE - MENU_BUTTON_OFFSET,
+      w: MENU_BUTTON_SIZE,
+      h: MENU_BUTTON_SIZE,
+      texture: menuButtons,
+      sx: MENU_BUTTON_SIZE,
+      sy: 0,
+      sw: MENU_BUTTON_SIZE,
+      sh: MENU_BUTTON_SIZE,
+    });
+
+    this.btnCancel = new Button({
+      x: SCREEN_WIDTH - MENU_BUTTON_SIZE - MENU_BUTTON_OFFSET,
+      y: SCREEN_HEIGHT - MENU_BUTTON_SIZE - MENU_BUTTON_OFFSET,
+      w: MENU_BUTTON_SIZE,
+      h: MENU_BUTTON_SIZE,
+      texture: menuButtons,
+      sx: MENU_BUTTON_SIZE * 2,
+      sy: 0,
+      sw: MENU_BUTTON_SIZE,
+      sh: MENU_BUTTON_SIZE,
+    });
   }
 
   render() {
-    const size = MENU_BUTTON_SIZE;
-    const offset = MENU_BUTTON_OFFSET;
-    const w = SCREEN_WIDTH;
-    const h = SCREEN_HEIGHT;
-
-    base.context.drawImage(menuButtons, size, 0, size, size, offset, h - size - offset, size, size);
-    base.context.drawImage(menuButtons, size * 2, 0, size, size, w - size - offset, h - size - offset, size, size);
+    this.btnConfirm.render();
+    this.btnCancel.render();
 
     base.context.drawImage(
       selectItemsFrameTexture,
@@ -35,13 +58,14 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
     this.parent.stateManager.changeState("IDLE");
   }
 
-  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
-    const offset = MENU_BUTTON_OFFSET - 4; // Expand 4 pixel
-    const size = MENU_BUTTON_SIZE + 8; // Expand 4 pixel
-    const h = SCREEN_HEIGHT;
+  onMouseDown(e: IMouseEvent) {
+    if (this.btnConfirm.contain(e)) {
+      this.parent.stateManager.changeState("IDLE");
+      return;
+    }
 
-    if (offsetX < offset || offsetX > offset + size || offsetY < h - offset - size || offsetY > h - offset) return;
-
-    this.parent.stateManager.changeState("IDLE");
+    if (this.btnCancel.contain(e)) {
+      this.parent.stateManager.changeState("IDLE");
+    }
   }
 }

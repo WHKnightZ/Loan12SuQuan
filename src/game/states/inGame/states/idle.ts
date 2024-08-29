@@ -5,6 +5,7 @@ import { FlickeringText } from "@/effects";
 import { IInGameState } from "../types";
 import { GameState } from "@/extensions";
 import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
+import { Button } from "@/elements/button";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -18,9 +19,22 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
 export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   private idleTimer: number;
   private hintDelayTimer: number;
+  private btnMenu: Button;
 
   constructor(parent: IInGameState) {
     super(parent, "IDLE");
+
+    this.btnMenu = new Button({
+      x: MENU_BUTTON_OFFSET,
+      y: SCREEN_HEIGHT - MENU_BUTTON_SIZE - MENU_BUTTON_OFFSET,
+      w: MENU_BUTTON_SIZE,
+      h: MENU_BUTTON_SIZE,
+      texture: menuButtons,
+      sx: 0,
+      sy: 0,
+      sw: MENU_BUTTON_SIZE,
+      sh: MENU_BUTTON_SIZE,
+    });
   }
 
   init() {
@@ -50,13 +64,7 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   }
 
   render() {
-    // Menu button
-    if (this.parent.playerTurn === 0) {
-      const size = MENU_BUTTON_SIZE;
-      const offset = MENU_BUTTON_OFFSET;
-
-      base.context.drawImage(menuButtons, 0, 0, size, size, offset, SCREEN_HEIGHT - size - offset, size, size);
-    }
+    this.btnMenu.render();
 
     if (this.hintDelayTimer > 0) return;
 
@@ -83,6 +91,8 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   }
 
   update() {
+    this.btnMenu.visible = this.parent.playerTurn === 0;
+
     if (this.hintDelayTimer > 0) {
       this.hintDelayTimer -= 1;
       return;
@@ -95,27 +105,18 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
    * Xử lý sự kiện nhấn phím
    */
   onKeyDown(e: KeyboardEvent) {
-    if (e.key !== "Enter") return;
+    switch (e.key) {
+      case "Enter":
+        this.parent.stateManager.changeState("SELECT_ITEM");
+        break;
 
-    this.parent.stateManager.changeState("SELECT_ITEM");
+      case "Escape":
+        this.parent.fadeOut();
+        break;
+    }
   }
-  // onKeyDown(e: KeyboardEvent) {
-  //   this.stateManager.onKeyDown(e);
 
-  //   switch (e.key) {
-  //     case "Escape":
-  //       this.fadeOut();
-  //       break;
-  //   }
-  // }
-
-  onMouseDown({ offsetX, offsetY }: IMouseEvent) {
-    const offset = MENU_BUTTON_OFFSET - 4; // Expand 4 pixel
-    const size = MENU_BUTTON_SIZE + 8; // Expand 4 pixel
-    const h = SCREEN_HEIGHT;
-
-    if (offsetX < offset || offsetX > offset + size || offsetY < h - offset - size || offsetY > h - offset) return;
-
-    this.parent.stateManager.changeState("SELECT_ITEM");
+  onMouseDown(e: IMouseEvent) {
+    if (this.btnMenu.contain(e)) this.parent.stateManager.changeState("SELECT_ITEM");
   }
 }
