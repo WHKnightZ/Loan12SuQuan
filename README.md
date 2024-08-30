@@ -52,6 +52,7 @@ https://12lords.khanhnn.xyz
 - [x] Vẽ bao nhiêu điểm trên map thì bị tụt FPS? 1000? Sau đó thử tối ưu virtual scroll, và test với 10000 điểm
 - [x] Chia toạ độ cho chu kỳ để ước lượng được khoảng hiện tại, sau đó check trong 3 khoảng hiện tại (-1 => 1) các điểm nằm trong màn hình để tối ưu render
 - [x] Hiệu ứng scroll giật ngược khi kéo đến biên (của MAC)
+- [ ] Tutorial kèm Dialog message có hình ảnh
 
 ### Bug:
 
