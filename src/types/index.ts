@@ -134,6 +134,23 @@ export type IBase = {
 
 export type IFontFamily = "CAP_WHITE" | "CAP_YELLOW" | "ARIAL" | "BLACK" | "VERDANA";
 
+export type ISkillId =
+  | "qua-cau-lua"
+  | "mua-thien-thach"
+  | "lua-dia-nguc"
+  | "chuoi-set"
+  | "khien-set"
+  | "sam-set"
+  | "mui-ten-bang"
+  | "cam-lo-thuy"
+  | "bang-phong";
+
+export type ISkillAttributes = {
+  name: string;
+  description: string;
+  manaCost: number;
+};
+
 export type ICharacterId =
   | "trang-si"
   | "linh-quen"

@@ -1,19 +1,19 @@
 import { resize } from "@/utils/canvas";
 import { loadTexture, waitLoadImage } from "@/utils/common";
 
-export let selectItemsFrameTexture: HTMLImageElement;
+export let selectItemFrameTexture: HTMLImageElement;
 
 const WIDTH = 236;
 const HEIGHT = 236;
 const OFFSET_BACKGROUND = 3;
 
-export const loadFrames = async () => {
+export const loadSelectItemFrame = async () => {
   const [cornerTop, cornerBottom, horizontalTop, horizontalBottom, vertical] = await Promise.all([
-    loadTexture("frames/corner-top"),
-    loadTexture("frames/corner-bottom"),
-    loadTexture("frames/horizontal-top"),
-    loadTexture("frames/horizontal-bottom"),
-    loadTexture("frames/vertical"),
+    loadTexture("selectItem/corner-top"),
+    loadTexture("selectItem/corner-bottom"),
+    loadTexture("selectItem/horizontal-top"),
+    loadTexture("selectItem/horizontal-bottom"),
+    loadTexture("selectItem/vertical"),
   ]);
 
   const canvas = document.createElement("canvas");
@@ -52,9 +52,9 @@ export const loadFrames = async () => {
   drawSide();
   context.restore();
 
-  selectItemsFrameTexture = new Image();
-  selectItemsFrameTexture.src = canvas.toDataURL();
+  selectItemFrameTexture = new Image();
+  selectItemFrameTexture.src = canvas.toDataURL();
 
-  await waitLoadImage(selectItemsFrameTexture);
-  selectItemsFrameTexture = await resize(selectItemsFrameTexture, 2);
+  await waitLoadImage(selectItemFrameTexture);
+  selectItemFrameTexture = await resize(selectItemFrameTexture, 2);
 };

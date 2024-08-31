@@ -4,7 +4,7 @@ import { loadCommonTextures, hintArrows, menuButtons } from "./commonTextures";
 import { loadCornerSelections, cornerSelections } from "./cornerSelections";
 import { loadCrystals, crystalTextures, swordCrystalTextures, damageTextures } from "./crystals";
 import { loadFonts, fontTextures } from "./fonts";
-import { loadFrames, selectItemsFrameTexture } from "./frames";
+import { loadSelectItemFrame, selectItemFrameTexture } from "./selectItemFrame";
 import { loadStatusBoard, statusBoardTexture, barTextures } from "./statusBoard";
 import { loadPowerAttackTextures, powerAttackTextures } from "./powerAttack";
 import { loadStars, starTextures } from "./stars";
@@ -25,7 +25,7 @@ export {
   winTextures,
   loseTextures,
   powerAttackTextures,
-  selectItemsFrameTexture,
+  selectItemFrameTexture,
   backgroundTextures,
   menuButtons,
 };
@@ -42,7 +42,7 @@ export const loadTextures = () => {
     loadCrystals(),
     loadWinLoseTextures(),
     loadPowerAttackTextures(),
-    loadFrames(),
+    loadSelectItemFrame(),
     loadBackgroundTextures(),
   ]);
 };

@@ -5,6 +5,8 @@ import {
   ICharacterWithoutIdAttributes,
   IMapPoint,
   IMapPointAvatar,
+  ISkillAttributes,
+  ISkillId,
   ITileType,
 } from "@/types";
 
@@ -227,6 +229,60 @@ export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
  * Màu của spin
  */
 export const SPIN_ANIMATION_COLOR = "#96e6e0";
+/**
+ * Danh sách kỹ năng
+ */
+export const SKILLS: { [key in ISkillId]: ISkillAttributes } = {
+  "qua-cau-lua": {
+    name: "Quả Cầu Lửa",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì 1 vùng diện tích 3x3 ô trên bàn cờ.",
+    manaCost: 30,
+  },
+  "mua-thien-thach": {
+    name: "Mưa Thiên Thạch",
+    description:
+      "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 3 đến 5 vùng diện tích 2x2 ô trên bàn cờ.",
+    manaCost: 60,
+  },
+  "lua-dia-nguc": {
+    name: "Lửa Địa Ngục",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì 2 vùng diện tích 4x4 ô trên bàn cờ.",
+    manaCost: 100,
+  },
+  "chuoi-set": {
+    name: "Chuỗi Sét",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 4 đến 8 ô trên bàn cờ.",
+    manaCost: 30,
+  },
+  "khien-set": {
+    name: "Khiên Sét",
+    description: "Hóa giải tất cả các đòn tấn công của kẻ thù. Tác dụng trong 6 lượt.",
+    manaCost: 60,
+  },
+  "sam-set": {
+    name: "Sấm Sét",
+    description:
+      "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 3 đến 6 vùng diện tích 3x3 ô trên bàn cờ.",
+    manaCost: 100,
+  },
+  "mui-ten-bang": {
+    name: "Mũi Tên Băng",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, triệt tiêu một lượng nhỏ năng lượng của kẻ thù.",
+    manaCost: 30,
+  },
+  "cam-lo-thuy": {
+    name: "Cam Lộ Thủy",
+    description:
+      "Phục hồi 20% sinh lực cho bản thân. Phá hủy tất cả trái tim trên bàn cờ và hấp thụ sinh lực của trái tim bị hủy.",
+    manaCost: 60,
+  },
+  "bang-phong": {
+    name: "Băng Phong",
+    description:
+      "Đóng băng kẻ thù trong 2 lượt, gây sát thương kẻ thù, lực sát thương bằng {0}, triệt tiêu một lượng lớn năng lượng của kẻ thù.",
+    manaCost: 100,
+  },
+};
 /**
  * Danh sách các nhân vật
  */

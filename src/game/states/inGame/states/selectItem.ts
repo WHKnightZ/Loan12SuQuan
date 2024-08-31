@@ -1,6 +1,6 @@
 import { BOARD_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH, base } from "@/configs/consts";
 import { GameState } from "@/extensions";
-import { menuButtons, selectItemsFrameTexture } from "@/textures";
+import { menuButtons, selectItemFrameTexture } from "@/textures";
 import { IInGameState } from "../types";
 import { IInGameStateType, IMouseEvent } from "@/types";
 import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
@@ -46,9 +46,9 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
     this.btnCancel.render();
 
     base.context.drawImage(
-      selectItemsFrameTexture,
-      (BOARD_SIZE - selectItemsFrameTexture.width) / 2,
-      (BOARD_SIZE - selectItemsFrameTexture.height) / 2 - 2
+      selectItemFrameTexture,
+      (BOARD_SIZE - selectItemFrameTexture.width) / 2,
+      (BOARD_SIZE - selectItemFrameTexture.height) / 2 - 2
     );
   }
 
