@@ -53,6 +53,7 @@ https://12lords.khanhnn.xyz
 - [x] Chia toạ độ cho chu kỳ để ước lượng được khoảng hiện tại, sau đó check trong 3 khoảng hiện tại (-1 => 1) các điểm nằm trong màn hình để tối ưu render
 - [x] Hiệu ứng scroll giật ngược khi kéo đến biên (của MAC)
 - [ ] Không resize x2 nữa mà thay vào đó resize cả cửa sổ bằng CSS
+- [ ] Tutorial kèm Dialog message có hình ảnh
 
 ### Bug:
 
