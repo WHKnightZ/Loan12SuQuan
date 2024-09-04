@@ -1,4 +1,6 @@
 export type IPoint = { x: number; y: number };
+export type ISize = { w: number; h: number };
+export type IRectangle = IPoint & ISize;
 export type IPointExt = IPoint & { value: number };
 export type IMapPoint = IPoint & { hidden?: boolean };
 export type IMapPointAvatar = IMapPoint & { avatar: number };
@@ -184,6 +186,7 @@ export type ICharacterWithoutIdAttributes = {
   attack: number;
   intelligence: number;
   life: number;
+  skills: ISkillId[];
 };
 
 export type ICharacterAttributes = ICharacterWithoutIdAttributes & {

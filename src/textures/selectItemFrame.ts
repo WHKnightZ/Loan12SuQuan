@@ -1,3 +1,4 @@
+import { IRectangle } from "@/types";
 import { resize } from "@/utils/canvas";
 import { loadTexture, waitLoadImage } from "@/utils/common";
 
@@ -6,15 +7,18 @@ export let selectItemFrameTexture: HTMLImageElement;
 const WIDTH = 236;
 const HEIGHT = 236;
 const OFFSET_BACKGROUND = 3;
+const OFFSET_DIVIDE = 80;
+
+const vertical = { x: 20, y: 0, w: 3, h: 12 };
+const cornerBottom = { x: 18, y: 20, w: 11, h: 9 };
+const cornerTop = { x: 0, y: 20, w: 18, h: 19 };
+const divideCenter = { x: 0, y: 12, w: 30, h: 5 };
+const divideLeft = { x: 0, y: 0, w: 20, h: 7 };
+const horizontalBottom = { x: 0, y: 17, w: 20, h: 3 };
+const horizontalTop = { x: 0, y: 7, w: 20, h: 5 };
 
 export const loadSelectItemFrame = async () => {
-  const [cornerTop, cornerBottom, horizontalTop, horizontalBottom, vertical] = await Promise.all([
-    loadTexture("selectItem/corner-top"),
-    loadTexture("selectItem/corner-bottom"),
-    loadTexture("selectItem/horizontal-top"),
-    loadTexture("selectItem/horizontal-bottom"),
-    loadTexture("selectItem/vertical"),
-  ]);
+  const selectItemFrameSpriteSheet = await loadTexture("selectItem/frame");
 
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
@@ -30,20 +34,20 @@ export const loadSelectItemFrame = async () => {
 
   drawBackground();
 
-  const drawSide = () => {
-    context.drawImage(cornerTop, 0, 0);
-    context.drawImage(vertical, 2, cornerTop.height, vertical.width, HEIGHT - cornerTop.height - cornerBottom.height);
-    context.drawImage(cornerBottom, 2, HEIGHT - cornerBottom.height);
+  const draw = (position: IRectangle, x: number, y: number, w: number, h: number) => {
+    context.drawImage(selectItemFrameSpriteSheet, position.x, position.y, position.w, position.h, x, y, w, h);
   };
 
-  context.drawImage(horizontalTop, cornerTop.width, 2, WIDTH - 2 * cornerTop.width, horizontalTop.height);
-  context.drawImage(
-    horizontalBottom,
-    cornerBottom.width,
-    HEIGHT - 3,
-    WIDTH - 2 * cornerBottom.width,
-    horizontalBottom.height
-  );
+  const drawSide = () => {
+    draw(cornerTop, 0, 0, cornerTop.w, cornerTop.h);
+    draw(vertical, 2, cornerTop.h, vertical.w, HEIGHT - cornerTop.h - cornerBottom.h);
+    draw(cornerBottom, 2, HEIGHT - cornerBottom.h, cornerBottom.w, cornerBottom.h);
+    draw(divideLeft, 4, OFFSET_DIVIDE, divideLeft.w, divideLeft.h);
+  };
+
+  draw(horizontalTop, cornerTop.w, 2, WIDTH - 2 * cornerTop.w, horizontalTop.h);
+  draw(horizontalBottom, cornerBottom.w, HEIGHT - 3, WIDTH - 2 * cornerBottom.w, horizontalBottom.h);
+  draw(divideCenter, 4 + divideLeft.w, OFFSET_DIVIDE + 1, WIDTH - 2 * (4 + divideLeft.w), divideCenter.h);
 
   drawSide();
   context.save();

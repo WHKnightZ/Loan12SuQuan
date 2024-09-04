@@ -85,8 +85,7 @@ body {
 
 @media screen and (max-width: 500px) {
   #canvas {
-    width: 100vw;
-    height: 120vw;
+    width: 100dvw;
     border-width: 3px;
     box-sizing: border-box;
   }

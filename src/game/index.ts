@@ -22,6 +22,8 @@ export class Game implements IGame {
       { name: "SELECT_STAGE", state: new SelectStageState(this), isDefault: true },
       { name: "IN_GAME", state: new InGameState(this) },
     ]);
+
+    this.stateManager.changeState("IN_GAME", 0);
   }
 
   /**

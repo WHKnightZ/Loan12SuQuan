@@ -108,6 +108,8 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
         state: new InGameSelectItemState(this),
       },
     ]);
+
+    setTimeout(() => this.stateManager.changeState("SELECT_ITEM"), 1000);
   }
 
   /**
@@ -126,7 +128,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.combo = 0;
     this.explosions = [];
     this.isFinished = false;
-
     this.players = [
       new Player({
         inGame: this,
