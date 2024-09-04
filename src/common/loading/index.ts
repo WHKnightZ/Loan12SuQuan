@@ -1,5 +1,5 @@
 import { BACKGROUND_COLOR, SCREEN_HEIGHT, SCREEN_WIDTH } from "@/configs/consts";
-import { FourLinesToDotsLoading } from "./loadingSkins/fourLinesToDots";
+import { FourLinesToDotsLoading } from "./fourLinesToDots";
 import { ILoadingSkin } from "./type";
 
 const MAX_FADING_TIMER = 40;

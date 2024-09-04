@@ -1,4 +1,4 @@
-import { ILoadingSkin } from "../type";
+import { ILoadingSkin } from "./type";
 
 export class LoadingSkin implements ILoadingSkin {
   protected context: CanvasRenderingContext2D;

@@ -54,6 +54,7 @@ https://12lords.khanhnn.xyz
 - [x] Hiệu ứng scroll giật ngược khi kéo đến biên (của MAC)
 - [ ] Không resize x2 nữa mà thay vào đó resize cả cửa sổ bằng CSS
 - [ ] Tutorial kèm Dialog message có hình ảnh
+- [ ] Bỏ resize
 
 ### Bug:
 

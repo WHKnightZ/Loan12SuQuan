@@ -1,7 +1,7 @@
 import { SCREEN_HEIGHT_HALF, SCREEN_WIDTH_HALF } from "@/configs/consts";
 import { LoadingSkin } from "./loadingSkin";
-import { IColor } from "../type";
-import { convertToHexColor, ease } from "../utils";
+import { IColor } from "./type";
+import { convertToHexColor, ease } from "./utils";
 
 const MAX = 120;
 const FACTOR = 20;
