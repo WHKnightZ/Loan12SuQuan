@@ -51,7 +51,7 @@ const main = async () => {
 
   await loadTextures();
   Font.init();
-  await pause(500);
+  // await pause(500);
 
   loading.end();
 

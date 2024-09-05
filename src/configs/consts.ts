@@ -92,7 +92,7 @@ export const TILE_SIZE = 50;
 /**
  * Kích thước tile trong spritesheet
  */
-export const REAL_TILE_SIZE = 28;
+export const REAL_TILE_SIZE = 25;
 /**
  * Vẽ tile cách 1 khoảng offset để căn giữa tile
  */
