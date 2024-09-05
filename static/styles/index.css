@@ -21,7 +21,6 @@ body {
   border: 6px solid #3e3226;
   image-rendering: pixelated;
   width: 480px;
-  height: 576px;
   background-color: #e5e6e7;
 }
 
@@ -86,8 +85,7 @@ body {
 
 @media screen and (max-width: 500px) {
   #canvas {
-    width: 100vw;
-    height: 120vw;
+    width: 100dvw;
     border-width: 3px;
     box-sizing: border-box;
   }

@@ -1,4 +1,6 @@
 export type IPoint = { x: number; y: number };
+export type ISize = { w: number; h: number };
+export type IRectangle = IPoint & ISize;
 export type IPointExt = IPoint & { value: number };
 export type IMapPoint = IPoint & { hidden?: boolean };
 export type IMapPointAvatar = IMapPoint & { avatar: number };
@@ -134,6 +136,23 @@ export type IBase = {
 
 export type IFontFamily = "CAP_WHITE" | "CAP_YELLOW" | "ARIAL" | "BLACK" | "VERDANA";
 
+export type ISkillId =
+  | "qua-cau-lua"
+  | "mua-thien-thach"
+  | "lua-dia-nguc"
+  | "chuoi-set"
+  | "khien-set"
+  | "sam-set"
+  | "mui-ten-bang"
+  | "cam-lo-thuy"
+  | "bang-phong";
+
+export type ISkillAttributes = {
+  name: string;
+  description: string;
+  manaCost: number;
+};
+
 export type ICharacterId =
   | "trang-si"
   | "linh-quen"
@@ -167,6 +186,7 @@ export type ICharacterWithoutIdAttributes = {
   attack: number;
   intelligence: number;
   life: number;
+  skills: ISkillId[];
 };
 
 export type ICharacterAttributes = ICharacterWithoutIdAttributes & {

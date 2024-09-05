@@ -1,9 +1,11 @@
-import { base, CELL_SIZE, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
-import { hintArrows } from "@/textures";
-import { IDirection, IInGameStateType } from "@/types";
+import { base, CELL_SIZE, SCREEN_HEIGHT, TIMER_HINT_DELAY_DEFAULT } from "@/configs/consts";
+import { hintArrows, menuButtons } from "@/textures";
+import { IDirection, IInGameStateType, IMouseEvent } from "@/types";
 import { FlickeringText } from "@/effects";
 import { IInGameState } from "../types";
 import { GameState } from "@/extensions";
+import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
+import { Button } from "@/elements/button";
 
 const HINT_ARROW_CYCLE = 30;
 
@@ -17,9 +19,22 @@ const hintArrowOffsets = Array.from({ length: HINT_ARROW_CYCLE }).map((_, i) =>
 export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   private idleTimer: number;
   private hintDelayTimer: number;
+  private btnMenu: Button;
 
   constructor(parent: IInGameState) {
     super(parent, "IDLE");
+
+    this.btnMenu = new Button({
+      x: MENU_BUTTON_OFFSET,
+      y: SCREEN_HEIGHT - MENU_BUTTON_SIZE - MENU_BUTTON_OFFSET,
+      w: MENU_BUTTON_SIZE,
+      h: MENU_BUTTON_SIZE,
+      texture: menuButtons,
+      sx: 0,
+      sy: 0,
+      sw: MENU_BUTTON_SIZE,
+      sh: MENU_BUTTON_SIZE,
+    });
   }
 
   init() {
@@ -48,13 +63,9 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
     }
   }
 
-  onKeyDown(e: KeyboardEvent) {
-    if (e.key !== "Enter") return;
-
-    this.parent.stateManager.changeState("SELECT_ITEM");
-  }
-
   render() {
+    this.btnMenu.render();
+
     if (this.hintDelayTimer > 0) return;
 
     const hint = this.parent.matchedPositions[this.parent.hintIndex];
@@ -80,11 +91,32 @@ export class InGameIdleState extends GameState<IInGameState, IInGameStateType> {
   }
 
   update() {
+    this.btnMenu.visible = this.parent.playerTurn === 0;
+
     if (this.hintDelayTimer > 0) {
       this.hintDelayTimer -= 1;
       return;
     }
 
     this.idleTimer += 1;
+  }
+
+  /**
+   * Xử lý sự kiện nhấn phím
+   */
+  onKeyDown(e: KeyboardEvent) {
+    switch (e.key) {
+      case "Enter":
+        this.parent.stateManager.changeState("SELECT_ITEM");
+        break;
+
+      case "Escape":
+        this.parent.fadeOut();
+        break;
+    }
+  }
+
+  onMouseDown(e: IMouseEvent) {
+    if (this.btnMenu.contain(e)) this.parent.stateManager.changeState("SELECT_ITEM");
   }
 }

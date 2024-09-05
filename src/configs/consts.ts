@@ -5,6 +5,8 @@ import {
   ICharacterWithoutIdAttributes,
   IMapPoint,
   IMapPointAvatar,
+  ISkillAttributes,
+  ISkillId,
   ITileType,
 } from "@/types";
 
@@ -64,9 +66,9 @@ export const BOARD_SIZE = MAP_WIDTH * CELL_SIZE;
  */
 export const BOARD_CENTER = BOARD_SIZE / 2;
 /**
- * Chiều cao menu
+ * Chiều cao status board
  */
-export const MENU_HEIGHT = 96;
+export const STATUS_BOARD_HEIGHT = 150;
 /**
  * Chiều rộng màn hình
  */
@@ -74,7 +76,7 @@ export const SCREEN_WIDTH = BOARD_SIZE;
 /**
  * Chiều cao màn hình
  */
-export const SCREEN_HEIGHT = BOARD_SIZE + MENU_HEIGHT;
+export const SCREEN_HEIGHT = BOARD_SIZE + STATUS_BOARD_HEIGHT;
 /**
  * Chính giữa ngang màn hình
  */
@@ -228,35 +230,95 @@ export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
  */
 export const SPIN_ANIMATION_COLOR = "#96e6e0";
 /**
+ * Danh sách kỹ năng
+ */
+export const SKILLS: { [key in ISkillId]: ISkillAttributes } = {
+  "qua-cau-lua": {
+    name: "Quả Cầu Lửa",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì 1 vùng diện tích 3x3 ô trên bàn cờ.",
+    manaCost: 30,
+  },
+  "mua-thien-thach": {
+    name: "Mưa Thiên Thạch",
+    description:
+      "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 3 đến 5 vùng diện tích 2x2 ô trên bàn cờ.",
+    manaCost: 60,
+  },
+  "lua-dia-nguc": {
+    name: "Lửa Địa Ngục",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì 2 vùng diện tích 4x4 ô trên bàn cờ.",
+    manaCost: 100,
+  },
+  "chuoi-set": {
+    name: "Chuỗi Sét",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 4 đến 8 ô trên bàn cờ.",
+    manaCost: 30,
+  },
+  "khien-set": {
+    name: "Khiên Sét",
+    description: "Hóa giải tất cả các đòn tấn công của kẻ thù. Tác dụng trong 6 lượt.",
+    manaCost: 60,
+  },
+  "sam-set": {
+    name: "Sấm Sét",
+    description:
+      "Gây sát thương kẻ thù, lực sát thương bằng {0}, phá hủy tức thì từ 3 đến 6 vùng diện tích 3x3 ô trên bàn cờ.",
+    manaCost: 100,
+  },
+  "mui-ten-bang": {
+    name: "Mũi Tên Băng",
+    description: "Gây sát thương kẻ thù, lực sát thương bằng {0}, triệt tiêu một lượng nhỏ năng lượng của kẻ thù.",
+    manaCost: 30,
+  },
+  "cam-lo-thuy": {
+    name: "Cam Lộ Thủy",
+    description:
+      "Phục hồi 20% sinh lực cho bản thân. Phá hủy tất cả trái tim trên bàn cờ và hấp thụ sinh lực của trái tim bị hủy.",
+    manaCost: 60,
+  },
+  "bang-phong": {
+    name: "Băng Phong",
+    description:
+      "Đóng băng kẻ thù trong 2 lượt, gây sát thương kẻ thù, lực sát thương bằng {0}, triệt tiêu một lượng lớn năng lượng của kẻ thù.",
+    manaCost: 100,
+  },
+};
+/**
  * Danh sách các nhân vật
  */
 const CHARACTER_WITHOUT_IDS: { [key in ICharacterId]: ICharacterWithoutIdAttributes } = {
-  "trang-si": { name: "Tráng Sĩ", attack: 2, life: 100, intelligence: 60 },
-  "linh-quen": { name: "Lính Quèn", attack: 1, life: 80, intelligence: 10 },
-  "cay-an-thit": { name: "Cây Ăn Thịt", attack: 3, life: 120, intelligence: 70 },
-  "nguyen-bac": { name: "Nguyễn Bặc", attack: 4.5, life: 160, intelligence: 50 },
-  "quy-ong": { name: "Quỷ Ong", attack: 5, life: 200, intelligence: 100 },
-  "linh-binh-kieu": { name: "Lính Bình Kiều", attack: 5, life: 200, intelligence: 100 },
-  "quy-lun": { name: "Quỷ Lùn", attack: 5, life: 200, intelligence: 100 },
-  "son-tac": { name: "Sơn Tặc", attack: 5, life: 200, intelligence: 100 },
-  "linh-hoi-ho": { name: "Lính Hồi Hồ", attack: 5, life: 200, intelligence: 100 },
-  "chon-tinh": { name: "Chồn Tinh", attack: 5, life: 200, intelligence: 100 },
-  "ly-khue": { name: "Lý Khuê", attack: 5, life: 200, intelligence: 100 },
-  "moc-tinh": { name: "Mộc Tinh", attack: 5, life: 200, intelligence: 100 },
-  "linh-phong-chau": { name: "Lính Phong Châu", attack: 5, life: 200, intelligence: 100 },
-  "la-duong": { name: "Lã Đường", attack: 5, life: 200, intelligence: 100 },
-  "linh-tam-dai": { name: "Lính Tam Đái", attack: 5, life: 200, intelligence: 100 },
-  "xa-tinh": { name: "Xà Tinh", attack: 5, life: 200, intelligence: 100 },
-  "tuong-do-dong": { name: "Tướng Đỗ Động", attack: 5, life: 200, intelligence: 100 },
-  "doc-nhan-tru": { name: "Độc Nhãn Trư", attack: 5, life: 200, intelligence: 100 },
-  "do-canh-thac": { name: "Đỗ Cảnh Thạc", attack: 5, life: 200, intelligence: 100 },
-  "ngo-xuong-xi": { name: "Ngô Xương Xí", attack: 5, life: 200, intelligence: 100 },
-  "nhen-tinh": { name: "Nhện Tinh", attack: 5, life: 200, intelligence: 100 },
-  "nguyen-tri-kha": { name: "Nguyễn Trí Khả", attack: 5, life: 200, intelligence: 100 },
-  "ngo-nhat-khanh": { name: "Ngô Nhật Khánh", attack: 5, life: 200, intelligence: 100 },
-  "sau-quy": { name: "Sâu Quỷ", attack: 5, life: 200, intelligence: 100 },
-  "kieu-thuan": { name: "Kiều Thuận", attack: 15, life: 1000, intelligence: 100 },
-  "kieu-cong-han": { name: "Kiều Công Hãn", attack: 15, life: 1000, intelligence: 100 },
+  "trang-si": {
+    name: "Tráng Sĩ",
+    attack: 2,
+    life: 100,
+    intelligence: 60,
+    skills: ["qua-cau-lua", "mua-thien-thach", "lua-dia-nguc"],
+  },
+  "linh-quen": { name: "Lính Quèn", attack: 1, life: 80, intelligence: 10, skills: [] },
+  "cay-an-thit": { name: "Cây Ăn Thịt", attack: 3, life: 120, intelligence: 70, skills: [] },
+  "nguyen-bac": { name: "Nguyễn Bặc", attack: 4.5, life: 160, intelligence: 50, skills: [] },
+  "quy-ong": { name: "Quỷ Ong", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "linh-binh-kieu": { name: "Lính Bình Kiều", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "quy-lun": { name: "Quỷ Lùn", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "son-tac": { name: "Sơn Tặc", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "linh-hoi-ho": { name: "Lính Hồi Hồ", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "chon-tinh": { name: "Chồn Tinh", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "ly-khue": { name: "Lý Khuê", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "moc-tinh": { name: "Mộc Tinh", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "linh-phong-chau": { name: "Lính Phong Châu", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "la-duong": { name: "Lã Đường", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "linh-tam-dai": { name: "Lính Tam Đái", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "xa-tinh": { name: "Xà Tinh", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "tuong-do-dong": { name: "Tướng Đỗ Động", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "doc-nhan-tru": { name: "Độc Nhãn Trư", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "do-canh-thac": { name: "Đỗ Cảnh Thạc", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "ngo-xuong-xi": { name: "Ngô Xương Xí", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "nhen-tinh": { name: "Nhện Tinh", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "nguyen-tri-kha": { name: "Nguyễn Trí Khả", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "ngo-nhat-khanh": { name: "Ngô Nhật Khánh", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "sau-quy": { name: "Sâu Quỷ", attack: 5, life: 200, intelligence: 100, skills: [] },
+  "kieu-thuan": { name: "Kiều Thuận", attack: 15, life: 1000, intelligence: 100, skills: [] },
+  "kieu-cong-han": { name: "Kiều Công Hãn", attack: 15, life: 1000, intelligence: 100, skills: [] },
 };
 export const CHARACTERS = getKeys(CHARACTER_WITHOUT_IDS).reduce(
   (a, b) => ({ ...a, [b]: { ...CHARACTER_WITHOUT_IDS[b], id: b } }),
