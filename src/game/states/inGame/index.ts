@@ -108,8 +108,6 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
         state: new InGameSelectItemState(this),
       },
     ]);
-
-    setTimeout(() => this.stateManager.changeState("SELECT_ITEM"), 1000);
   }
 
   /**
@@ -141,6 +139,7 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.isUpdatedTurnCount = true;
 
     this.fadeIn();
+    // this.stateManager.changeState("SELECT_ITEM");
   }
   /**
    * Kiểm tra cách hoán đổi này ăn được những gì

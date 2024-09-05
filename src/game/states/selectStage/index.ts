@@ -48,17 +48,8 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
   constructor(parent: IGame) {
     super(parent, "SELECT_STAGE");
 
-    this.activeAvatar = -1;
     avatarFullWidth = AVATAR_WIDTH + avatarGapX;
     avatarFullHeight = AVATAR_WIDTH + avatarGapY;
-
-    this.offsetY = OFFSET_MAP;
-    this.offsetY2 = 0;
-    this.dragging = false;
-    this.factor = 1;
-
-    this.velocity = 0;
-    this.map = [];
 
     this.gradient = base.context.createLinearGradient(0, 0, 0, 125);
     this.gradient.addColorStop(0.0, "#000000bf");
@@ -66,6 +57,19 @@ export class SelectStageState extends GameState<IGame, IGameStateType> {
     this.gradient.addColorStop(1.0, "#00000000");
   }
 
+  /**
+   * Khởi tạo
+   * @param enemyIndex
+   */
+  init(): void {
+    this.activeAvatar = -1;
+    this.offsetY = OFFSET_MAP;
+    this.offsetY2 = 0;
+    this.dragging = false;
+    this.factor = 1;
+    this.velocity = 0;
+    this.map = [];
+  }
   /**
    * Hiển thị
    */
