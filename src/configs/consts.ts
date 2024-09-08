@@ -52,7 +52,7 @@ export const TOTAL_TILES = MAP_WIDTH * MAP_WIDTH;
 /**
  * Kích thước 1 cell
  */
-export const CELL_SIZE = 60;
+export const CELL_SIZE = 30;
 /**
  * Chính giữa cell
  */
@@ -68,7 +68,7 @@ export const BOARD_CENTER = BOARD_SIZE / 2;
 /**
  * Chiều cao status board
  */
-export const STATUS_BOARD_HEIGHT = 150;
+export const STATUS_BOARD_HEIGHT = 75;
 /**
  * Chiều rộng màn hình
  */
@@ -88,11 +88,7 @@ export const SCREEN_HEIGHT_HALF = SCREEN_HEIGHT / 2;
 /**
  * Kích thước hiển thị của tile
  */
-export const TILE_SIZE = 50;
-/**
- * Kích thước tile trong spritesheet
- */
-export const REAL_TILE_SIZE = 25;
+export const TILE_SIZE = 24;
 /**
  * Vẽ tile cách 1 khoảng offset để căn giữa tile
  */
@@ -112,15 +108,11 @@ export const SWAP_OFFSET = CELL_SIZE / SWAP_DURATION;
 /**
  * Tốc độ rơi khởi đầu
  */
-export const VELOCITY_BASE = 3.5;
+export const VELOCITY_BASE = 1.75;
 /**
  * Tốc độ rơi tăng thêm sau mỗi frame
  */
-export const GRAVITY = 0.27;
-/**
- * Tỉ lệ để phóng to tile lên
- */
-export const SCALE_RATIO = TILE_SIZE / REAL_TILE_SIZE;
+export const GRAVITY = 0.135;
 /**
  * Chỉ số tính xem gợi ý nước đi của người chơi tốt hay kém
  */
@@ -145,10 +137,6 @@ export const EPSILON_2 = 0.01;
  * Khoảng thời gian người chơi được gợi ý nếu không thao tác (tính bằng số frame)
  */
 export const TIMER_HINT_DELAY_DEFAULT = 300;
-/**
- * Sau khi load font xong, x2 kích thước font
- */
-export const FONT_SCALE = 2;
 /**
  * Code của các tile
  */
@@ -208,11 +196,11 @@ export const base = {} as IBase;
 /**
  * Avatar width
  */
-export const AVATAR_WIDTH = 60;
+export const AVATAR_WIDTH = 30;
 /**
  * Avatar height
  */
-export const AVATAR_HEIGHT = 52;
+export const AVATAR_HEIGHT = 26;
 /**
  * Avatar center
  */
@@ -220,11 +208,11 @@ export const AVATAR_CENTER = AVATAR_WIDTH / 2;
 /**
  * Offset X của avatar
  */
-export const AVATAR_OFFSET_X = 62;
+export const AVATAR_OFFSET_X = 31;
 /**
  * Offset Y của avatar
  */
-export const AVATAR_OFFSET_Y = BOARD_SIZE + 24;
+export const AVATAR_OFFSET_Y = BOARD_SIZE + 12;
 /**
  * Màu của spin
  */

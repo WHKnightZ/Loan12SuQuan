@@ -85,7 +85,7 @@ export const rotate180 = (image: HTMLImageElement) => {
   return new Promise<HTMLImageElement>((res) => (image.onload = () => res(image)));
 };
 
-export const resize = (image: HTMLImageElement, ratio: number = 1) => {
+const resize = (image: HTMLImageElement, ratio: number = 1) => {
   const width = Math.floor(image.width * ratio);
   const height = Math.floor(image.height * ratio);
   const canvas = document.createElement("canvas");

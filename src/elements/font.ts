@@ -1,4 +1,4 @@
-import { base, BOARD_CENTER, BOARD_SIZE, FONT_SCALE, getKeys, SCREEN_WIDTH_HALF } from "@/configs/consts";
+import { base, BOARD_CENTER, getKeys, SCREEN_WIDTH_HALF } from "@/configs/consts";
 import { fontTextures } from "@/textures";
 import { IFontFamily } from "@/types";
 
@@ -320,12 +320,12 @@ export class Font {
 
       for (let i = 0; i < length; i += 1) {
         mappingChar[chars[i]] = {
-          x: xList[i] * FONT_SCALE,
-          y: yList[i] * FONT_SCALE,
-          width: widthList[i] * FONT_SCALE,
-          height: heightList[i] * FONT_SCALE,
-          offsetX: offsetXList[i] * FONT_SCALE,
-          offsetY: offsetYList[i] * FONT_SCALE,
+          x: xList[i],
+          y: yList[i],
+          width: widthList[i],
+          height: heightList[i],
+          offsetX: offsetXList[i],
+          offsetY: offsetYList[i],
         };
       }
 

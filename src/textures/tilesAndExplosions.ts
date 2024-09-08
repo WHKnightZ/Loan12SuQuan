@@ -1,4 +1,4 @@
-import { SCALE_RATIO, TILES, getKeys, mapTileInfo } from "@/configs/consts";
+import { TILES, getKeys, mapTileInfo } from "@/configs/consts";
 import { crop } from "@/utils/canvas";
 import { getImageSrc } from "@/utils/common";
 
@@ -13,8 +13,8 @@ export const loadTilesAndExplosions = async () => {
       (res) =>
         (image.onload = async () => {
           const getCropImage = (pos: number) => {
-            const width = Math.floor((image.width / TILE_LENGTH) * SCALE_RATIO);
-            const height = Math.floor(image.height * SCALE_RATIO);
+            const width = Math.floor(image.width / TILE_LENGTH);
+            const height = Math.floor(image.height);
             const newPosition = (image.width / TILE_LENGTH) * pos;
             const newWidth = image.width / TILE_LENGTH;
 

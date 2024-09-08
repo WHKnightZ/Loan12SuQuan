@@ -20,7 +20,7 @@ import { Spring } from "./spring";
 import { PowerAttackPlugin } from "./plugins";
 import { IInGameState, IPlayer, IPlayerAttribute, IPlayerAttributeExtra, IPowerAttackPlugin } from "../types";
 
-const BAR_OFFSET_X = 132;
+const BAR_OFFSET_X = 66;
 
 export class Player implements IPlayer {
   /**
@@ -205,9 +205,9 @@ export class Player implements IPlayer {
     // Hiển thị các bars
     this.bars.forEach(({ texture, attribute }, index) => {
       const amount = attribute.currentDisplayValue / attribute.maxValue;
-      const width = 84 * amount;
+      const width = 42 * amount;
       if (width < 1) return;
-      context.drawImage(texture, 0, 0, width, 12, this.barOffsetX, BOARD_SIZE + 24 + index * 20, width, 12);
+      context.drawImage(texture, 0, 0, width, 6, this.barOffsetX, BOARD_SIZE + 12 + index * 10, width, 6);
     });
 
     // Hiển thị avatar

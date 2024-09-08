@@ -1,5 +1,4 @@
 import { IRectangle } from "@/types";
-import { resize } from "@/utils/canvas";
 import { loadTexture, waitLoadImage } from "@/utils/common";
 
 export let selectItemFrameTexture: HTMLImageElement;
@@ -60,5 +59,4 @@ export const loadSelectItemFrame = async () => {
   selectItemFrameTexture.src = canvas.toDataURL();
 
   await waitLoadImage(selectItemFrameTexture);
-  selectItemFrameTexture = await resize(selectItemFrameTexture, 2);
 };

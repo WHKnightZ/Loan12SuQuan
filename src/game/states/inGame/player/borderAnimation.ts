@@ -12,7 +12,7 @@ export class BorderAnimation implements IRenderable {
     this.inGame = inGame;
     this.index = index;
 
-    const padding = 4;
+    const padding = 2;
 
     this.spins = Array.from({ length: 2 }).map(
       (_, i) =>
@@ -21,11 +21,11 @@ export class BorderAnimation implements IRenderable {
           avatarOffset.x + AVATAR_WIDTH + padding,
           avatarOffset.y - padding,
           avatarOffset.y + AVATAR_HEIGHT + padding,
-          0.8,
+          0.6,
           "CW",
-          40,
-          3,
-          avatarOffset.x + (i === 0 ? 10 - padding : AVATAR_WIDTH + padding - 10),
+          20,
+          2,
+          avatarOffset.x + (i === 0 ? 4 - padding : AVATAR_WIDTH + padding - 4),
           avatarOffset.y + (i === 0 ? -padding : AVATAR_HEIGHT + padding)
         )
     );

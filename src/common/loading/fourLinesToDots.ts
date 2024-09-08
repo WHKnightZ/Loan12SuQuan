@@ -62,7 +62,7 @@ export class FourLinesToDotsLoading extends LoadingSkin {
     this.context.rotate(Math.PI * 0.9);
     lineValues.forEach(({ x, y, width, height }, index) => {
       this.context.fillStyle = convertToHexColor(colors[index]);
-      this.drawLine(x, y, width, height);
+      this.drawLine(x / 2, y / 2, width / 2, height / 2);
     });
     this.context.restore();
   }

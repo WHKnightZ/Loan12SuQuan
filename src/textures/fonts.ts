@@ -1,6 +1,5 @@
-import { FONT_SCALE, getKeys } from "@/configs/consts";
+import { getKeys } from "@/configs/consts";
 import { IFontFamily } from "@/types";
-import { resize } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
 export const fontTextures: { [key in IFontFamily]: HTMLImageElement } = {} as any;
@@ -15,8 +14,7 @@ const fonts: { [key in IFontFamily]: string } = {
 
 export const loadFonts = async () => {
   const promises = getKeys(fonts).map(async (key) => {
-    const img = await loadTexture(`fonts/${fonts[key]}`);
-    fontTextures[key] = await resize(img, FONT_SCALE);
+    fontTextures[key] = await loadTexture(`fonts/${fonts[key]}`);
   });
 
   return Promise.all(promises);

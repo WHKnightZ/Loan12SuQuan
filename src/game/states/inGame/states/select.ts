@@ -8,7 +8,7 @@ import { IInGameState } from "../types";
 const CORNER_SELECTION_CYCLE = 30;
 
 const cornerSelectionOffsets = Array.from({ length: CORNER_SELECTION_CYCLE }).map((_, i) =>
-  Math.floor(3 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
+  Math.floor(2 * Math.sin((2 * Math.PI * i) / CORNER_SELECTION_CYCLE))
 );
 
 /**

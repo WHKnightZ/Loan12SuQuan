@@ -1,11 +1,10 @@
-import { resize, rotate180, rotateCCW90, rotateCW90 } from "@/utils/canvas";
+import { rotate180, rotateCCW90, rotateCW90 } from "@/utils/canvas";
 import { loadTexture } from "@/utils/common";
 
 export let starTextures: HTMLImageElement[] = [];
 
 export const loadStars = async () => {
-  const texture = await loadTexture("common/star");
-  starTextures[0] = await resize(texture, 2);
+  starTextures[0] = await loadTexture("common/star");
 
   const promises: Promise<any>[] = [];
 
