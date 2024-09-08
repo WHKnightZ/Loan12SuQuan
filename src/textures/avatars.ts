@@ -5,7 +5,7 @@ import { loadTexture } from "@/utils/common";
 
 export const avatarTextures = {} as { [key in ICharacterId]: HTMLImageElement };
 
-export const loadAvatars = async () => {
+export const loadAvatarTextures = async () => {
   return await Promise.all(
     getKeys(CHARACTERS).map(
       (key) =>

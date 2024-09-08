@@ -1,6 +1,6 @@
 import { BOARD_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH, base } from "@/configs/consts";
 import { GameState } from "@/extensions";
-import { menuButtons, selectItemFrameTexture } from "@/textures";
+import { menuButtons, selectItemFrameTexture, skillTextures } from "@/textures";
 import { IInGameState } from "../types";
 import { IInGameStateType, IMouseEvent } from "@/types";
 import { MENU_BUTTON_OFFSET, MENU_BUTTON_SIZE } from "@/textures/commonTextures";
@@ -50,6 +50,12 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
       (BOARD_SIZE - selectItemFrameTexture.width) / 2,
       (BOARD_SIZE - selectItemFrameTexture.height) / 2 - 2
     );
+
+    base.context.imageSmoothingEnabled = false;
+
+    this.parent.getActivePlayer().attributes.skills.forEach((skill, index) => {
+      base.context.drawImage(skillTextures[skill], 80 + index * 80, 40, 60, 60);
+    });
   }
 
   onKeyDown(e: KeyboardEvent) {

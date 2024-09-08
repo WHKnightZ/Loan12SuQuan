@@ -80,6 +80,10 @@ export class Player implements IPlayer {
    * Hiệu ứng sức mạnh
    */
   powerAttackPlugin: IPowerAttackPlugin;
+  /**
+   * Chỉ số
+   */
+  attributes: ICharacterAttributes;
 
   constructor({
     inGame,
@@ -91,6 +95,7 @@ export class Player implements IPlayer {
     attributes: ICharacterAttributes;
   }) {
     this.inGame = inGame;
+    this.attributes = attributes;
 
     const { id, attack, intelligence, life } = attributes;
     this.index = index;

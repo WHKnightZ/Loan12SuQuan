@@ -17,7 +17,7 @@ const divideLeft = { x: 0, y: 0, w: 20, h: 7 };
 const horizontalBottom = { x: 0, y: 17, w: 20, h: 3 };
 const horizontalTop = { x: 0, y: 7, w: 20, h: 5 };
 
-export const loadSelectItemFrame = async () => {
+export const loadSelectItemFrameTexture = async () => {
   const selectItemFrameSpriteSheet = await loadTexture("selectItem/frame");
 
   const canvas = document.createElement("canvas");

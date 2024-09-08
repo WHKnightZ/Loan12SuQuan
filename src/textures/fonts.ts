@@ -13,7 +13,7 @@ const fonts: { [key in IFontFamily]: string } = {
   VERDANA: "verdana",
 };
 
-export const loadFonts = async () => {
+export const loadFontTextures = async () => {
   const promises = getKeys(fonts).map(async (key) => {
     const img = await loadTexture(`fonts/${fonts[key]}`);
     fontTextures[key] = await resize(img, FONT_SCALE);

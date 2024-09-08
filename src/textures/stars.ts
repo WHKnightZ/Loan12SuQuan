@@ -3,7 +3,7 @@ import { loadTexture } from "@/utils/common";
 
 export let starTextures: HTMLImageElement[] = [];
 
-export const loadStars = async () => {
+export const loadStarTextures = async () => {
   const texture = await loadTexture("common/star");
   starTextures[0] = await resize(texture, 2);
 

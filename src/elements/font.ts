@@ -1,4 +1,4 @@
-import { base, BOARD_CENTER, BOARD_SIZE, FONT_SCALE, getKeys, SCREEN_WIDTH_HALF } from "@/configs/consts";
+import { base, BOARD_CENTER, FONT_SCALE, getKeys, SCREEN_WIDTH_HALF } from "@/configs/consts";
 import { fontTextures } from "@/textures";
 import { IFontFamily } from "@/types";
 

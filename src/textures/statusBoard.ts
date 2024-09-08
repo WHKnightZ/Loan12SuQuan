@@ -7,7 +7,7 @@ type BarType = "life" | "energy" | "mana";
 
 export const barTextures: { [key in BarType]: HTMLImageElement } = {} as any;
 
-export const loadStatusBoard = async () => {
+export const loadStatusBoardTexture = async () => {
   statusBoardTexture = await loadTexture("common/status-board").then((img) => resize(img, 2));
 
   const bars: BarType[] = ["life", "energy", "mana"];

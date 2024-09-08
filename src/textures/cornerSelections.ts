@@ -8,7 +8,7 @@ export let cornerSelections: {
   offset: { x: number; y: number };
 }[] = [];
 
-export const loadCornerSelections = () => {
+export const loadCornerSelectionTextures = () => {
   cornerSelections = [];
 
   let cornerTopLeft = new Image();

@@ -4,7 +4,7 @@ import { getImageSrc } from "@/utils/common";
 
 const TILE_LENGTH = 7;
 
-export const loadTilesAndExplosions = async () => {
+export const loadTilesAndExplosionTextures = async () => {
   const loadImage = (key: number, src: string) => {
     const image = new Image();
     image.src = getImageSrc(`tiles/${src}`);

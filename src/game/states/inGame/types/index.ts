@@ -1,4 +1,5 @@
 import {
+  ICharacterAttributes,
   IGame,
   IGamePlugin,
   IGameState,
@@ -76,6 +77,10 @@ export type IPlayer = IRenderable & {
    * Hiệu ứng sức mạnh
    */
   powerAttackPlugin: IPowerAttackPlugin;
+  /**
+   * Chỉ số
+   */
+  attributes: ICharacterAttributes;
 
   /**
    * Mục đích: lấy ngẫu nhiên một nước đi dựa theo chỉ số trí tuệ

@@ -1,15 +1,16 @@
-import { loadAvatars, avatarTextures } from "./avatars";
+import { loadAvatarTextures, avatarTextures } from "./avatars";
 import { loadBackgroundTextures, backgroundTextures } from "./backgrounds";
 import { loadCommonTextures, hintArrows, menuButtons } from "./commonTextures";
-import { loadCornerSelections, cornerSelections } from "./cornerSelections";
-import { loadCrystals, crystalTextures, swordCrystalTextures, damageTextures } from "./crystals";
-import { loadFonts, fontTextures } from "./fonts";
-import { loadSelectItemFrame, selectItemFrameTexture } from "./selectItemFrame";
-import { loadStatusBoard, statusBoardTexture, barTextures } from "./statusBoard";
+import { loadCornerSelectionTextures, cornerSelections } from "./cornerSelections";
+import { loadCrystalTextures, crystalTextures, swordCrystalTextures, damageTextures } from "./crystals";
+import { loadFontTextures, fontTextures } from "./fonts";
+import { loadSelectItemFrameTexture, selectItemFrameTexture } from "./selectItemFrame";
+import { loadStatusBoardTexture, statusBoardTexture, barTextures } from "./statusBoard";
 import { loadPowerAttackTextures, powerAttackTextures } from "./powerAttack";
-import { loadStars, starTextures } from "./stars";
-import { loadTilesAndExplosions } from "./tilesAndExplosions";
+import { loadStarTextures, starTextures } from "./stars";
+import { loadTilesAndExplosionTextures } from "./tilesAndExplosions";
 import { loadWinLoseTextures, winTextures, loseTextures } from "./winLose";
+import { loadSkillTextures, skillTextures } from "./skills";
 
 export {
   avatarTextures,
@@ -28,21 +29,23 @@ export {
   selectItemFrameTexture,
   backgroundTextures,
   menuButtons,
+  skillTextures,
 };
 
 export const loadTextures = () => {
   return Promise.all([
-    loadTilesAndExplosions(),
-    loadCornerSelections(),
+    loadTilesAndExplosionTextures(),
+    loadCornerSelectionTextures(),
     loadCommonTextures(),
-    loadStatusBoard(),
-    loadAvatars(),
-    loadFonts(),
-    loadStars(),
-    loadCrystals(),
+    loadStatusBoardTexture(),
+    loadAvatarTextures(),
+    loadFontTextures(),
+    loadStarTextures(),
+    loadCrystalTextures(),
     loadWinLoseTextures(),
     loadPowerAttackTextures(),
-    loadSelectItemFrame(),
+    loadSelectItemFrameTexture(),
     loadBackgroundTextures(),
+    loadSkillTextures(),
   ]);
 };

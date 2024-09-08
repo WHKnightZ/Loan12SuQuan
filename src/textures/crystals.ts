@@ -6,7 +6,7 @@ export const crystalTextures: HTMLImageElement[][] = [];
 export const swordCrystalTextures: HTMLImageElement[][] = [];
 export let damageTextures: HTMLImageElement[] = [];
 
-export const loadCrystals = async () => {
+export const loadCrystalTextures = async () => {
   const crystalSize = 34;
   let texture = await loadTexture("common/crystals");
   texture = await resize(texture, 2.62);
