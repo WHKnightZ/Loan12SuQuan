@@ -15,10 +15,11 @@ const init = () => {
 
   canvas.width = SCREEN_WIDTH;
   canvas.height = SCREEN_HEIGHT;
-  context.imageSmoothingEnabled = false;
 
   base.canvas = canvas;
   base.context = context;
+
+  context.imageSmoothingEnabled = false;
 };
 
 // Timer

@@ -138,8 +138,8 @@ export class InGameState extends GameState<IGame, IGameStateType> implements IIn
     this.turnCount = 1;
     this.isUpdatedTurnCount = true;
 
-    this.fadeIn();
-    // this.stateManager.changeState("SELECT_ITEM");
+    // this.fadeIn();
+    this.stateManager.changeState("SELECT_ITEM");
   }
   /**
    * Kiểm tra cách hoán đổi này ăn được những gì

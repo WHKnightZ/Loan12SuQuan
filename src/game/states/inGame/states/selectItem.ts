@@ -51,8 +51,6 @@ export class InGameSelectItemState extends GameState<IInGameState, IInGameStateT
       (BOARD_SIZE - selectItemFrameTexture.height) / 2 - 2
     );
 
-    base.context.imageSmoothingEnabled = false;
-
     this.parent.getActivePlayer().attributes.skills.forEach((skill, index) => {
       base.context.drawImage(skillTextures[skill], 80 + index * 80, 40, 60, 60);
     });
